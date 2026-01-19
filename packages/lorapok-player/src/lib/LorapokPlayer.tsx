@@ -36,10 +36,20 @@ export function LorapokPlayer({
     // Local state for internal player control logic
     const [currentSrc, setCurrentSrc] = useState<string | null>(src || null)
 
-    // Sync prop src changes
+    // Sync prop src changes & Reset State
     useEffect(() => {
-        if (src) setCurrentSrc(src)
-    }, [src])
+        if (src !== currentSrc) {
+            setCurrentSrc(src || null)
+            setIsPlaying(autoPlay)
+            setCurrentTime(0)
+            setDuration(0)
+            setCodecError(null)
+            setIsBuffering(false)
+            if (!autoPlay) {
+                setShowControls(true)
+            }
+        }
+    }, [src, autoPlay])
 
     const [currentTime, setCurrentTime] = useState(0)
     const [duration, setDuration] = useState(0)
@@ -320,6 +330,17 @@ export function LorapokPlayer({
                             animate={{ opacity: 1 }}
                             className="w-full h-full flex items-center justify-center relative group z-10"
                         >
+                            {!isPlaying && !isBuffering && (
+                                <div
+                                    className="absolute inset-0 z-50 flex items-center justify-center cursor-pointer bg-black/20 hover:bg-black/10 transition-colors"
+                                    onClick={togglePlay}
+                                >
+                                    <div className="w-24 h-24 rounded-full bg-midnight/80 backdrop-blur-md border border-neon-cyan/50 flex items-center justify-center group/play shadow-[0_0_50px_rgba(0,243,255,0.2)] hover:scale-110 transition-transform duration-300">
+                                        <Play className="w-10 h-10 text-neon-cyan fill-neon-cyan ml-1 group-hover/play:scale-125 transition-transform" />
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="absolute top-4 right-4 z-40 scale-[0.4] origin-top-right opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Mascot state={isBuffering ? 'buffering' : (isPlaying ? 'playing' : 'idle')} />
                             </div>

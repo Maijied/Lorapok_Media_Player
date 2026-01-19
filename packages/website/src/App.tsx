@@ -118,10 +118,16 @@ function App() {
                                 MP4
                             </button>
                             <button
-                                onClick={() => setDemoUrl("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")}
-                                className={`px-3 py-1 text-xs font-mono border rounded ${demoUrl.includes('ElephantsDream') ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50'}`}
+                                onClick={() => setDemoUrl("https://live-hls-abr-cdn.livepush.io/live/bigbuckbunnyclip/index.m3u8")}
+                                className={`px-3 py-1 text-xs font-mono border rounded ${demoUrl.includes('.m3u8') ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50'}`}
                             >
-                                STREAM
+                                HLS
+                            </button>
+                            <button
+                                onClick={() => setDemoUrl("https://live-hls-abr-cdn.livepush.io/live/bigbuckbunnyclip/index.mpd")}
+                                className={`px-3 py-1 text-xs font-mono border rounded ${demoUrl.includes('.mpd') ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50'}`}
+                            >
+                                DASH
                             </button>
                         </div>
                     </div>
@@ -148,8 +154,8 @@ function App() {
                         },
                         {
                             icon: Globe,
-                            title: "Web Ready",
-                            desc: "Drop-in React container that works instantly in any modern web application."
+                            title: "Universal Stream",
+                            desc: "Native support for HLS (.m3u8), DASH (.mpd), and direct MP4/WebM streaming."
                         },
                         {
                             icon: Zap,

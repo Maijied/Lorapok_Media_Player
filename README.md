@@ -20,6 +20,16 @@
     Built for the modern web and desktop.
   </p>
 
+  <br />
+
+  <img src="assets/showcase-main.png" alt="Lorapok Main Interface" width="800" style="border-radius: 10px; box-shadow: 0 0 50px rgba(0, 243, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);" />
+  
+  <br/><br/>
+
+  <div style="display: flex; justify-content: center; gap: 20px;">
+     <img src="assets/showcase-neural.png" alt="Neural Decode" width="380" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+  </div>
+
 </div>
 
 ---
