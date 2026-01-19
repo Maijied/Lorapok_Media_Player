@@ -230,7 +230,11 @@ app.whenReady().then(() => {
       decodedPath = decodedPath.substring(1)
     }
 
-    return net.fetch(`file://${decodedPath}`)
+    return net.fetch(`file://${decodedPath}`, {
+      headers: request.headers,
+      method: request.method,
+      bypassCustomProtocolHandlers: true
+    })
   })
 
   // Register Protocol for Windows/Linux

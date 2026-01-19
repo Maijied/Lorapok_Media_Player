@@ -229,7 +229,7 @@ function App() {
           if (isFullscreen) toggleFullscreen()
           break
         case 'arrowright':
-          if (videoRef.current && videoRef.current.readyState >= 1) {
+          if (videoRef.current) {
             e.preventDefault()
             const current = videoRef.current.currentTime
             // Ensure duration is valid, otherwise default to a safely large seek range
@@ -243,7 +243,7 @@ function App() {
           }
           break
         case 'arrowleft':
-          if (videoRef.current && videoRef.current.readyState >= 1) {
+          if (videoRef.current) {
             e.preventDefault()
             const current = videoRef.current.currentTime
             const prev = current - 10
