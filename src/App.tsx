@@ -492,13 +492,19 @@ function App() {
   };
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (videoRef.current && duration) {
+    if (videoRef.current) {
       const rect = e.currentTarget.getBoundingClientRect()
       const x = e.clientX - rect.left
       const percentage = x / rect.width
-      const newTime = percentage * duration
-      videoRef.current.currentTime = newTime
-      setCurrentTime(newTime)
+
+      // Use reported duration if available, otherwise fallback to video's own duration
+      const totalDuration = (duration && isFinite(duration) && duration > 0) ? duration : videoRef.current.duration
+
+      if (isFinite(totalDuration) && totalDuration > 0) {
+        const newTime = percentage * totalDuration
+        videoRef.current.currentTime = newTime
+        setCurrentTime(newTime)
+      }
     }
   }
 
@@ -777,6 +783,7 @@ function App() {
                       onWaiting={() => setIsBuffering(true)}
                       onPlaying={() => setIsBuffering(false)}
                       onError={handleVideoError}
+                      onDoubleClick={toggleFullscreen}
                       autoPlay
                     />
 
@@ -834,7 +841,7 @@ function App() {
       </main>
 
       {/* Control Deck */}
-      <footer className="h-24 px-6 pb-6 pt-2 z-50">
+      <footer className={`h-24 px-6 pb-6 pt-2 z-50 transition-transform duration-300 ${isFullscreen ? 'translate-y-full opacity-0 pointer-events-none' : ''}`}>
         <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90">
 
           {/* Progress Bar */}
