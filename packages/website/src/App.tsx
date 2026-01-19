@@ -25,7 +25,7 @@ function App() {
                 <div className="flex gap-6 text-sm font-mono text-white/60">
                     <a href="#features" className="hover:text-neon-cyan transition-colors">FEATURES</a>
                     <a href="#demo" className="hover:text-neon-cyan transition-colors">LIVE_DEMO</a>
-                    <a href="https://github.com/lorapok/lorapok-player" className="hover:text-neon-cyan transition-colors">GITHUB</a>
+                    <a href="https://github.com/Maijied/Lorapok_Media_Player" className="hover:text-neon-cyan transition-colors">GITHUB</a>
                 </div>
             </nav>
 
@@ -81,7 +81,7 @@ function App() {
                         ].map((build) => (
                             <a
                                 key={build.os}
-                                href="https://github.com/lorapok/lorapok-player/releases/latest"
+                                href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-6 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:border-neon-cyan/50 transition-all group flex flex-col gap-4"

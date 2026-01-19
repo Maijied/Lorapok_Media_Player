@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react'
-import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX } from 'lucide-react'
+import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Brand Logo Component (Embedded to prevent path issues)
@@ -129,6 +129,8 @@ function App() {
   const [volume, setVolume] = useState(0.8)
   const [isMuted, setIsMuted] = useState(false)
   const [showControls, setShowControls] = useState(true)
+  const [showStreamInput, setShowStreamInput] = useState(false)
+  const [streamUrl, setStreamUrl] = useState('')
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -349,6 +351,18 @@ function App() {
       if (filePath) {
         localStorage.setItem(`lorapok-resume-${filePath}`, time.toString())
       }
+    }
+  }
+
+  const handleStreamSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (streamUrl) {
+      setPlaylist([...playlist, streamUrl])
+      setFilePath(streamUrl)
+      setIsPlaying(true)
+      setCodecError(null)
+      setShowStreamInput(false)
+      setStreamUrl('')
     }
   }
 
@@ -754,14 +768,25 @@ function App() {
               </div>
 
               <div className="flex flex-col items-center gap-4 mt-4">
-                <button
-                  onClick={handleOpenFile}
-                  className="group relative px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#00f3ff]/50 rounded-2xl transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#00f3ff]/10 to-[#bc13fe]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                  <FolderOpen className="w-5 h-5 text-[#00f3ff] relative z-10" />
-                  <span className="font-mono text-xs font-bold relative z-10 tracking-widest">INITIALIZE_CORE</span>
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleOpenFile}
+                    className="group relative px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#00f3ff]/50 rounded-2xl transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#00f3ff]/10 to-[#bc13fe]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                    <FolderOpen className="w-5 h-5 text-[#00f3ff] relative z-10" />
+                    <span className="font-mono text-xs font-bold relative z-10 tracking-widest">INITIALIZE_CORE</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowStreamInput(true)}
+                    className="group relative px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#bc13fe]/50 rounded-2xl transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#bc13fe]/10 to-[#00f3ff]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                    <Globe className="w-5 h-5 text-[#bc13fe] relative z-10" />
+                    <span className="font-mono text-xs font-bold relative z-10 tracking-widest">NETWORK_STREAM</span>
+                  </button>
+                </div>
                 <p className="text-white/20 font-mono text-[9px]">OR_DRAG_DATA_HERE</p>
               </div>
             </motion.div>
@@ -838,8 +863,7 @@ function App() {
                 return (
                   <div className="relative w-full h-full flex items-center justify-center">
                     <video
-                      ref={videoRef}
-                      src={`media://${filePath}`}
+                      src={filePath?.match(/^https?:\/\//) ? filePath : `media://${filePath}`}
                       className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
                       style={{ boxShadow: `0 0 80px -20px ${ambientColor}` }}
                       onTimeUpdate={handleTimeUpdate}
@@ -850,6 +874,7 @@ function App() {
                       onError={handleVideoError}
                       onDoubleClick={toggleFullscreen}
                       autoPlay
+                      crossOrigin={filePath?.match(/^https?:\/\//) ? "anonymous" : undefined}
                     />
 
                     {/* Professional Codec Error / Neural Decode Overlay */}
@@ -980,6 +1005,52 @@ function App() {
                 </div>
               </div>
             </motion.footer>
+          )}
+        </AnimatePresence>
+
+        {/* Stream Input Modal */}
+        <AnimatePresence>
+          {showStreamInput && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+            >
+              <div className="bg-midnight border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/5 to-electric-purple/5 pointer-events-none" />
+                <h3 className="text-xl font-black mb-6 flex items-center gap-3 relative z-10">
+                  <Globe className="w-6 h-6 text-neon-cyan" />
+                  NETWORK_STREAM
+                </h3>
+                <form onSubmit={handleStreamSubmit} className="flex flex-col gap-4 relative z-10">
+                  <input
+                    type="url"
+                    placeholder="https://example.com/video.mp4"
+                    value={streamUrl}
+                    onChange={(e) => setStreamUrl(e.target.value)}
+                    className="bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-sm font-mono text-white placeholder:text-white/20 focus:outline-none focus:border-neon-cyan/50 transition-colors w-full"
+                    autoFocus
+                  />
+                  <div className="flex justify-end gap-3 mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowStreamInput(false)}
+                      className="px-4 py-2 rounded-lg text-xs font-mono hover:bg-white/5 transition-colors"
+                    >
+                      CANCEL
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!streamUrl}
+                      className="px-6 py-2 bg-neon-cyan/10 border border-neon-cyan/50 text-neon-cyan rounded-lg text-xs font-bold hover:bg-neon-cyan/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      CONNECT
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </main>

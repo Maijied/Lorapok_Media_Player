@@ -1,70 +1,88 @@
-# Lorapok Media Player
-
 <div align="center">
-  <h3>Organic Intelligence. Dark Mode Futurism.</h3>
-  <p>A cross-platform media player built for developers, featuring a unique "Lorapok" larva mascot and a high-tech holographic UI.</p>
+
+  <img src="packages/website/public/logo.png" alt="Lorapok Player Logo" width="200" height="200" />
+
+  # LORAPOK PLAYER
+  ### ORGANIC INTELLIGENCE MEDIA ENGINE
+
+  <p align="center">
+    <a href="https://maijied.github.io/Lorapok_Media_Player/">
+      <img src="https://img.shields.io/badge/LIVE_DEMO-00F3FF?style=for-the-badge&logo=googlechrome&logoColor=black" alt="Live Demo" />
+    </a>
+    <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest">
+      <img src="https://img.shields.io/badge/DOWNLOAD_LATEST-BC13FE?style=for-the-badge&logo=windows&logoColor=white" alt="Download" />
+    </a>
+  </p>
+
+  <p align="center">
+    The next-generation media player blending <b>biological aesthetics</b> with <b>supercomputing performance</b>.
+    <br />
+    Built for the modern web and desktop.
+  </p>
+
 </div>
 
 ---
 
-## ✦ Core Identity
+## 🧬 CORE FEATURES
 
-**Lorapok Media Player** fuses a friendly biological design with high-tech precision. 
-- **Mascot:** The Lorapok Larva — a friendly, curious assistant that reacts to your media.
-- **Vibe:** "Dark Mode Futurism" — deep midnight blues, neon cyan data streams, and electric purple AI accents.
+- **Neural Decoding**: Advanced playback engine supporting all major formats (MKV, AVI, WMV) via FFmpeg integration.
+- **Organic UI**: A "living" interface that reacts to media content with dynamic ambient lighting and micro-animations.
+- **Universal Drop**: Drag-and-drop any media file to instantly initialize the playback core.
+- **Network Stream**: Direct URL streaming with protocol-agnostic handling.
+- **Cross-Platform**: Optimized builds for Windows, macOS, and Linux.
 
-## 🚀 Key Features
+## 📦 COMPONENT LIBRARY
 
-### 🎬 Playback Engine
-- **Universal Format Support:** Plays MP4, WebM, OGG, AVI, WMV, MOV, FLV, and more.
-- **High-Fidelity Audio Engine:** Dedicated professional view for AAC, FLAC, ALAC, MP3, and OGG with hardware-synced glows.
-- **High-Definition Ready:** Optimized for **1080p, 4K, and 8K** playback.
-- **Hardware Acceleration:** Zero-copy GPU decoding enabled for smooth performance on all platforms.
-- **Improved Codec Handling:** Automated professional error states for legacy codecs with conversion recommendations.
-- **Smart Resume & Speed:** Remembers position for every file; cycle through 0.5x to 2x speeds.
+Lorapok Player is also available as a standalone React component for web developers.
 
-### 🎧 User Experience
-- **Frameless "Holographic" UI:** Custom title bar and glassmorphic controls.
-- **Drag-and-Drop:** Seamlessly load media by dragging files into the window.
-- **Stats for Nerds:** Real-time overlay showing resolution, bitrate, and playback stats.
-- **Native File Integration:** Standard OS dialogs for file selection.
+```bash
+npm install lorapok-player
+```
 
-### 🛠️ Technical Stack
-- **Core:** Electron + React + TypeScript
-- **Styling:** Tailwind CSS + Framer Motion
-- **Icons:** Lucide React
-- **Build System:** Vite + Electron Builder
+```tsx
+import { LorapokPlayer } from 'lorapok-player';
+import 'lorapok-player/style.css';
 
-## 📦 Installation
+function App() {
+  return (
+    <LorapokPlayer
+      src="https://example.com/video.mp4"
+      className="w-full aspect-video rounded-xl"
+    />
+  );
+}
+```
 
-### Pre-built Binaries
-Check the [Releases](https://github.com/Maijied/Lorapok_Media_Player/releases) page for Windows, macOS, and Linux installers.
+## 🚀 DEVELOPMENT
 
-### Building from Source
+### Desktop App (Electron)
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Maijied/Lorapok_Media_Player.git
-   cd Lorapok_Media_Player
-   ```
+```bash
+# Install dependencies
+npm install
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+# Start development server
+npm run dev:electron
 
-3. **Run in Development Mode**
-   ```bash
-   npm run dev
-   ```
+# Build for production
+npm run build:electron
+```
 
-4. **Build for Production**
-   ```bash
-   npm run build
-   ```
+### Website
 
-## 🤝 Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
+```bash
+cd packages/website
+npm install
+npm run dev
+```
 
-## 📄 License
-MIT License.
+## 🏗 ARCHITECTURE
+
+- **Frontend**: React, TypeScript, Tailwind CSS, Framer Motion
+- **Runtime**: Electron (Main + Renderer Process Isolation)
+- **Media Engine**: Fluent-FFmpeg + Custom Protocol Handler (`media://`)
+
+## 📜 LICENSE
+
+[MIT](LICENSE) © 2024 Lorapok Team
