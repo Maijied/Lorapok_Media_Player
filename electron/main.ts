@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, protocol, net } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, protocol } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -249,21 +249,47 @@ app.whenReady().then(() => {
     const url = request.url.replace('media://', '')
     let decodedPath = decodeURIComponent(url)
 
-    // Fix for absolute paths on Linux/Mac
     if (process.platform !== 'win32' && !decodedPath.startsWith('/')) {
       decodedPath = '/' + decodedPath
     }
-
-    // Remove leading slash if present on Windows (e.g. /C:/path)
     if (process.platform === 'win32' && decodedPath.startsWith('/')) {
       decodedPath = decodedPath.substring(1)
     }
 
-    return net.fetch(`file://${decodedPath}`, {
-      headers: request.headers,
-      method: request.method,
-      bypassCustomProtocolHandlers: true
-    })
+    try {
+      const stats = fs.statSync(decodedPath)
+      const range = request.headers.get('range')
+
+      if (!range) {
+        return new Response(fs.createReadStream(decodedPath) as any, {
+          status: 200,
+          headers: {
+            'Content-Type': 'video/mp4', // browser will sniff anyway
+            'Content-Length': stats.size.toString(),
+            'Accept-Ranges': 'bytes'
+          }
+        })
+      }
+
+      const parts = range.replace(/bytes=/, "").split("-")
+      const start = parseInt(parts[0], 10)
+      const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1
+      const chunksize = (end - start) + 1
+      const file = fs.createReadStream(decodedPath, { start, end })
+
+      return new Response(file as any, {
+        status: 206,
+        headers: {
+          'Content-Range': `bytes ${start}-${end}/${stats.size}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunksize.toString(),
+          'Content-Type': 'video/mp4'
+        }
+      })
+    } catch (e) {
+      logToFile(`Media Protocol Error: ${e}`)
+      return new Response('File not found', { status: 404 })
+    }
   })
 
   // Register Protocol for Windows/Linux

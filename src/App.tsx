@@ -127,6 +127,8 @@ function App() {
   const [isBuffering, setIsBuffering] = useState(false)
   const [volume, setVolume] = useState(0.8)
   const [isMuted, setIsMuted] = useState(false)
+  const [showControls, setShowControls] = useState(true)
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -291,6 +293,33 @@ function App() {
       videoRef.current.volume = isMuted ? 0 : volume
     }
   }, [volume, isMuted])
+
+  // Auto-hide controls logic
+  const resetControlsTimeout = useCallback(() => {
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
+    if (isFullscreen) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false)
+      }, 3000)
+    }
+  }, [isFullscreen])
+
+  useEffect(() => {
+    if (isFullscreen) {
+      resetControlsTimeout()
+    } else {
+      setShowControls(true)
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
+    }
+    return () => {
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
+    }
+  }, [isFullscreen, resetControlsTimeout])
+
+  const handleMouseMove = () => {
+    if (!showControls) setShowControls(true)
+    resetControlsTimeout()
+  }
 
   // Smart Resume: Load saved position
   useEffect(() => {
@@ -524,11 +553,12 @@ function App() {
       ref={containerRef}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
+      onMouseMove={handleMouseMove}
       className="h-screen w-screen flex flex-col bg-midnight text-white selection:bg-neon-cyan selection:text-midnight overflow-hidden font-inter"
     >
 
       {/* Title Bar / Header */}
-      <header className={`h-10 flex items-center justify-between px-4 border-b border-white/5 bg-midnight/50 backdrop-blur-md select-none drag-region z-[60] ${isFullscreen ? 'hidden' : ''}`}>
+      <header className={`h-10 flex items-center justify-between px-4 border-b border-white/5 bg-midnight/50 backdrop-blur-md select-none drag-region z-[60] transition-opacity duration-500 ${!showControls && isFullscreen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="flex items-center gap-2 no-drag">
           <Logo className="w-5 h-5" />
           <span className="font-mono text-xs tracking-tighter font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f3ff] to-[#bc13fe]">
@@ -845,11 +875,11 @@ function App() {
 
         {/* Control Deck (Absolute to main viewport to avoid layout shifts) */}
         <AnimatePresence>
-          {!isFullscreen && (
+          {showControls && (
             <motion.footer
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
+              exit={{ opacity: 0, y: 20 }}
               className="absolute bottom-0 left-0 right-0 h-24 px-6 pb-6 pt-2 z-50 pointer-events-auto"
             >
               <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90">
