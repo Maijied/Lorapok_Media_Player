@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 // Brand Logo Component
 export const Logo = ({ className = "w-12 h-12" }: { className?: string }) => (
