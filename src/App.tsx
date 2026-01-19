@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react'
-import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2 } from 'lucide-react'
+import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Brand Logo Component (Embedded to prevent path issues)
@@ -7,26 +7,56 @@ const Logo = ({ className = "w-12 h-12" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#00F3FF" />
-        <stop offset="100%" stop-color="#BC13FE" />
+        <stop offset="0%" stopColor="#00F3FF" />
+        <stop offset="100%" stopColor="#BC13FE" />
       </linearGradient>
-      <filter id="glassBlur" x="-20%" y="-20%" width="140%" height="140%">
-        <feGaussianBlur stdDeviation="15" result="blur" />
+      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="12" result="blur" />
         <feComposite in="SourceGraphic" in2="blur" operator="over" />
       </filter>
-      <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="10" stdDeviation="15" flood-opacity="0.3" />
-      </filter>
     </defs>
-    <rect x="64" y="64" width="384" height="384" rx="80" fill="#050510" />
-    <path d="M180 160 C 140 160, 120 200, 120 256 C 120 312, 140 352, 180 352 L 320 352 C 380 352, 400 300, 340 260 L 220 180 C 200 165, 180 160, 180 160 Z"
-      fill="url(#brandGradient)" fill-opacity="0.15" stroke="url(#brandGradient)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" filter="url(#softShadow)" />
-    <path d="M340 260 L 220 180 C 210 175, 200 175, 190 180 C 170 190, 170 230, 170 256 C 170 282, 170 322, 190 332"
-      stroke="white" stroke-width="2" stroke-opacity="0.4" filter="url(#glassBlur)" />
-    <circle cx="180" cy="220" r="10" fill="white">
-      <animate attributeName="opacity" values="1;0.5;1" dur="4s" repeatCount="indefinite" />
-    </circle>
-    <circle cx="340" cy="260" r="40" fill="#00F3FF" fill-opacity="0.1" filter="url(#glassBlur)" />
+
+    {/* Tech Ring Background */}
+    <circle cx="256" cy="256" r="230" stroke="url(#brandGradient)" strokeWidth="2" strokeDasharray="15 10" opacity="0.1" />
+    <circle cx="256" cy="256" r="245" stroke="url(#brandGradient)" strokeWidth="6" opacity="0.3" />
+
+    {/* Segmented Larva - Bio-Digital Identity */}
+    <g transform="translate(45, 45) scale(0.82)">
+      {[...Array(9)].map((_, i) => {
+        const offsetAngle = 0.8;
+        const angle = (i * 0.45) + offsetAngle;
+        const dist = 175;
+        const x = 256 + Math.cos(angle) * dist;
+        const y = 256 + Math.sin(angle) * dist;
+        const radius = 65 - (i * 5);
+        return (
+          <circle
+            key={i}
+            cx={x}
+            cy={y}
+            r={radius}
+            fill="url(#brandGradient)"
+            fillOpacity={1.0 - (i * 0.08)}
+            filter={i === 0 ? "url(#glow)" : ""}
+          />
+        );
+      })}
+
+      {/* Eye Feature */}
+      <circle cx={256 + Math.cos(0.8) * 175 + 10} cy={256 + Math.sin(0.8) * 175 - 10} r="14" fill="#00F3FF">
+        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite" />
+      </circle>
+
+      {/* Code Snippet Branding */}
+      <path
+        d="M260 240 L245 255 L260 270 M300 240 L315 255 L300 270"
+        stroke="white"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeOpacity="0.7"
+        transform={`translate(${Math.cos(0.8) * 140}, ${Math.sin(0.8) * 140}) rotate(30)`}
+      />
+    </g>
   </svg>
 );
 
@@ -95,6 +125,8 @@ function App() {
   const [gpuStatus, setGpuStatus] = useState<any>(null)
   const [ambientColor, setAmbientColor] = useState('rgba(0, 243, 255, 0.2)')
   const [isBuffering, setIsBuffering] = useState(false)
+  const [volume, setVolume] = useState(0.8)
+  const [isMuted, setIsMuted] = useState(false)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -178,6 +210,87 @@ function App() {
       }
     }
   }, [])
+
+  // Keyboard Shortcuts Handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+      switch (e.key.toLowerCase()) {
+        case ' ':
+          e.preventDefault()
+          togglePlay()
+          break
+        case 'f':
+          toggleFullscreen()
+          break
+        case 'escape':
+          if (isFullscreen) toggleFullscreen()
+          break
+        case 'arrowright':
+          if (videoRef.current && videoRef.current.readyState >= 1) {
+            e.preventDefault()
+            const current = videoRef.current.currentTime
+            // Ensure duration is valid, otherwise default to a safely large seek range
+            const max = (duration && isFinite(duration) && duration > 0) ? duration : current + 1000
+            const next = current + 10
+            if (isFinite(next)) {
+              const finalTime = Math.min(max, next)
+              videoRef.current.currentTime = finalTime
+              setCurrentTime(finalTime)
+            }
+          }
+          break
+        case 'arrowleft':
+          if (videoRef.current && videoRef.current.readyState >= 1) {
+            e.preventDefault()
+            const current = videoRef.current.currentTime
+            const prev = current - 10
+            if (isFinite(prev)) {
+              const finalTime = Math.max(0, prev)
+              videoRef.current.currentTime = finalTime
+              setCurrentTime(finalTime)
+            }
+          }
+          break
+        case 'arrowup':
+          e.preventDefault()
+          setVolume(prev => Math.min(1, prev + 0.1))
+          setIsMuted(false)
+          break
+        case 'arrowdown':
+          e.preventDefault()
+          setVolume(prev => Math.max(0, prev - 0.1))
+          break
+        case 'm':
+          setIsMuted(prev => !prev)
+          break
+        case '[':
+          adjustPlaybackSpeed(-0.25)
+          break
+        case ']':
+          adjustPlaybackSpeed(0.25)
+          break
+        case 'n':
+          playNext()
+          break
+        case 'p':
+          playPrevious()
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isPlaying, isFullscreen, playbackRate, playlist, filePath, duration])
+
+  // Sync volume with video element
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = isMuted ? 0 : volume
+    }
+  }, [volume, isMuted])
 
   // Smart Resume: Load saved position
   useEffect(() => {
@@ -302,6 +415,43 @@ function App() {
     if (videoRef.current) {
       videoRef.current.playbackRate = newSpeed
     }
+  }
+
+  const adjustPlaybackSpeed = (delta: number) => {
+    const speeds = [0.5, 1, 1.25, 1.5, 2]
+    let currentIdx = speeds.indexOf(playbackRate)
+    if (currentIdx === -1) {
+      // Find closest speed
+      currentIdx = speeds.reduce((prev, curr, idx) =>
+        Math.abs(curr - playbackRate) < Math.abs(speeds[prev] - playbackRate) ? idx : prev, 0)
+    }
+
+    const newIdx = Math.max(0, Math.min(speeds.length - 1, currentIdx + (delta > 0 ? 1 : -1)))
+    const newSpeed = speeds[newIdx]
+    setPlaybackRate(newSpeed)
+    if (videoRef.current) {
+      videoRef.current.playbackRate = newSpeed
+    }
+  }
+
+  const playNext = () => {
+    if (playlist.length === 0) return
+    const currentIndex = playlist.indexOf(filePath || '')
+    const nextIndex = (currentIndex + 1) % playlist.length
+    const nextFile = playlist[nextIndex]
+    setFilePath(nextFile)
+    setIsPlaying(true)
+    setCodecError(null)
+  }
+
+  const playPrevious = () => {
+    if (playlist.length === 0) return
+    const currentIndex = playlist.indexOf(filePath || '')
+    const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length
+    const prevFile = playlist[prevIndex]
+    setFilePath(prevFile)
+    setIsPlaying(true)
+    setCodecError(null)
   }
 
   const handleLoadedMetadata = () => {
@@ -703,7 +853,7 @@ function App() {
           {/* Buttons Row */}
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center gap-4">
-              <button className="text-white/50 hover:text-white transition-colors"><SkipBack className="w-4 h-4" /></button>
+              <button onClick={playPrevious} className="text-white/50 hover:text-white transition-colors" title="Previous (P)"><SkipBack className="w-4 h-4" /></button>
 
               <button
                 onClick={togglePlay}
@@ -712,18 +862,42 @@ function App() {
                 {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
               </button>
 
-              <button className="text-white/50 hover:text-white transition-colors"><SkipForward className="w-4 h-4" /></button>
+              <button onClick={playNext} className="text-white/50 hover:text-white transition-colors" title="Next (N)"><SkipForward className="w-4 h-4" /></button>
 
               <div className="font-mono text-[10px] text-white/50 ml-2">
                 {formatTime(currentTime)} / {duration > 0 ? formatTime(duration) : '--:--'}
               </div>
             </div>
 
-            <div className="font-mono text-[10px] text-white/30 tracking-widest truncate max-w-[300px] uppercase hidden sm:block">
-              {filePath ? `// ${filePath.split(/[/\\]/).pop()}` : '// READY'}
-            </div>
-
             <div className="flex items-center gap-3">
+              {/* Volume Control */}
+              <div className="flex items-center gap-2 group/volume relative">
+                <button
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="text-white/50 hover:text-white transition-colors"
+                >
+                  {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+                </button>
+
+                <div
+                  className="w-24 h-1.5 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar"
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const val = (e.clientX - rect.left) / rect.width;
+                    setVolume(Math.max(0, Math.min(1, val)));
+                    setIsMuted(false);
+                  }}
+                  title={`Volume: ${Math.round(volume * 100)}%`}
+                >
+                  <div
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-white shadow-[0_0_8px_#00f3ff] transition-all"
+                    style={{ width: `${isMuted ? 0 : volume * 100}%` }}
+                  />
+                  {/* Hover visual feedback */}
+                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
+                </div>
+              </div>
+
               {/* Playback Speed */}
               <button
                 onClick={cyclePlaybackSpeed}
