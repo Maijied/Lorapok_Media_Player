@@ -1,17 +1,22 @@
-import { app, BrowserWindow, ipcMain, dialog, protocol } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, protocol, screen } from 'electron'
+import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs'
 
+const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Polyfill for legacy packages that expect global __dirname or require
+Object.assign(globalThis, { __dirname, require })
+
+let ffmpeg: any;
 const debugLogPath = path.join(process.cwd(), 'debug.log');
 
 function logToFile(message: string) {
   const timestamp = new Date().toISOString();
   fs.appendFileSync(debugLogPath, `[${timestamp}] ${message}\n`);
 }
-
-logToFile('--- LORAPOK STARTUP ---');
 
 process.env.APP_ROOT = path.join(__dirname, '..')
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -146,8 +151,9 @@ ipcMain.handle('renderer-ready', () => {
     const ext = path.extname(arg).toLowerCase();
     const mediaExtensions = [
       '.mp4', '.webm', '.ogg', '.mp3', '.mkv', '.avi', '.mov', '.flv',
-      '.wmv', '.m4v', '.mpg', '.mpeg', '.m2ts', '.mts', '.ts', '.3gp',
-      '.wav', '.aac', '.flac', '.m4a', '.opus', '.wma'
+      '.wmv', '.m4v', '.mpg', '.mpeg', '.m2ts', '.mts', '.ts', '.3gp', '.3g2',
+      '.vob', '.mxf', '.rm', '.rmvb', '.asf', '.divx', '.ogm', '.ogv',
+      '.wav', '.aac', '.flac', '.m4a', '.opus', '.wma', '.ape', '.wv', '.mka'
     ];
     return mediaExtensions.includes(ext);
   });
@@ -167,8 +173,8 @@ ipcMain.handle('open-file', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog(win, {
     properties: ['openFile'],
     filters: [
-      { name: 'Movies', extensions: ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov', 'flv', 'wmv', 'm4v', 'mpg', 'mpeg', 'm2ts', 'mts', 'ts', '3gp'] },
-      { name: 'Audio', extensions: ['mp3', 'wav', 'aac', 'flac', 'm4a', 'opus', 'wma'] },
+      { name: 'Movies & TV', extensions: ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov', 'flv', 'wmv', 'm4v', 'mpg', 'mpeg', 'm2ts', 'mts', 'ts', '3gp', '3g2', 'vob', 'mxf', 'rm', 'rmvb', 'asf', 'divx', 'ogm', 'ogv'] },
+      { name: 'Audio', extensions: ['mp3', 'wav', 'aac', 'flac', 'm4a', 'opus', 'wma', 'ape', 'wv', 'mka', 'm4p', 'alac', 'oga'] },
       { name: 'All Files', extensions: ['*'] }
     ]
   })
@@ -179,7 +185,6 @@ ipcMain.handle('get-gpu-status', async () => app.getGPUFeatureStatus())
 
 ipcMain.handle('set-window-size', async (_event, { width, height }) => {
   if (win && !win.isDestroyed() && !win.isFullScreen()) {
-    const { screen } = require('electron')
     const primaryDisplay = screen.getPrimaryDisplay()
     const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize
 
@@ -243,49 +248,129 @@ app.on('open-url', (event, url) => {
   }
 })
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  logToFile('--- LORAPOK STARTUP ---');
+
+  // Use dynamic imports to ensure polyfills are applied before dependency evaluation
+  try {
+    ffmpeg = (await import('fluent-ffmpeg')).default
+    let ffmpegStatic = (await import('ffmpeg-static')).default
+
+    // Fix for dev environment where __dirname points to dist-electron
+    if (ffmpegStatic && !fs.existsSync(ffmpegStatic)) {
+      // Check common locations based on platform
+      const executable = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
+      const possiblePaths = [
+        path.join(process.cwd(), 'node_modules', 'ffmpeg-static', 'ffmpeg'), // Linux/Mac structure
+        path.join(process.cwd(), 'node_modules', 'ffmpeg-static', executable), // Flat with ext
+        path.join(process.cwd(), 'node_modules', 'ffmpeg-static', 'bin', process.platform, process.arch, executable), // Nested
+        path.join(process.cwd(), '..', 'node_modules', 'ffmpeg-static', executable), // Parent dir check
+        path.join(app.getAppPath(), '..', 'node_modules', 'ffmpeg-static', executable), // App path check
+        // Add specific Windows check if platform is win32, blindly looking for ffmpeg.exe
+        ...(process.platform === 'win32' ? [
+          path.join(process.cwd(), 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'),
+          path.join(process.cwd(), 'resources', 'ffmpeg.exe') // Prod check
+        ] : [])
+      ]
+
+      for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+          ffmpegStatic = p
+          break
+        }
+      }
+    }
+
+    if (ffmpegStatic && fs.existsSync(ffmpegStatic)) {
+      ffmpeg.setFfmpegPath(ffmpegStatic)
+      logToFile(`✅ FFmpeg Engine Initialized: ${ffmpegStatic}`);
+    } else {
+      logToFile('⚠️ FFmpeg binary not found at static path, checking system path...');
+    }
+  } catch (err) {
+    logToFile(`❌ FFmpeg Load failed: ${err}`);
+  }
+
   // Register Media Protocol Handler
-  protocol.handle('media', (request) => {
+  protocol.handle('media', async (request) => {
     const url = request.url.replace('media://', '')
     let decodedPath = decodeURIComponent(url)
 
-    if (process.platform !== 'win32' && !decodedPath.startsWith('/')) {
-      decodedPath = '/' + decodedPath
-    }
-    if (process.platform === 'win32' && decodedPath.startsWith('/')) {
-      decodedPath = decodedPath.substring(1)
+    // Handle Windows drive letters (e.g., /C:/path -> C:/path)
+    if (process.platform === 'win32') {
+      // Remove leading slash if it precedes a drive letter (e.g. /C:)
+      if (decodedPath.match(/^\/[a-zA-Z]:/)) {
+        decodedPath = decodedPath.substring(1)
+      }
+    } else {
+      // Ensure leading slash for Linux/Mac
+      if (!decodedPath.startsWith('/')) {
+        decodedPath = '/' + decodedPath
+      }
     }
 
     try {
       const stats = fs.statSync(decodedPath)
-      const range = request.headers.get('range')
+      const ext = path.extname(decodedPath).toLowerCase()
 
-      if (!range) {
-        return new Response(fs.createReadStream(decodedPath) as any, {
-          status: 200,
+      // Native Chromium support check
+      const nativeSupport = ['.mp4', '.webm', '.ogg', '.mp3', '.wav', '.aac', '.flac', '.m4a', '.opus'].includes(ext)
+
+      if (nativeSupport) {
+        const range = request.headers.get('range')
+        if (!range) {
+          return new Response(fs.createReadStream(decodedPath) as any, {
+            status: 200,
+            headers: {
+              'Content-Type': 'video/mp4',
+              'Content-Length': stats.size.toString(),
+              'Accept-Ranges': 'bytes'
+            }
+          })
+        }
+
+        const parts = range.replace(/bytes=/, "").split("-")
+        const start = parseInt(parts[0], 10)
+        const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1
+        const chunksize = (end - start) + 1
+        return new Response(fs.createReadStream(decodedPath, { start, end }) as any, {
+          status: 206,
           headers: {
-            'Content-Type': 'video/mp4', // browser will sniff anyway
-            'Content-Length': stats.size.toString(),
-            'Accept-Ranges': 'bytes'
+            'Content-Range': `bytes ${start}-${end}/${stats.size}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunksize.toString(),
+            'Content-Type': 'video/mp4'
           }
         })
       }
 
-      const parts = range.replace(/bytes=/, "").split("-")
-      const start = parseInt(parts[0], 10)
-      const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1
-      const chunksize = (end - start) + 1
-      const file = fs.createReadStream(decodedPath, { start, end })
+      // 🧠 NEURAL DECODE: FFmpeg Real-time Transcoding
+      logToFile(`🧠 Universal Decode: ${ext} -> fMP4`);
 
-      return new Response(file as any, {
-        status: 206,
+      const ffstream = ffmpeg(decodedPath)
+        .format('mp4')
+        .videoCodec('libx264')
+        .audioCodec('aac')
+        .videoBitrate('2000k')
+        .audioBitrate('128k')
+        .outputOptions([
+          '-movflags frag_keyframe+empty_moov+default_base_moof',
+          '-preset veryfast',
+          '-tune zerolatency'
+        ])
+        .on('error', (err: Error) => {
+          logToFile(`FFmpeg Error: ${err.message}`)
+        })
+        .pipe();
+
+      return new Response(ffstream as any, {
+        status: 200,
         headers: {
-          'Content-Range': `bytes ${start}-${end}/${stats.size}`,
-          'Accept-Ranges': 'bytes',
-          'Content-Length': chunksize.toString(),
-          'Content-Type': 'video/mp4'
+          'Content-Type': 'video/mp4',
+          'Transfer-Encoding': 'chunked'
         }
-      })
+      });
+
     } catch (e) {
       logToFile(`Media Protocol Error: ${e}`)
       return new Response('File not found', { status: 404 })

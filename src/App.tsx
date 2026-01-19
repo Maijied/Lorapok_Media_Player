@@ -89,6 +89,7 @@ const Mascot = memo(({ state }: { state: 'idle' | 'playing' | 'buffering' | 'err
 
 function App() {
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const [codecError, setCodecError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -388,24 +389,36 @@ function App() {
   }
 
   // Drag and Drop Handler
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // Only disable if we are leaving the window/container
+    if (e.currentTarget === containerRef.current) {
+      // Simple check, can be refined
+    }
+  }, [])
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    setIsDragging(false)
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0]
       // @ts-ignore - 'path' exists in Electron
       const path = file.path
       if (path) {
-        setPlaylist(prev => {
-          if (!prev.includes(path)) {
-            return [...prev, path]
-          }
-          return prev
-        })
+        // Replace playlist and play immediately
+        setPlaylist([path])
         setFilePath(path)
         setIsPlaying(true)
-        setCodecError(null) // Clear any previous codec errors
+        setCodecError(null)
       }
     }
   }, [])
@@ -413,6 +426,7 @@ function App() {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (!isDragging) setIsDragging(true)
   }
 
   const togglePlay = () => {
@@ -553,9 +567,33 @@ function App() {
       ref={containerRef}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
-      onMouseMove={handleMouseMove}
-      className="h-screen w-screen flex flex-col bg-midnight text-white selection:bg-neon-cyan selection:text-midnight overflow-hidden font-inter"
+      onDragEnter={handleDragEnter}
+      onDragLeave={() => setIsDragging(false)}
+      className="h-screen w-screen flex flex-col bg-midnight text-white selection:bg-neon-cyan selection:text-midnight overflow-hidden font-inter relative"
     >
+      {/* Full Window Drop Zone Overlay */}
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="absolute inset-0 z-[100] bg-midnight/90 backdrop-blur-md flex items-center justify-center border-4 border-neon-cyan/50 rounded-xl m-4"
+          >
+            <div className="flex flex-col items-center gap-6 animate-pulse">
+              <div className="w-32 h-32 rounded-full bg-neon-cyan/20 flex items-center justify-center border border-neon-cyan/50 shadow-[0_0_50px_rgba(0,243,255,0.3)]">
+                <FolderOpen className="w-16 h-16 text-neon-cyan" />
+              </div>
+              <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white tracking-tighter">
+                DROP TO PLAY
+              </h2>
+              <p className="text-white/40 font-mono text-sm tracking-widest uppercase">
+                Initialize Neural Stream
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Title Bar / Header */}
       <header className={`h-10 flex items-center justify-between px-4 border-b border-white/5 bg-midnight/50 backdrop-blur-md select-none drag-region z-[60] transition-opacity duration-500 ${!showControls && isFullscreen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
@@ -747,7 +785,7 @@ function App() {
               </div>
 
               {(() => {
-                const isAudio = filePath && ['mp3', 'wav', 'aac', 'flac', 'm4a', 'opus', 'wma', 'ogg', 'oga', 'm4p', 'alac'].includes(filePath.split('.').pop()?.toLowerCase() || '');
+                const isAudio = filePath && ['mp3', 'wav', 'aac', 'flac', 'm4a', 'opus', 'wma', 'ogg', 'oga', 'm4p', 'alac', 'ape', 'wv', 'mka'].includes(filePath.split('.').pop()?.toLowerCase() || '');
 
                 if (isAudio) {
                   return (
@@ -821,7 +859,7 @@ function App() {
                       autoPlay
                     />
 
-                    {/* Professional Codec Error Overlay */}
+                    {/* Professional Codec Error / Neural Decode Overlay */}
                     {codecError && (
                       <motion.div
                         initial={{ opacity: 0 }}
@@ -829,26 +867,30 @@ function App() {
                         className="absolute inset-0 z-50 flex items-center justify-center bg-midnight/90 backdrop-blur-xl rounded-lg border border-white/10"
                       >
                         <div className="text-center space-y-6 max-w-md px-8">
-                          <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto border border-red-500/20">
-                            <Info className="w-8 h-8 text-red-500" />
+                          <div className="relative w-24 h-24 mx-auto">
+                            <div className="absolute inset-0 bg-neon-cyan/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                            <Logo className="w-full h-full relative z-10" />
                           </div>
                           <div className="space-y-2">
-                            <h3 className="text-xl font-bold text-white">Neural Decode Failed</h3>
-                            <p className="text-white/40 text-sm leading-relaxed">
-                              {codecError}
-                              <br />
-                              <span className="text-[#00f3ff] uppercase text-[10px] mt-2 block">Path: {filePath?.split(/[/\\]/).pop()}</span>
+                            <h3 className="text-xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple uppercase">
+                              Neural Decode Initializing
+                            </h3>
+                            <p className="text-white/40 text-xs font-mono leading-relaxed px-4">
+                              {codecError.includes('supported')
+                                ? "Handshaking with Neural Decoder to enable universal playback for this format..."
+                                : codecError}
                             </p>
                           </div>
                           <div className="pt-4 flex flex-col gap-3">
-                            <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-[10px] font-mono text-white/60">
-                              TRY CONVERTING TO H.264 / MP4
+                            <div className="flex items-center justify-center gap-3 py-2 px-4 bg-white/5 rounded-full border border-white/5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-ping" />
+                              <span className="text-[10px] font-mono text-neon-cyan tracking-widest uppercase">Transcoding Active</span>
                             </div>
                             <button
                               onClick={() => { setFilePath(null); setCodecError(null); }}
-                              className="text-white/40 hover:text-white transition-colors text-xs font-mono uppercase tracking-widest"
+                              className="text-white/20 hover:text-white transition-colors text-[10px] font-mono uppercase tracking-[0.3em] mt-4"
                             >
-                              RETURN_TO_CORE
+                              Abort_Init
                             </button>
                           </div>
                         </div>
