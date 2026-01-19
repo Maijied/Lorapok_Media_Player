@@ -395,14 +395,6 @@ function App() {
     setIsDragging(true)
   }, [])
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    // Only disable if we are leaving the window/container
-    if (e.currentTarget === containerRef.current) {
-      // Simple check, can be refined
-    }
-  }, [])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -565,6 +557,7 @@ function App() {
   return (
     <div
       ref={containerRef}
+      onMouseMove={handleMouseMove}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
