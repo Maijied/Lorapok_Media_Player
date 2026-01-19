@@ -1,85 +1,201 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, protocol, net } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import fs from 'node:fs'
 
-// const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const debugLogPath = path.join(process.cwd(), 'debug.log');
 
-// The built directory structure
-//
-// ├─┬─┬ dist
-// │ │ └── index.html
-// │ │
-// │ ├─┬ dist-electron
-// │ │ ├── main.js
-// │ │ └── preload.mjs
-// │
+function logToFile(message: string) {
+  const timestamp = new Date().toISOString();
+  fs.appendFileSync(debugLogPath, `[${timestamp}] ${message}\n`);
+}
+
+logToFile('--- LORAPOK STARTUP ---');
+
 process.env.APP_ROOT = path.join(__dirname, '..')
-
-// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
-
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
-// Enable GPU Acceleration for 4K/8K playback
-app.commandLine.appendSwitch('ignore-gpu-blacklist');
-app.commandLine.appendSwitch('enable-gpu-rasterization');
-app.commandLine.appendSwitch('enable-zero-copy');
-app.commandLine.appendSwitch('enable-native-gpu-memory-buffers');
+// Register Custom Media Protocol Schemes
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'media', privileges: { bypassCSP: true, secure: true, supportFetchAPI: true, stream: true } }
+])
+
+// Single Instance Lock
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (_event, commandLine) => {
+    if (win) {
+      if (win.isMinimized()) win.restore()
+      win.focus()
+      const url = commandLine.pop()
+      if (url?.startsWith('lorapok://')) {
+        win.webContents.send('open-protocol-url', url)
+      }
+    }
+  })
+}
+
+// GPU Configuration Strategy
+const args = process.argv;
+const isSafeMode = args.includes('--safe-mode');
+const isDebug = args.includes('--debug');
+let gpuCrashCount = 0;
+const MAX_GPU_CRASHES = 2;
+
+function applyGpuSettings() {
+  if (process.platform === 'linux') {
+    app.commandLine.appendSwitch('disable-gpu-sandbox');
+    app.commandLine.appendSwitch('disable-dev-shm-usage');
+    app.commandLine.appendSwitch('ignore-gpu-blocklist');
+    app.commandLine.appendSwitch('no-sandbox');
+  }
+
+  // Enable additional media features
+  app.commandLine.appendSwitch('enable-features', 'VaapiVideoDecoder,Vulkan,PlatformHEVCDecoderSupport');
+  app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+
+  if (isSafeMode || gpuCrashCount >= MAX_GPU_CRASHES) {
+    logToFile('⚠️ Forcing Software Rendering (Safe Mode)');
+    app.disableHardwareAcceleration();
+  }
+}
+
+applyGpuSettings();
+
+app.on('child-process-gone', (_event, details) => {
+  logToFile(`🚨 Process Gone: ${details.type} (${details.reason})`);
+  if (details.type === 'GPU') {
+    gpuCrashCount++;
+    if (gpuCrashCount >= MAX_GPU_CRASHES) {
+      logToFile('🛑 Critical GPU failure. Relaunching in Safe Mode...');
+      app.relaunch({ args: process.argv.slice(1).concat(['--safe-mode']) });
+      app.exit();
+    } else if (win && !win.isDestroyed()) {
+      win.reload();
+    }
+  }
+});
 
 let win: BrowserWindow | null
 
 function createWindow() {
+  const preloadPath = path.join(__dirname, 'preload.mjs');
+  logToFile('Creating Window...');
+
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     width: 1100,
     height: 700,
     minWidth: 800,
     minHeight: 600,
-    frame: false, // Frameless for custom title bar
+    frame: false,
+    show: false,
+    autoHideMenuBar: true,
+    backgroundColor: '#050510',
     titleBarStyle: 'hidden',
     webPreferences: {
-      preload: path.join(__dirname, 'preload.mjs'),
+      preload: preloadPath,
       sandbox: false,
-      webSecurity: false, // Required to load local media files
+      webSecurity: false,
+      contextIsolation: true,
     },
   })
 
-  // Test active push message to Renderer-process.
+  win.once('ready-to-show', () => {
+    logToFile('Window Ready to Show');
+    setTimeout(() => {
+      if (win && !win.isDestroyed()) {
+        win.show();
+        if (isDebug) win.webContents.openDevTools();
+      }
+    }, 100);
+  });
+
+  win.webContents.on('did-fail-load', (_e, code, desc) => {
+    logToFile(`❌ Renderer Failed to Load: ${code} - ${desc}`);
+  });
+
   win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', (new Date).toLocaleString())
-  })
+    logToFile('Renderer Finished Load');
+  });
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
-    // win.loadFile('dist/index.html')
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
 }
 
-// IPC Handlers
+ipcMain.handle('renderer-ready', () => {
+  logToFile('Renderer reported READY');
+
+  // 1. Check for protocol URL
+  const protocolUrl = process.argv.find(arg => arg.startsWith('lorapok://'))
+  if (protocolUrl && win) {
+    win.webContents.send('open-protocol-url', protocolUrl)
+    return;
+  }
+
+  // 2. Check for file path
+  const possibleFile = process.argv.slice(1).find(arg => {
+    const ext = path.extname(arg).toLowerCase();
+    const mediaExtensions = [
+      '.mp4', '.webm', '.ogg', '.mp3', '.mkv', '.avi', '.mov', '.flv',
+      '.wmv', '.m4v', '.mpg', '.mpeg', '.m2ts', '.mts', '.ts', '.3gp',
+      '.wav', '.aac', '.flac', '.m4a', '.opus', '.wma'
+    ];
+    return mediaExtensions.includes(ext);
+  });
+
+  if (possibleFile && win) {
+    const absolutePath = path.isAbsolute(possibleFile) ? possibleFile : path.join(process.cwd(), possibleFile);
+    win.webContents.send('open-protocol-url', `lorapok://${absolutePath}`);
+  }
+})
+
+ipcMain.handle('log-to-file', (_event, message) => {
+  logToFile(`[RENDERER] ${message}`);
+})
+
 ipcMain.handle('open-file', async () => {
   if (!win) return null
   const { canceled, filePaths } = await dialog.showOpenDialog(win, {
     properties: ['openFile'],
     filters: [
-      { name: 'Movies', extensions: ['mkv', 'avi', 'mp4', 'webm', 'ogg'] },
+      { name: 'Movies', extensions: ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov', 'flv', 'wmv', 'm4v', 'mpg', 'mpeg', 'm2ts', 'mts', 'ts', '3gp'] },
+      { name: 'Audio', extensions: ['mp3', 'wav', 'aac', 'flac', 'm4a', 'opus', 'wma'] },
       { name: 'All Files', extensions: ['*'] }
     ]
   })
-  if (canceled) {
-    return null
-  } else {
-    return filePaths[0]
+  return canceled ? null : filePaths[0]
+})
+
+ipcMain.handle('get-gpu-status', async () => app.getGPUFeatureStatus())
+
+// Window Control Handlers
+ipcMain.handle('window-minimize', () => {
+  if (win && !win.isDestroyed()) win.minimize()
+})
+
+ipcMain.handle('window-maximize', () => {
+  if (win && !win.isDestroyed()) {
+    if (win.isMaximized()) {
+      win.unmaximize()
+    } else {
+      win.maximize()
+    }
   }
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+ipcMain.handle('window-close', () => {
+  if (win && !win.isDestroyed()) win.close()
+})
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
@@ -88,11 +204,42 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow()
+  if (BrowserWindow.getAllWindows().length === 0) createWindow()
+})
+
+app.on('open-url', (event, url) => {
+  event.preventDefault()
+  if (url.startsWith('lorapok://') && win) {
+    win.webContents.send('open-protocol-url', url)
   }
 })
 
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  // Register Media Protocol Handler
+  protocol.handle('media', (request) => {
+    const url = request.url.replace('media://', '')
+    let decodedPath = decodeURIComponent(url)
+
+    // Fix for absolute paths on Linux/Mac
+    if (process.platform !== 'win32' && !decodedPath.startsWith('/')) {
+      decodedPath = '/' + decodedPath
+    }
+
+    // Remove leading slash if present on Windows (e.g. /C:/path)
+    if (process.platform === 'win32' && decodedPath.startsWith('/')) {
+      decodedPath = decodedPath.substring(1)
+    }
+
+    return net.fetch(`file://${decodedPath}`)
+  })
+
+  // Register Protocol for Windows/Linux
+  if (process.defaultApp) {
+    if (process.argv.length >= 2) {
+      app.setAsDefaultProtocolClient('lorapok', process.execPath, [path.resolve(process.argv[1])])
+    }
+  } else {
+    app.setAsDefaultProtocolClient('lorapok')
+  }
+  createWindow()
+})

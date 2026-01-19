@@ -16,11 +16,12 @@
 ## 🚀 Key Features
 
 ### 🎬 Playback Engine
-- **Universal Format Support:** Plays MP4, WebM, OGG natively (VLC/FFmpeg codec support planned).
+- **Universal Format Support:** Plays MP4, WebM, OGG, AVI, WMV, MOV, FLV, and more.
+- **High-Fidelity Audio Engine:** Dedicated professional view for AAC, FLAC, ALAC, MP3, and OGG with hardware-synced glows.
 - **High-Definition Ready:** Optimized for **1080p, 4K, and 8K** playback.
 - **Hardware Acceleration:** Zero-copy GPU decoding enabled for smooth performance on all platforms.
-- **Smart Resume:** Automatically remembers your playback position for every file.
-- **Playback Speed:** Cycle through 0.5x to 2x speeds on the fly.
+- **Improved Codec Handling:** Automated professional error states for legacy codecs with conversion recommendations.
+- **Smart Resume & Speed:** Remembers position for every file; cycle through 0.5x to 2x speeds.
 
 ### 🎧 User Experience
 - **Frameless "Holographic" UI:** Custom title bar and glassmorphic controls.

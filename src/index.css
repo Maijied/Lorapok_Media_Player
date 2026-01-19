@@ -9,9 +9,13 @@
   line-height: 1.5;
   font-weight: 400;
 
+  --brand-cyan: #00f3ff;
+  --brand-purple: #bc13fe;
+  --brand-midnight: #050510;
+
   color-scheme: dark;
   color: rgba(255, 255, 255, 0.9);
-  background-color: #050510; /* midnight */
+  background-color: var(--brand-midnight);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

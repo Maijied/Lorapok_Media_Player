@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <!-- Meta-style Mesh Gradient -->
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F3FF" />
+      <stop offset="100%" stop-color="#BC13FE" />
+    </linearGradient>
+    
+    <!-- Glassmorphism Blur -->
+    <filter id="glassBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    
+    <!-- Sophisticated Depth Shadow -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Background Base (Clean squircle hint) -->
+  <rect x="64" y="64" width="384" height="384" rx="80" fill="#050510" />
+
+  <!-- The "Infinity Larva" Abstract Shape -->
+  <!-- A single, elegant flowing line that implies a larva curled into a play button -->
+  <path d="M180 160 C 140 160, 120 200, 120 256 C 120 312, 140 352, 180 352 L 320 352 C 380 352, 400 300, 340 260 L 220 180 C 200 165, 180 160, 180 160 Z" 
+        fill="url(#brandGradient)" 
+        fill-opacity="0.15" 
+        stroke="url(#brandGradient)" 
+        stroke-width="12" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        filter="url(#softShadow)" />
+
+  <!-- Glass Highlight Overlap -->
+  <path d="M340 260 L 220 180 C 210 175, 200 175, 190 180 C 170 190, 170 230, 170 256 C 170 282, 170 322, 190 332" 
+        stroke="white" 
+        stroke-width="2" 
+        stroke-opacity="0.4" 
+        filter="url(#glassBlur)" />
+
+  <!-- The "Eye" - A single high-tech dot (The 'Intelligence' factor) -->
+  <circle cx="180" cy="220" r="10" fill="white">
+    <animate attributeName="opacity" values="1;0.5;1" dur="4s" repeatCount="indefinite" />
+  </circle>
+
+  <!-- Floating Glow Element -->
+  <circle cx="340" cy="260" r="40" fill="#00F3FF" fill-opacity="0.1" filter="url(#glassBlur)" />
+</svg>
