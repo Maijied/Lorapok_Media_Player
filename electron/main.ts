@@ -177,6 +177,35 @@ ipcMain.handle('open-file', async () => {
 
 ipcMain.handle('get-gpu-status', async () => app.getGPUFeatureStatus())
 
+ipcMain.handle('set-window-size', async (_event, { width, height }) => {
+  if (win && !win.isDestroyed() && !win.isFullScreen()) {
+    const { screen } = require('electron')
+    const primaryDisplay = screen.getPrimaryDisplay()
+    const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize
+
+    // Don't resize if already maximized or in fullscreen (redundant check)
+    if (win.isMaximized()) return
+
+    // Calculate sane bounds (max 80% of screen)
+    const maxWidth = Math.floor(screenWidth * 0.9)
+    const maxHeight = Math.floor(screenHeight * 0.9)
+
+    let finalWidth = Math.min(width + 40, maxWidth) // Add padding for UI
+    let finalHeight = Math.min(height + 120, maxHeight) // Add padding for header/footer
+
+    // Maintain aspect ratio if we hit max bounds
+    const videoRatio = width / height
+    if (finalWidth === maxWidth) {
+      finalHeight = Math.floor(finalWidth / videoRatio) + 120
+    } else if (finalHeight === maxHeight) {
+      finalWidth = Math.floor((finalHeight - 120) * videoRatio) + 40
+    }
+
+    win.setSize(finalWidth, finalHeight, true)
+    win.center()
+  }
+})
+
 // Window Control Handlers
 ipcMain.handle('window-minimize', () => {
   if (win && !win.isDestroyed()) win.minimize()

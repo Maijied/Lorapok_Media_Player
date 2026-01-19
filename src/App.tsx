@@ -456,11 +456,15 @@ function App() {
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
+      const w = videoRef.current.videoWidth
+      const h = videoRef.current.videoHeight
       setDuration(videoRef.current.duration)
-      setVideoStats({
-        width: videoRef.current.videoWidth,
-        height: videoRef.current.videoHeight
-      })
+      setVideoStats({ width: w, height: h })
+
+      // Dynamic Window Resizing (VLC Style)
+      if (window.ipcRenderer && w > 0 && h > 0) {
+        window.ipcRenderer.invoke('set-window-size', { width: w, height: h })
+      }
     }
   }
 
@@ -524,7 +528,7 @@ function App() {
     >
 
       {/* Title Bar / Header */}
-      <header className={`h-10 flex items-center justify-between px-4 border-b border-white/5 bg-midnight/50 backdrop-blur-md select-none drag-region z-50 ${isFullscreen ? 'hidden' : ''}`}>
+      <header className={`h-10 flex items-center justify-between px-4 border-b border-white/5 bg-midnight/50 backdrop-blur-md select-none drag-region z-[60] ${isFullscreen ? 'hidden' : ''}`}>
         <div className="flex items-center gap-2 no-drag">
           <Logo className="w-5 h-5" />
           <span className="font-mono text-xs tracking-tighter font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f3ff] to-[#bc13fe]">
@@ -838,118 +842,82 @@ function App() {
             </motion.div>
           )}
         </AnimatePresence>
-      </main>
 
-      {/* Control Deck */}
-      <footer className={`h-24 px-6 pb-6 pt-2 z-50 transition-transform duration-300 ${isFullscreen ? 'translate-y-full opacity-0 pointer-events-none' : ''}`}>
-        <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90">
-
-          {/* Progress Bar */}
-          <div
-            className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden"
-            onClick={handleSeek}
-          >
-            <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-electric-purple shadow-[0_0_15px_#00f3ff] transition-all"
-              style={{ width: `${(currentTime / duration) * 100}%` }}
-            />
-            {/* Hover highlight for seek */}
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-
-          {/* Buttons Row */}
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-4">
-              <button onClick={playPrevious} className="text-white/50 hover:text-white transition-colors" title="Previous (P)"><SkipBack className="w-4 h-4" /></button>
-
-              <button
-                onClick={togglePlay}
-                className="w-8 h-8 rounded-full bg-white text-midnight flex items-center justify-center hover:bg-neon-cyan hover:shadow-[0_0_15px_#00f3ff] transition-all duration-300"
-              >
-                {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-              </button>
-
-              <button onClick={playNext} className="text-white/50 hover:text-white transition-colors" title="Next (N)"><SkipForward className="w-4 h-4" /></button>
-
-              <div className="font-mono text-[10px] text-white/50 ml-2">
-                {formatTime(currentTime)} / {duration > 0 ? formatTime(duration) : '--:--'}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* Volume Control */}
-              <div className="flex items-center gap-2 group/volume relative">
-                <button
-                  onClick={() => setIsMuted(!isMuted)}
-                  className="text-white/50 hover:text-white transition-colors"
-                >
-                  {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
-                </button>
-
+        {/* Control Deck (Absolute to main viewport to avoid layout shifts) */}
+        <AnimatePresence>
+          {!isFullscreen && (
+            <motion.footer
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="absolute bottom-0 left-0 right-0 h-24 px-6 pb-6 pt-2 z-50 pointer-events-auto"
+            >
+              <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90">
+                {/* Progress Bar */}
                 <div
-                  className="w-24 h-1.5 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const val = (e.clientX - rect.left) / rect.width;
-                    setVolume(Math.max(0, Math.min(1, val)));
-                    setIsMuted(false);
-                  }}
-                  title={`Volume: ${Math.round(volume * 100)}%`}
+                  className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden"
+                  onClick={handleSeek}
                 >
                   <div
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-white shadow-[0_0_8px_#00f3ff] transition-all"
-                    style={{ width: `${isMuted ? 0 : volume * 100}%` }}
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-electric-purple shadow-[0_0_15px_#00f3ff] transition-all"
+                    style={{ width: `${(currentTime / duration) * 100}%` }}
                   />
-                  {/* Hover visual feedback */}
-                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+
+                {/* Buttons Row */}
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center gap-4">
+                    <button onClick={playPrevious} className="text-white/50 hover:text-white transition-colors" title="Previous (P)"><SkipBack className="w-4 h-4" /></button>
+                    <button onClick={togglePlay} className="w-8 h-8 rounded-full bg-white text-midnight flex items-center justify-center hover:bg-neon-cyan transition-all">
+                      {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+                    </button>
+                    <button onClick={playNext} className="text-white/50 hover:text-white transition-colors" title="Next (N)"><SkipForward className="w-4 h-4" /></button>
+                    <div className="font-mono text-[10px] text-white/50 ml-2">
+                      {formatTime(currentTime)} / {duration > 0 ? formatTime(duration) : '--:--'}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 group/volume relative">
+                      <button onClick={() => setIsMuted(!isMuted)} className="text-white/50 hover:text-white transition-colors">
+                        {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+                      </button>
+                      <div className="w-24 h-1.5 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar" onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const val = (e.clientX - rect.left) / rect.width;
+                        setVolume(Math.max(0, Math.min(1, val)));
+                        setIsMuted(false);
+                      }}>
+                        <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-white" style={{ width: `${isMuted ? 0 : volume * 100}%` }} />
+                        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
+                      </div>
+                    </div>
+
+                    <button onClick={cyclePlaybackSpeed} className="text-[10px] font-mono font-bold text-neon-cyan border border-neon-cyan/30 px-1.5 py-0.5 rounded hover:bg-neon-cyan/10">
+                      {playbackRate}x
+                    </button>
+                    <button onClick={() => setShowDebug(!showDebug)} className={`transition-colors ${showDebug ? 'text-electric-purple' : 'text-white/30 hover:text-white/70'}`} title="Stats">
+                      <Info className="w-4 h-4" />
+                    </button>
+                    {window.ipcRenderer && (
+                      <button onClick={handleOpenFile} className="text-white/50 hover:text-neon-cyan transition-colors" title="Open File">
+                        <FolderOpen className="w-4 h-4" />
+                      </button>
+                    )}
+                    <button onClick={() => setShowPlaylist(!showPlaylist)} className={`transition-colors ${showPlaylist ? 'text-neon-cyan' : 'text-white/30 hover:text-white/70'}`} title="Playlist">
+                      <List className="w-4 h-4" />
+                    </button>
+                    <button onClick={toggleFullscreen} className="text-white/50 hover:text-electric-purple transition-colors" title="Fullscreen">
+                      {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              {/* Playback Speed */}
-              <button
-                onClick={cyclePlaybackSpeed}
-                className="text-[10px] font-mono font-bold text-neon-cyan border border-neon-cyan/30 px-1.5 py-0.5 rounded hover:bg-neon-cyan/10 transition-colors"
-                title="Playback Speed"
-              >
-                {playbackRate}x
-              </button>
-
-              <button
-                onClick={() => setShowDebug(!showDebug)}
-                className={`transition-colors ${showDebug ? 'text-electric-purple' : 'text-white/30 hover:text-white/70'}`}
-                title="Stats for Nerds"
-              >
-                <Info className="w-4 h-4" />
-              </button>
-
-              {window.ipcRenderer && (
-                <>
-                  <div className="w-px h-4 bg-white/10 mx-1" />
-                  <button onClick={handleOpenFile} className="text-white/50 hover:text-neon-cyan transition-colors" title="Open File">
-                    <FolderOpen className="w-4 h-4" />
-                  </button>
-                </>
-              )}
-
-              <button
-                onClick={() => setShowPlaylist(!showPlaylist)}
-                className={`transition-colors ${showPlaylist ? 'text-neon-cyan' : 'text-white/30 hover:text-white/70'}`}
-                title="Toggle Playlist"
-              >
-                <List className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={toggleFullscreen}
-                className="text-white/50 hover:text-electric-purple transition-colors"
-                title="Toggle Fullscreen"
-              >
-                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-        </div>
-      </footer>
+            </motion.footer>
+          )}
+        </AnimatePresence>
+      </main>
     </div>
   )
 }
