@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react'
 import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe } from 'lucide-react'
+import Hls from 'hls.js'
+import dashjs from 'dashjs'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Brand Logo Component (Embedded to prevent path issues)
@@ -136,6 +138,8 @@ function App() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const hlsRef = useRef<Hls | null>(null)
+  const dashRef = useRef<dashjs.MediaPlayerClass | null>(null)
 
   // Load Playlist from localStorage
   useEffect(() => {
@@ -342,6 +346,57 @@ function App() {
       window.ipcRenderer.invoke('get-gpu-status').then(setGpuStatus)
     }
   }, [showDebug])
+
+  // HLS & DASH Stream Handler
+  useEffect(() => {
+    if (!filePath || !videoRef.current) return
+
+    // Cleanup previous instances
+    if (hlsRef.current) {
+      hlsRef.current.destroy()
+      hlsRef.current = null
+    }
+    if (dashRef.current) {
+      dashRef.current.reset()
+      dashRef.current = null
+    }
+
+    const isStream = filePath.match(/^https?:\/\//)
+    const ext = filePath.split('.').pop()?.toLowerCase() || ''
+    const isM3U8 = ext === 'm3u8' || filePath.includes('.m3u8')
+    const isMPD = ext === 'mpd' || filePath.includes('.mpd')
+
+    if (isStream) {
+      if (isM3U8) {
+        if (Hls.isSupported()) {
+          const hls = new Hls()
+          hls.loadSource(filePath)
+          hls.attachMedia(videoRef.current)
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            videoRef.current?.play().catch(e => console.log('Auto-play blocked', e))
+          })
+          hlsRef.current = hls
+        } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+          // Native HLS support (Safari) - standard src prop handles this, but we explicitly set it here just in case
+        }
+      } else if (isMPD) {
+        const player = dashjs.MediaPlayer().create()
+        player.initialize(videoRef.current, filePath, true)
+        dashRef.current = player
+      }
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy()
+        hlsRef.current = null
+      }
+      if (dashRef.current) {
+        dashRef.current.reset()
+        dashRef.current = null
+      }
+    }
+  }, [filePath])
 
   // Smart Resume: Save position
   const handleTimeUpdate = () => {
@@ -863,7 +918,17 @@ function App() {
                 return (
                   <div className="relative w-full h-full flex items-center justify-center">
                     <video
-                      src={filePath?.match(/^https?:\/\//) ? filePath : `media://${filePath}`}
+                      src={(() => {
+                        const isStream = filePath?.match(/^https?:\/\//);
+                        const isAdaptive = filePath?.includes('.m3u8') || filePath?.includes('.mpd');
+                        // If adaptive stream, let Hls/Dash handled it (return undefined src)
+                        // Unless native HLS is needed (Safari), but we assume generic env here for now.
+                        // Actually, for HLS.js attached media, we don't set src.
+                        if (isStream && isAdaptive && Hls.isSupported()) return undefined;
+                        if (isStream && isAdaptive && filePath?.includes('.mpd')) return undefined; // DashJS handles src
+
+                        return isStream ? filePath : `media://${filePath}`;
+                      })()}
                       className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
                       style={{ boxShadow: `0 0 80px -20px ${ambientColor}` }}
                       onTimeUpdate={handleTimeUpdate}
