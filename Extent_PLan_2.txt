@@ -1,0 +1,97 @@
+# Lorapok Media Player — Feature List
+
+### Overview
+**Lorapok Media Player** is a cross‑platform (Windows, Ubuntu, macOS) multimedia application built with the **Lorapok brand DNA** — an "Organic Intelligence" aesthetic that fuses *friendly biological design* with *high‑tech precision*. The player extends to a **browser‑based plugin** for consistent experience across all environments.
+
+---
+
+## ✦ Core Identity
+- **Mascot Integration:** Animated Lorapok larva ("the friendly helper") greets users and reacts during playback events (loading, errors, completion).
+- **Design Language:** Dark‑mode holographic UI with glassmorphic panels, neon cyan accents, and electric purple highlights.
+- **Personality:** Playful yet professional — developers’ tool with character.
+
+---
+
+## 🎬 Playback & Format Support
+- Universal video format support (via FFmpeg integration): MP4, MKV, AVI, MOV, WebM, FLV, WMV, OGG.
+- Audio playback: MP3, FLAC, AAC, OGG, WAV, M4A.
+- Subtitle support: SRT, VTT, ASS with customizable styling.
+- Streaming support: HTTP, HLS, DASH.
+- **High‑definition playback** up to:
+  - 1080p (Full HD)
+  - 4K (Ultra HD)
+  - 8K (Super UHD)
+- Hardware acceleration via GPU for smoother 4K+ playback.
+- Frame‑by‑frame navigation and screenshots.
+- Multi‑audio track selection.
+- Playback speed control (0.25× to 4×).
+
+---
+
+## 🧠 Smart and Organic Features
+- **Smart Resume:** Automatically remembers last playback position per media.
+- **Adaptive Interface:** UI subtly changes color tones based on video brightness (mimicking organic adaptation).
+- **Lorapok Assistant:** Optional AI‑driven plugin (future integration) that recommends media or analyzes codec issues.
+- **Reactive Mascot Animations:** Mascot responds to playback status (e.g., idle, buffering, paused).
+
+---
+
+## 🎧 User Experience
+- Frameless window with custom Lorapok‑themed title bar.
+- Holographic control panels with blur and reflection effects.
+- Visual equalizer animation synced to audio tracks.
+- Drag‑and‑drop media loading.
+- Mini‑player and full‑screen modes.
+- Playlist manager with smart sorting and search.
+- Theme presets: “Midnight Core”, “Cyber Bloom”, “Quantum Pulse”.
+
+---
+
+## ⚙️ Developer‑Grade Features
+- **Codec Info Overlay:** Displays runtime video codec, bitrate, and frame rate.
+- **Debug Mode:** Real‑time rendering stats (GPU usage, dropped frames).
+- **Plugin API:** Extend functionality through JS modules (e.g., visualizers, streaming integrations).
+- **Hotkey System:** Fully remappable keyboard shortcuts.
+- **Command‑line Interface:** `lorapok-player --file <path>` launch option.
+
+---
+
+## 🌐 Web Plugin Integration
+The **Lorapok Web Plugin** provides the same player engine as the desktop version inside browsers.
+
+- Built as a **React + WebAssembly** component.
+- Compatible with Chromium, Firefox, and WebKit engines.
+- Allows embedding Lorapok player in web pages (similar to YouTube iframe).
+- Supports 1080p–4K streaming and adaptive bitrates.
+- Themed UI automatically adapts to host site’s color context.
+- Secure sandbox execution for privacy and safety.
+
+---
+
+## 🛠️ Technical Stack
+- **Core Framework:** Electron (desktop), React (frontend)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS + Framer Motion + Custom Glassmorphism effects
+- **Media Engine:** FFmpeg bindings + WASM player wrapper
+- **Icons:** Lucide React (customized to Lorapok theme)
+- **Plugin API:** Node/Browser-compatible extension model
+
+---
+
+## 🚀 Future Roadmap
+- AI‑based media tagging and auto‑playlist creation.
+- Network streaming (DLNA, Chromecast, Miracast).
+- In‑player YouTube/Twitch integration.
+- Cloud sync for playlists and preferences.
+- Collaborative “Watch Together” mode.
+
+---
+
+## 🧩 Lorapok Brand Alignment
+Everything in this media player — from UI glow states to mascot reactions — expresses the **Lorapok ecosystem ethos**:
+> “A premium, dark‑mode developer tool featuring a cute 3D larva mascot.
+>  It evolves with the user, symbolizing growth, intelligence, and community.”
+
+---
+
+*Version 0.1 Draft — Lorapok Development Team*
