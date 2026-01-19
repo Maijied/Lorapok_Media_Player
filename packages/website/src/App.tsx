@@ -4,7 +4,7 @@ import { LorapokPlayer, Logo } from 'lorapok-player'
 import { Download, Terminal, Zap, Cpu, Globe } from 'lucide-react'
 
 function App() {
-    const [demoUrl, setDemoUrl] = useState("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+    const [demoUrl, setDemoUrl] = useState("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
 
     return (
         <div className="min-h-screen bg-midnight text-white selection:bg-neon-cyan selection:text-midnight font-inter overflow-hidden">
@@ -112,13 +112,13 @@ function App() {
                         </h2>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setDemoUrl("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")}
+                                onClick={() => setDemoUrl("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")}
                                 className={`px-3 py-1 text-xs font-mono border rounded ${demoUrl.includes('BigBuckBunny') ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50'}`}
                             >
                                 MP4
                             </button>
                             <button
-                                onClick={() => setDemoUrl("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")}
+                                onClick={() => setDemoUrl("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")}
                                 className={`px-3 py-1 text-xs font-mono border rounded ${demoUrl.includes('ElephantsDream') ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50'}`}
                             >
                                 STREAM
