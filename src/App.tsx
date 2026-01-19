@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react'
 import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe } from 'lucide-react'
 import Hls from 'hls.js'
-import dashjs from 'dashjs'
+import * as dashjs from 'dashjs'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Brand Logo Component (Embedded to prevent path issues)
@@ -133,6 +133,7 @@ function App() {
   const [showControls, setShowControls] = useState(true)
   const [showStreamInput, setShowStreamInput] = useState(false)
   const [streamUrl, setStreamUrl] = useState('')
+  const [showHelp, setShowHelp] = useState(false)
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -286,6 +287,10 @@ function App() {
           break
         case 'p':
           playPrevious()
+          break
+        case 'h':
+        case '?':
+          setShowHelp(prev => !prev)
           break
       }
     }
@@ -657,6 +662,36 @@ function App() {
         )}
       </AnimatePresence>
 
+      {/* Help Modal */}
+      <AnimatePresence>
+        {showHelp && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="absolute inset-0 z-[100] bg-midnight/90 backdrop-blur-xl flex items-center justify-center p-8"
+            onClick={() => setShowHelp(false)}
+          >
+            <div className="max-w-2xl w-full bg-black/50 border border-white/10 rounded-2xl p-8" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
+                <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">KEYBOARD SHORTCUTS</h2>
+                <button onClick={() => setShowHelp(false)}><X className="w-6 h-6 hover:text-red-500" /></button>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm font-mono text-white/70">
+                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">SPACE</span> <span>Play / Pause</span></div>
+                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">F</span> <span>Toggle Fullscreen</span></div>
+                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">← / →</span> <span>Seek -/+ 10s</span></div>
+                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">↑ / ↓</span> <span>Volume</span></div>
+                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">M</span> <span>Mute</span></div>
+                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">[ / ]</span> <span>Speed Control</span></div>
+                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">N / P</span> <span>Next / Prev</span></div>
+                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">ESC</span> <span>Exit Fullscreen</span></div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Title Bar / Header */}
       <header className={`h-10 flex items-center justify-between px-4 border-b border-white/5 bg-midnight/50 backdrop-blur-md select-none drag-region z-[60] transition-opacity duration-500 ${!showControls && isFullscreen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="flex items-center gap-2 no-drag">
@@ -666,460 +701,476 @@ function App() {
           </span>
         </div>
 
-        {/* Real-ish Window Controls */}
-        <div className="flex items-center no-drag">
-          <button
-            onClick={() => window.ipcRenderer?.invoke('window-minimize')}
-            className="p-2 hover:bg-white/10 transition-colors"
-          >
-            <Minus className="w-3 h-3" />
-          </button>
-          <button
-            onClick={() => window.ipcRenderer?.invoke('window-maximize')}
-            className="p-2 hover:bg-white/10 transition-colors"
-          >
-            <Square className="w-3 h-3" />
-          </button>
-          <button
-            onClick={() => window.ipcRenderer?.invoke('window-close')}
-            className="p-2 hover:bg-red-500/80 transition-colors"
-          >
-            <X className="w-3 h-3" />
-          </button>
-        </div>
-      </header>
+    </div>
+        
+        {/* Help Toggle in Header */ }
+  <div className="flex items-center no-drag mr-2">
+    <button onClick={() => setShowHelp(true)} className="p-1.5 hover:bg-neon-cyan/10 rounded transition-colors text-xs font-mono text-neon-cyan/70 border border-neon-cyan/20">
+      ? HELP
+    </button>
+  </div>
 
-      {/* Main Viewport */}
-      <main className="flex-1 relative flex flex-col items-center justify-center overflow-hidden bg-black/50 transition-colors duration-1000" style={{ backgroundColor: ambientColor.replace('0.3', '0.05') }}>
-        {/* Hidden Canvas for sampling */}
-        <canvas ref={canvasRef} width="10" height="10" className="hidden" />
+  {/* Real-ish Window Controls */ }
+  <div className="flex items-center no-drag">
+    <button
+      onClick={() => window.ipcRenderer?.invoke('window-minimize')}
+      className="p-2 hover:bg-white/10 transition-colors"
+    >
+      <Minus className="w-3 h-3" />
+    </button>
+    <button
+      onClick={() => window.ipcRenderer?.invoke('window-maximize')}
+      className="p-2 hover:bg-white/10 transition-colors"
+    >
+      <Square className="w-3 h-3" />
+    </button>
+    <button
+      onClick={() => window.ipcRenderer?.invoke('window-close')}
+      className="p-2 hover:bg-red-500/80 transition-colors"
+    >
+      <X className="w-3 h-3" />
+    </button>
+  </div>
+      </header >
 
-        {/* Background Grid Effect - only visible if no file */}
-        {!filePath && (
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,243,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,243,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
-        )}
+    {/* Main Viewport */ }
+    < main className = "flex-1 relative flex flex-col items-center justify-center overflow-hidden bg-black/50 transition-colors duration-1000" style = {{ backgroundColor: ambientColor.replace('0.3', '0.05') }
+}>
+  {/* Hidden Canvas for sampling */ }
+  < canvas ref = { canvasRef } width = "10" height = "10" className = "hidden" />
 
-        {/* Dynamic Ambient Glow */}
-        {filePath && (
-          <div
-            className="absolute inset-0 blur-[120px] opacity-40 pointer-events-none transition-colors duration-1000"
-            style={{ backgroundColor: ambientColor }}
-          />
-        )}
+    {/* Background Grid Effect - only visible if no file */ }
+{
+  !filePath && (
+    <div className="absolute inset-0 bg-[linear-gradient(rgba(0,243,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,243,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+  )
+}
 
-        {/* Playlist Side Panel */}
-        <AnimatePresence>
-          {showPlaylist && (
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute right-0 top-0 bottom-0 w-80 bg-midnight/80 backdrop-blur-2xl border-l border-white/10 z-50 flex flex-col shadow-2xl"
-            >
-              <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                <h3 className="font-mono text-xs font-bold text-neon-cyan flex items-center gap-2">
-                  <List className="w-4 h-4" /> PLAYLIST_QUEUE
-                </h3>
-                <button onClick={() => setShowPlaylist(false)} className="text-white/30 hover:text-white transition-colors">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+{/* Dynamic Ambient Glow */ }
+{
+  filePath && (
+    <div
+      className="absolute inset-0 blur-[120px] opacity-40 pointer-events-none transition-colors duration-1000"
+      style={{ backgroundColor: ambientColor }}
+    />
+  )
+}
 
-              <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-                {playlist.length === 0 && (
-                  <div className="h-full flex flex-col items-center justify-center opacity-20 text-center p-8">
-                    <List className="w-12 h-12 mb-2" />
-                    <p className="text-xs font-mono">QUEUE_EMPTY</p>
-                  </div>
-                )}
-                {playlist.map((path, idx) => (
-                  <div
-                    key={path}
-                    className={`group flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer ${filePath === path ? 'bg-neon-cyan/10 border border-neon-cyan/30' : 'hover:bg-white/5 border border-transparent'}`}
-                    onClick={() => {
-                      setFilePath(path)
-                      setIsPlaying(true)
-                    }}
-                  >
-                    <div className="text-[10px] font-mono opacity-30 w-4">{idx + 1}</div>
-                    <div className="flex-1 min-w-0">
-                      <div className={`text-xs truncate ${filePath === path ? 'text-neon-cyan font-bold' : 'text-white/70'}`}>
-                        {path.split(/[/\\]/).pop()}
-                      </div>
-                      <div className="text-[8px] font-mono opacity-20 truncate">{path}</div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        removeFromPlaylist(path)
-                      }}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-all"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+{/* Playlist Side Panel */ }
+<AnimatePresence>
+  {showPlaylist && (
+    <motion.div
+      initial={{ x: '100%' }}
+      animate={{ x: 0 }}
+      exit={{ x: '100%' }}
+      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+      className="absolute right-0 top-0 bottom-0 w-80 bg-midnight/80 backdrop-blur-2xl border-l border-white/10 z-50 flex flex-col shadow-2xl"
+    >
+      <div className="p-4 border-b border-white/10 flex items-center justify-between">
+        <h3 className="font-mono text-xs font-bold text-neon-cyan flex items-center gap-2">
+          <List className="w-4 h-4" /> PLAYLIST_QUEUE
+        </h3>
+        <button onClick={() => setShowPlaylist(false)} className="text-white/30 hover:text-white transition-colors">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
 
-              <div className="p-4 border-t border-white/10">
-                <button
-                  onClick={addToPlaylist}
-                  className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center gap-2 transition-all group"
-                >
-                  <Plus className="w-4 h-4 text-neon-cyan group-hover:rotate-90 transition-transform" />
-                  <span className="font-mono text-[10px]">ADD_TO_QUEUE</span>
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Codec Info Overlay */}
-        {showDebug && (
-          <div className="absolute top-4 left-4 z-40 bg-black/80 border border-neon-cyan/30 p-4 rounded-lg font-mono text-xs text-neon-cyan backdrop-blur-md shadow-lg pointer-events-none max-w-sm overflow-hidden">
-            <h3 className="font-bold border-b border-white/10 pb-2 mb-2 flex items-center gap-2">
-              <Info className="w-3 h-3" /> STATS_FOR_NERDS
-            </h3>
-            <div className="space-y-1 opacity-80">
-              {videoStats && (
-                <>
-                  <p>RES: {videoStats.width}x{videoStats.height}</p>
-                  <p>DUR: {duration.toFixed(2)}s</p>
-                  <p>CUR: {currentTime.toFixed(4)}s</p>
-                  <p>SPD: {playbackRate}x</p>
-                  <p>SRC: {filePath?.split(/[/\\]/).pop()}</p>
-                </>
-              )}
-              {gpuStatus && (
-                <div className="mt-2 pt-2 border-t border-white/10 text-[10px]">
-                  <p className="font-bold text-electric-purple">GPU ACCELERATION:</p>
-                  <p>2D: {gpuStatus['2d_canvas']}</p>
-                  <p>GL: {gpuStatus['gpu_compositing']}</p>
-                  <p>Vid Decode: {gpuStatus['video_decode']}</p>
-                </div>
-              )}
-            </div>
+      <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+        {playlist.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center opacity-20 text-center p-8">
+            <List className="w-12 h-12 mb-2" />
+            <p className="text-xs font-mono">QUEUE_EMPTY</p>
           </div>
         )}
-
-        <AnimatePresence mode="wait">
-          {!filePath ? (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="z-10 flex flex-col items-center gap-6"
+        {playlist.map((path, idx) => (
+          <div
+            key={path}
+            className={`group flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer ${filePath === path ? 'bg-neon-cyan/10 border border-neon-cyan/30' : 'hover:bg-white/5 border border-transparent'}`}
+            onClick={() => {
+              setFilePath(path)
+              setIsPlaying(true)
+            }}
+          >
+            <div className="text-[10px] font-mono opacity-30 w-4">{idx + 1}</div>
+            <div className="flex-1 min-w-0">
+              <div className={`text-xs truncate ${filePath === path ? 'text-neon-cyan font-bold' : 'text-white/70'}`}>
+                {path.split(/[/\\]/).pop()}
+              </div>
+              <div className="text-[8px] font-mono opacity-20 truncate">{path}</div>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                removeFromPlaylist(path)
+              }}
+              className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-all"
             >
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#00f3ff]/20 to-[#bc13fe]/20 blur-3xl rounded-full scale-150 group-hover:scale-175 transition-transform duration-1000" />
-                <Logo className="w-48 h-48 relative z-10 drop-shadow-[0_0_30px_rgba(0,243,255,0.3)]" />
-              </div>
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
+        ))}
+      </div>
 
-              <div className="text-center space-y-1">
-                <h2 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">LORAPOK</h2>
-                <p className="text-[#00f3ff]/40 font-mono text-[10px] tracking-[0.2em] uppercase">Supercomputing Media Engine</p>
-              </div>
+      <div className="p-4 border-t border-white/10">
+        <button
+          onClick={addToPlaylist}
+          className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center gap-2 transition-all group"
+        >
+          <Plus className="w-4 h-4 text-neon-cyan group-hover:rotate-90 transition-transform" />
+          <span className="font-mono text-[10px]">ADD_TO_QUEUE</span>
+        </button>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
-              <div className="flex flex-col items-center gap-4 mt-4">
-                <div className="flex gap-4">
-                  <button
-                    onClick={handleOpenFile}
-                    className="group relative px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#00f3ff]/50 rounded-2xl transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#00f3ff]/10 to-[#bc13fe]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                    <FolderOpen className="w-5 h-5 text-[#00f3ff] relative z-10" />
-                    <span className="font-mono text-xs font-bold relative z-10 tracking-widest">INITIALIZE_CORE</span>
-                  </button>
-
-                  <button
-                    onClick={() => setShowStreamInput(true)}
-                    className="group relative px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#bc13fe]/50 rounded-2xl transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#bc13fe]/10 to-[#00f3ff]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                    <Globe className="w-5 h-5 text-[#bc13fe] relative z-10" />
-                    <span className="font-mono text-xs font-bold relative z-10 tracking-widest">NETWORK_STREAM</span>
-                  </button>
-                </div>
-                <p className="text-white/20 font-mono text-[9px]">OR_DRAG_DATA_HERE</p>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="player"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="w-full h-full flex items-center justify-center relative group z-10"
-            >
-              {/* Mini Mascot Overlay */}
-              <div className="absolute top-4 right-4 z-40 scale-[0.4] origin-top-right opacity-0 group-hover:opacity-100 transition-opacity">
-                <Mascot state={isBuffering ? 'buffering' : (isPlaying ? 'playing' : 'idle')} />
-              </div>
-
-              {(() => {
-                const isAudio = filePath && ['mp3', 'wav', 'aac', 'flac', 'm4a', 'opus', 'wma', 'ogg', 'oga', 'm4p', 'alac', 'ape', 'wv', 'mka'].includes(filePath.split('.').pop()?.toLowerCase() || '');
-
-                if (isAudio) {
-                  return (
-                    <div className="flex flex-col items-center gap-8 relative z-10 w-full max-w-2xl px-8">
-                      <div className="relative group">
-                        <motion.div
-                          animate={{
-                            scale: isPlaying ? [1, 1.05, 1] : 1,
-                            rotate: isPlaying ? [0, 5, -5, 0] : 0
-                          }}
-                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                          className="relative z-10"
-                        >
-                          <Logo className="w-64 h-64 drop-shadow-[0_0_50px_rgba(0,243,255,0.4)]" />
-                        </motion.div>
-                        {/* Audio Pulse Rings */}
-                        <AnimatePresence>
-                          {isPlaying && [1, 2, 3].map((i) => (
-                            <motion.div
-                              key={i}
-                              initial={{ scale: 0.8, opacity: 0.5 }}
-                              animate={{ scale: 2, opacity: 0 }}
-                              transition={{ duration: 3, repeat: Infinity, delay: i * 1, ease: "easeOut" }}
-                              className="absolute inset-0 border-2 border-[#00f3ff]/20 rounded-full"
-                            />
-                          ))}
-                        </AnimatePresence>
-                      </div>
-
-                      <div className="text-center space-y-2">
-                        <motion.h2
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-2xl font-black tracking-tight text-white"
-                        >
-                          {filePath?.split(/[/\\]/).pop()}
-                        </motion.h2>
-                        <p className="text-[#00f3ff] font-mono text-[10px] tracking-[0.3em] uppercase opacity-60">High-Fidelity Neural Stream</p>
-                      </div>
-
-                      <video
-                        ref={videoRef}
-                        src={`media://${filePath}`}
-                        className="hidden"
-                        onTimeUpdate={handleTimeUpdate}
-                        onLoadedMetadata={handleLoadedMetadata}
-                        onEnded={() => setIsPlaying(false)}
-                        onWaiting={() => setIsBuffering(true)}
-                        onPlaying={() => setIsBuffering(false)}
-                        onError={handleVideoError}
-                        autoPlay
-                      />
-                    </div>
-                  );
-                }
-
-                return (
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <video
-                      src={(() => {
-                        const isStream = filePath?.match(/^https?:\/\//);
-                        const isAdaptive = filePath?.includes('.m3u8') || filePath?.includes('.mpd');
-                        // If adaptive stream, let Hls/Dash handled it (return undefined src)
-                        // Unless native HLS is needed (Safari), but we assume generic env here for now.
-                        // Actually, for HLS.js attached media, we don't set src.
-                        if (isStream && isAdaptive && Hls.isSupported()) return undefined;
-                        if (isStream && isAdaptive && filePath?.includes('.mpd')) return undefined; // DashJS handles src
-
-                        return isStream ? filePath : `media://${filePath}`;
-                      })()}
-                      className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
-                      style={{ boxShadow: `0 0 80px -20px ${ambientColor}` }}
-                      onTimeUpdate={handleTimeUpdate}
-                      onLoadedMetadata={handleLoadedMetadata}
-                      onEnded={() => setIsPlaying(false)}
-                      onWaiting={() => setIsBuffering(true)}
-                      onPlaying={() => setIsBuffering(false)}
-                      onError={handleVideoError}
-                      onDoubleClick={toggleFullscreen}
-                      autoPlay
-                      crossOrigin={filePath?.match(/^https?:\/\//) ? "anonymous" : undefined}
-                    />
-
-                    {/* Professional Codec Error / Neural Decode Overlay */}
-                    {codecError && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="absolute inset-0 z-50 flex items-center justify-center bg-midnight/90 backdrop-blur-xl rounded-lg border border-white/10"
-                      >
-                        <div className="text-center space-y-6 max-w-md px-8">
-                          <div className="relative w-24 h-24 mx-auto">
-                            <div className="absolute inset-0 bg-neon-cyan/20 blur-2xl rounded-full scale-150 animate-pulse" />
-                            <Logo className="w-full h-full relative z-10" />
-                          </div>
-                          <div className="space-y-2">
-                            <h3 className="text-xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple uppercase">
-                              Neural Decode Initializing
-                            </h3>
-                            <p className="text-white/40 text-xs font-mono leading-relaxed px-4">
-                              {codecError.includes('supported')
-                                ? "Handshaking with Neural Decoder to enable universal playback for this format..."
-                                : codecError}
-                            </p>
-                          </div>
-                          <div className="pt-4 flex flex-col gap-3">
-                            <div className="flex items-center justify-center gap-3 py-2 px-4 bg-white/5 rounded-full border border-white/5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-ping" />
-                              <span className="text-[10px] font-mono text-neon-cyan tracking-widest uppercase">Transcoding Active</span>
-                            </div>
-                            <button
-                              onClick={() => { setFilePath(null); setCodecError(null); }}
-                              className="text-white/20 hover:text-white transition-colors text-[10px] font-mono uppercase tracking-[0.3em] mt-4"
-                            >
-                              Abort_Init
-                            </button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-                );
-              })()}
-
-              {/* Overlay Overlay when playing/paused */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 pointer-events-none">
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  whileHover={{ scale: 1.1 }}
-                  className="bg-midnight/60 p-4 rounded-full border border-white/10 backdrop-blur-sm pointer-events-auto cursor-pointer"
-                  onClick={togglePlay}
-                >
-                  {isPlaying ? <Pause className="w-8 h-8 text-white" /> : <Play className="w-8 h-8 text-white ml-1" />}
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Control Deck (Absolute to main viewport to avoid layout shifts) */}
-        <AnimatePresence>
-          {showControls && (
-            <motion.footer
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="absolute bottom-0 left-0 right-0 h-24 px-6 pb-6 pt-2 z-50 pointer-events-auto"
-            >
-              <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90">
-                {/* Progress Bar */}
-                <div
-                  className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden"
-                  onClick={handleSeek}
-                >
-                  <div
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-electric-purple shadow-[0_0_15px_#00f3ff] transition-all"
-                    style={{ width: `${(currentTime / duration) * 100}%` }}
-                  />
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-
-                {/* Buttons Row */}
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center gap-4">
-                    <button onClick={playPrevious} className="text-white/50 hover:text-white transition-colors" title="Previous (P)"><SkipBack className="w-4 h-4" /></button>
-                    <button onClick={togglePlay} className="w-8 h-8 rounded-full bg-white text-midnight flex items-center justify-center hover:bg-neon-cyan transition-all">
-                      {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-                    </button>
-                    <button onClick={playNext} className="text-white/50 hover:text-white transition-colors" title="Next (N)"><SkipForward className="w-4 h-4" /></button>
-                    <div className="font-mono text-[10px] text-white/50 ml-2">
-                      {formatTime(currentTime)} / {duration > 0 ? formatTime(duration) : '--:--'}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 group/volume relative">
-                      <button onClick={() => setIsMuted(!isMuted)} className="text-white/50 hover:text-white transition-colors">
-                        {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
-                      </button>
-                      <div className="w-24 h-1.5 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar" onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const val = (e.clientX - rect.left) / rect.width;
-                        setVolume(Math.max(0, Math.min(1, val)));
-                        setIsMuted(false);
-                      }}>
-                        <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-white" style={{ width: `${isMuted ? 0 : volume * 100}%` }} />
-                        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
-                      </div>
-                    </div>
-
-                    <button onClick={cyclePlaybackSpeed} className="text-[10px] font-mono font-bold text-neon-cyan border border-neon-cyan/30 px-1.5 py-0.5 rounded hover:bg-neon-cyan/10">
-                      {playbackRate}x
-                    </button>
-                    <button onClick={() => setShowDebug(!showDebug)} className={`transition-colors ${showDebug ? 'text-electric-purple' : 'text-white/30 hover:text-white/70'}`} title="Stats">
-                      <Info className="w-4 h-4" />
-                    </button>
-                    {window.ipcRenderer && (
-                      <button onClick={handleOpenFile} className="text-white/50 hover:text-neon-cyan transition-colors" title="Open File">
-                        <FolderOpen className="w-4 h-4" />
-                      </button>
-                    )}
-                    <button onClick={() => setShowPlaylist(!showPlaylist)} className={`transition-colors ${showPlaylist ? 'text-neon-cyan' : 'text-white/30 hover:text-white/70'}`} title="Playlist">
-                      <List className="w-4 h-4" />
-                    </button>
-                    <button onClick={toggleFullscreen} className="text-white/50 hover:text-electric-purple transition-colors" title="Fullscreen">
-                      {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.footer>
-          )}
-        </AnimatePresence>
-
-        {/* Stream Input Modal */}
-        <AnimatePresence>
-          {showStreamInput && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-            >
-              <div className="bg-midnight border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/5 to-electric-purple/5 pointer-events-none" />
-                <h3 className="text-xl font-black mb-6 flex items-center gap-3 relative z-10">
-                  <Globe className="w-6 h-6 text-neon-cyan" />
-                  NETWORK_STREAM
-                </h3>
-                <form onSubmit={handleStreamSubmit} className="flex flex-col gap-4 relative z-10">
-                  <input
-                    type="url"
-                    placeholder="https://example.com/video.mp4"
-                    value={streamUrl}
-                    onChange={(e) => setStreamUrl(e.target.value)}
-                    className="bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-sm font-mono text-white placeholder:text-white/20 focus:outline-none focus:border-neon-cyan/50 transition-colors w-full"
-                    autoFocus
-                  />
-                  <div className="flex justify-end gap-3 mt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowStreamInput(false)}
-                      className="px-4 py-2 rounded-lg text-xs font-mono hover:bg-white/5 transition-colors"
-                    >
-                      CANCEL
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!streamUrl}
-                      className="px-6 py-2 bg-neon-cyan/10 border border-neon-cyan/50 text-neon-cyan rounded-lg text-xs font-bold hover:bg-neon-cyan/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                    >
-                      CONNECT
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
+{/* Codec Info Overlay */ }
+{
+  showDebug && (
+    <div className="absolute top-4 left-4 z-40 bg-black/80 border border-neon-cyan/30 p-4 rounded-lg font-mono text-xs text-neon-cyan backdrop-blur-md shadow-lg pointer-events-none max-w-sm overflow-hidden">
+      <h3 className="font-bold border-b border-white/10 pb-2 mb-2 flex items-center gap-2">
+        <Info className="w-3 h-3" /> STATS_FOR_NERDS
+      </h3>
+      <div className="space-y-1 opacity-80">
+        {videoStats && (
+          <>
+            <p>RES: {videoStats.width}x{videoStats.height}</p>
+            <p>DUR: {duration.toFixed(2)}s</p>
+            <p>CUR: {currentTime.toFixed(4)}s</p>
+            <p>SPD: {playbackRate}x</p>
+            <p>SRC: {filePath?.split(/[/\\]/).pop()}</p>
+          </>
+        )}
+        {gpuStatus && (
+          <div className="mt-2 pt-2 border-t border-white/10 text-[10px]">
+            <p className="font-bold text-electric-purple">GPU ACCELERATION:</p>
+            <p>2D: {gpuStatus['2d_canvas']}</p>
+            <p>GL: {gpuStatus['gpu_compositing']}</p>
+            <p>Vid Decode: {gpuStatus['video_decode']}</p>
+          </div>
+        )}
+      </div>
     </div>
+  )
+}
+
+<AnimatePresence mode="wait">
+  {!filePath ? (
+    <motion.div
+      key="empty"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className="z-10 flex flex-col items-center gap-6"
+    >
+      <div className="relative group">
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#00f3ff]/20 to-[#bc13fe]/20 blur-3xl rounded-full scale-150 group-hover:scale-175 transition-transform duration-1000" />
+        <Logo className="w-48 h-48 relative z-10 drop-shadow-[0_0_30px_rgba(0,243,255,0.3)]" />
+      </div>
+
+      <div className="text-center space-y-1">
+        <h2 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">LORAPOK</h2>
+        <p className="text-[#00f3ff]/40 font-mono text-[10px] tracking-[0.2em] uppercase">Supercomputing Media Engine</p>
+      </div>
+
+      <div className="flex flex-col items-center gap-4 mt-4">
+        <div className="flex gap-4">
+          <button
+            onClick={handleOpenFile}
+            className="group relative px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#00f3ff]/50 rounded-2xl transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-[#00f3ff]/10 to-[#bc13fe]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+            <FolderOpen className="w-5 h-5 text-[#00f3ff] relative z-10" />
+            <span className="font-mono text-xs font-bold relative z-10 tracking-widest">INITIALIZE_CORE</span>
+          </button>
+
+          <button
+            onClick={() => setShowStreamInput(true)}
+            className="group relative px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#bc13fe]/50 rounded-2xl transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-[#bc13fe]/10 to-[#00f3ff]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+            <Globe className="w-5 h-5 text-[#bc13fe] relative z-10" />
+            <span className="font-mono text-xs font-bold relative z-10 tracking-widest">NETWORK_STREAM</span>
+          </button>
+        </div>
+        <p className="text-white/20 font-mono text-[9px]">OR_DRAG_DATA_HERE</p>
+      </div>
+    </motion.div>
+  ) : (
+    <motion.div
+      key="player"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="w-full h-full flex items-center justify-center relative group z-10"
+    >
+      {/* Mini Mascot Overlay */}
+      <div className="absolute top-4 right-4 z-40 scale-[0.4] origin-top-right opacity-0 group-hover:opacity-100 transition-opacity">
+        <Mascot state={isBuffering ? 'buffering' : (isPlaying ? 'playing' : 'idle')} />
+      </div>
+
+      {(() => {
+        const isAudio = filePath && ['mp3', 'wav', 'aac', 'flac', 'm4a', 'opus', 'wma', 'ogg', 'oga', 'm4p', 'alac', 'ape', 'wv', 'mka'].includes(filePath.split('.').pop()?.toLowerCase() || '');
+
+        if (isAudio) {
+          return (
+            <div className="flex flex-col items-center gap-8 relative z-10 w-full max-w-2xl px-8">
+              <div className="relative group">
+                <motion.div
+                  animate={{
+                    scale: isPlaying ? [1, 1.05, 1] : 1,
+                    rotate: isPlaying ? [0, 5, -5, 0] : 0
+                  }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative z-10"
+                >
+                  <Logo className="w-64 h-64 drop-shadow-[0_0_50px_rgba(0,243,255,0.4)]" />
+                </motion.div>
+                {/* Audio Pulse Rings */}
+                <AnimatePresence>
+                  {isPlaying && [1, 2, 3].map((i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0.8, opacity: 0.5 }}
+                      animate={{ scale: 2, opacity: 0 }}
+                      transition={{ duration: 3, repeat: Infinity, delay: i * 1, ease: "easeOut" }}
+                      className="absolute inset-0 border-2 border-[#00f3ff]/20 rounded-full"
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+
+              <div className="text-center space-y-2">
+                <motion.h2
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-2xl font-black tracking-tight text-white"
+                >
+                  {filePath?.split(/[/\\]/).pop()}
+                </motion.h2>
+                <p className="text-[#00f3ff] font-mono text-[10px] tracking-[0.3em] uppercase opacity-60">High-Fidelity Neural Stream</p>
+              </div>
+
+              <video
+                ref={videoRef}
+                src={`media://${filePath}`}
+                className="hidden"
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                onEnded={() => setIsPlaying(false)}
+                onWaiting={() => setIsBuffering(true)}
+                onPlaying={() => setIsBuffering(false)}
+                onError={handleVideoError}
+                autoPlay
+              />
+            </div>
+          );
+        }
+
+        return (
+          <div className="relative w-full h-full flex items-center justify-center">
+            <video
+              src={(() => {
+                const isStream = filePath?.match(/^https?:\/\//);
+                const isAdaptive = filePath?.includes('.m3u8') || filePath?.includes('.mpd');
+                // If adaptive stream, let Hls/Dash handled it (return undefined src)
+                // Unless native HLS is needed (Safari), but we assume generic env here for now.
+                // Actually, for HLS.js attached media, we don't set src.
+                if (isStream && isAdaptive && Hls.isSupported()) return undefined;
+                if (isStream && isAdaptive && filePath?.includes('.mpd')) return undefined; // DashJS handles src
+
+                return isStream ? filePath : `media://${filePath}`;
+              })()}
+              className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
+              style={{ boxShadow: `0 0 80px -20px ${ambientColor}` }}
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
+              onEnded={() => setIsPlaying(false)}
+              onWaiting={() => setIsBuffering(true)}
+              onPlaying={() => setIsBuffering(false)}
+              onError={handleVideoError}
+              onDoubleClick={toggleFullscreen}
+              autoPlay
+              crossOrigin={filePath?.match(/^https?:\/\//) ? "anonymous" : undefined}
+            />
+
+            {/* Professional Codec Error / Neural Decode Overlay */}
+            {codecError && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="absolute inset-0 z-50 flex items-center justify-center bg-midnight/90 backdrop-blur-xl rounded-lg border border-white/10"
+              >
+                <div className="text-center space-y-6 max-w-md px-8">
+                  <div className="relative w-24 h-24 mx-auto">
+                    <div className="absolute inset-0 bg-neon-cyan/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                    <Logo className="w-full h-full relative z-10" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple uppercase">
+                      Neural Decode Initializing
+                    </h3>
+                    <p className="text-white/40 text-xs font-mono leading-relaxed px-4">
+                      {codecError.includes('supported')
+                        ? "Handshaking with Neural Decoder to enable universal playback for this format..."
+                        : codecError}
+                    </p>
+                  </div>
+                  <div className="pt-4 flex flex-col gap-3">
+                    <div className="flex items-center justify-center gap-3 py-2 px-4 bg-white/5 rounded-full border border-white/5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-ping" />
+                      <span className="text-[10px] font-mono text-neon-cyan tracking-widest uppercase">Transcoding Active</span>
+                    </div>
+                    <button
+                      onClick={() => { setFilePath(null); setCodecError(null); }}
+                      className="text-white/20 hover:text-white transition-colors text-[10px] font-mono uppercase tracking-[0.3em] mt-4"
+                    >
+                      Abort_Init
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* Overlay Overlay when playing/paused */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 pointer-events-none">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          whileHover={{ scale: 1.1 }}
+          className="bg-midnight/60 p-4 rounded-full border border-white/10 backdrop-blur-sm pointer-events-auto cursor-pointer"
+          onClick={togglePlay}
+        >
+          {isPlaying ? <Pause className="w-8 h-8 text-white" /> : <Play className="w-8 h-8 text-white ml-1" />}
+        </motion.div>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+{/* Control Deck (Absolute to main viewport to avoid layout shifts) */ }
+<AnimatePresence>
+  {showControls && (
+    <motion.footer
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="absolute bottom-0 left-0 right-0 h-24 px-6 pb-6 pt-2 z-50 pointer-events-auto"
+    >
+      <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90">
+        {/* Progress Bar */}
+        <div
+          className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden"
+          onClick={handleSeek}
+        >
+          <div
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-electric-purple shadow-[0_0_15px_#00f3ff] transition-all"
+            style={{ width: `${(currentTime / duration) * 100}%` }}
+          />
+          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+
+        {/* Buttons Row */}
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center gap-4">
+            <button onClick={playPrevious} className="text-white/50 hover:text-white transition-colors" title="Previous (P)"><SkipBack className="w-4 h-4" /></button>
+            <button onClick={togglePlay} className="w-8 h-8 rounded-full bg-white text-midnight flex items-center justify-center hover:bg-neon-cyan transition-all">
+              {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+            </button>
+            <button onClick={playNext} className="text-white/50 hover:text-white transition-colors" title="Next (N)"><SkipForward className="w-4 h-4" /></button>
+            <div className="font-mono text-[10px] text-white/50 ml-2">
+              {formatTime(currentTime)} / {duration > 0 ? formatTime(duration) : '--:--'}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 group/volume relative">
+              <button onClick={() => setIsMuted(!isMuted)} className="text-white/50 hover:text-white transition-colors">
+                {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+              <div className="w-24 h-1.5 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar" onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const val = (e.clientX - rect.left) / rect.width;
+                setVolume(Math.max(0, Math.min(1, val)));
+                setIsMuted(false);
+              }}>
+                <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-white" style={{ width: `${isMuted ? 0 : volume * 100}%` }} />
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
+              </div>
+            </div>
+
+            <button onClick={cyclePlaybackSpeed} className="text-[10px] font-mono font-bold text-neon-cyan border border-neon-cyan/30 px-1.5 py-0.5 rounded hover:bg-neon-cyan/10">
+              {playbackRate}x
+            </button>
+            <button onClick={() => setShowDebug(!showDebug)} className={`transition-colors ${showDebug ? 'text-electric-purple' : 'text-white/30 hover:text-white/70'}`} title="Stats">
+              <Info className="w-4 h-4" />
+            </button>
+            {window.ipcRenderer && (
+              <button onClick={handleOpenFile} className="text-white/50 hover:text-neon-cyan transition-colors" title="Open File">
+                <FolderOpen className="w-4 h-4" />
+              </button>
+            )}
+            <button onClick={() => setShowPlaylist(!showPlaylist)} className={`transition-colors ${showPlaylist ? 'text-neon-cyan' : 'text-white/30 hover:text-white/70'}`} title="Playlist">
+              <List className="w-4 h-4" />
+            </button>
+            <button onClick={toggleFullscreen} className="text-white/50 hover:text-electric-purple transition-colors" title="Fullscreen">
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.footer>
+  )}
+</AnimatePresence>
+
+{/* Stream Input Modal */ }
+<AnimatePresence>
+  {showStreamInput && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div className="bg-midnight border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/5 to-electric-purple/5 pointer-events-none" />
+        <h3 className="text-xl font-black mb-6 flex items-center gap-3 relative z-10">
+          <Globe className="w-6 h-6 text-neon-cyan" />
+          NETWORK_STREAM
+        </h3>
+        <form onSubmit={handleStreamSubmit} className="flex flex-col gap-4 relative z-10">
+          <input
+            type="url"
+            placeholder="https://example.com/video.mp4"
+            value={streamUrl}
+            onChange={(e) => setStreamUrl(e.target.value)}
+            className="bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-sm font-mono text-white placeholder:text-white/20 focus:outline-none focus:border-neon-cyan/50 transition-colors w-full"
+            autoFocus
+          />
+          <div className="flex justify-end gap-3 mt-2">
+            <button
+              type="button"
+              onClick={() => setShowStreamInput(false)}
+              className="px-4 py-2 rounded-lg text-xs font-mono hover:bg-white/5 transition-colors"
+            >
+              CANCEL
+            </button>
+            <button
+              type="submit"
+              disabled={!streamUrl}
+              className="px-6 py-2 bg-neon-cyan/10 border border-neon-cyan/50 text-neon-cyan rounded-lg text-xs font-bold hover:bg-neon-cyan/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              CONNECT
+            </button>
+          </div>
+        </form>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
+      </main >
+    </div >
   )
 }
 
