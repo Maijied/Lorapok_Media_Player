@@ -1,10 +1,22 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
 import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX, Subtitles, Languages, Scissors, SkipBack, SkipForward, X, HelpCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Logo } from '../components/Logo'
 import { Mascot } from '../components/Mascot'
+
+export interface LorapokPlayerRef {
+    load: (url: string) => void;
+    play: () => void;
+    pause: () => void;
+    toggle: () => void;
+    seek: (time: number) => void;
+    setVolume: (v: number) => void;
+    setMuted: (m: boolean) => void;
+    setTheme: (themeName: 'Midnight Core' | 'Cyber Bloom' | 'Quantum Pulse') => void;
+    videoElement: HTMLVideoElement | null;
+}
 
 export interface LorapokPlayerProps {
     src?: string;
@@ -18,7 +30,7 @@ export interface LorapokPlayerProps {
     onError?: (error: any) => void;
 }
 
-export function LorapokPlayer({
+export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
     src,
     poster,
     autoPlay = false,
@@ -28,7 +40,7 @@ export function LorapokPlayer({
     onPause,
     onEnded,
     onError
-}: LorapokPlayerProps) {
+}, ref) => {
     const [isPlaying, setIsPlaying] = useState(autoPlay)
     const [isDragging, setIsDragging] = useState(false)
     const [codecError, setCodecError] = useState<string | null>(null)
@@ -298,6 +310,42 @@ export function LorapokPlayer({
             setIsPlaying(!isPlaying)
         }
     }
+
+    // Expose Imperative API
+    useImperativeHandle(ref, () => ({
+        load: (url: string) => {
+            setCurrentSrc(url)
+            setIsPlaying(autoPlay)
+            setCodecError(null)
+            setIsBuffering(true)
+        },
+        play: () => {
+            if (videoRef.current) {
+                setupAudio()
+                videoRef.current.play().catch(() => { })
+                setIsPlaying(true)
+                onPlay?.()
+            }
+        },
+        pause: () => {
+            if (videoRef.current) {
+                videoRef.current.pause()
+                setIsPlaying(false)
+                onPause?.()
+            }
+        },
+        toggle: () => togglePlay(),
+        seek: (time: number) => {
+            if (videoRef.current) {
+                videoRef.current.currentTime = time
+                setCurrentTime(time)
+            }
+        },
+        setVolume: (v: number) => setVolume(Math.max(0, Math.min(1, v))),
+        setMuted: (m: boolean) => setIsMuted(m),
+        setTheme: (themeName: 'Midnight Core' | 'Cyber Bloom' | 'Quantum Pulse') => setCurrentTheme(themeName),
+        videoElement: videoRef.current
+    }))
 
     // HLS & DASH Stream Handler
     useEffect(() => {

@@ -1,15 +1,17 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { LorapokPlayer, Logo } from 'lorapok-player'
+import { LorapokPlayer, Logo, LorapokPlayerRef } from 'lorapok-player'
 import { Download, Zap, Cpu, Globe, Keyboard, Info, CheckCircle } from 'lucide-react'
 
 function App() {
     const [demoUrl, setDemoUrl] = useState("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
     const [customUrl, setCustomUrl] = useState("")
+    const playerRef = useRef<LorapokPlayerRef>(null)
 
     const handleCustomUrlPlay = (e: React.FormEvent) => {
         e.preventDefault()
         if (customUrl.trim()) {
+            playerRef.current?.load(customUrl.trim())
             setDemoUrl(customUrl.trim())
         }
     }
@@ -124,6 +126,7 @@ function App() {
 
                     <div className="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative bg-black">
                         <LorapokPlayer
+                            ref={playerRef}
                             src={demoUrl}
                             className="w-full h-full"
                             autoPlay={false}

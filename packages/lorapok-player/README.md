@@ -61,6 +61,49 @@ const App = () => (
 
 ---
 
+## 🎮 PROGRAMMATIC CONTROL (Imperative API)
+
+The `LorapokPlayer` component exposes a functional API via React `refs`. This allows you to control the player procedurally from your own components.
+
+### Usage Example
+
+```tsx
+import { useRef } from 'react';
+import { LorapokPlayer, LorapokPlayerRef } from 'lorapok-player';
+
+const MyComponent = () => {
+  const playerRef = useRef<LorapokPlayerRef>(null);
+
+  const handleAction = () => {
+    // Programmatically load a new video
+    playerRef.current?.load('https://example.com/new-video.mp4');
+    
+    // Control playback
+    playerRef.current?.play();
+    
+    // Seek to 30 seconds
+    playerRef.current?.seek(30);
+  };
+
+  return <LorapokPlayer ref={playerRef} src="..." />;
+};
+```
+
+### Exposed Methods
+
+| Method | Signature | Description |
+| :--- | :--- | :--- |
+| **load** | `(url: string) => void` | Updates the source and prepares for playback. |
+| **play** | `() => void` | Starts or resumes playback. |
+| **pause** | `() => void` | Pauses playback. |
+| **toggle** | `() => void` | Toggles play/pause state. |
+| **seek** | `(time: number) => void` | Jumps to a specific timestamp (seconds). |
+| **setVolume** | `(v: number) => void` | Sets volume level (0.0 to 1.0). |
+| **setMuted** | `(m: boolean) => void` | Toggles or sets mute state. |
+| **setTheme** | `(name: string) => void` | Switches the biological aesthetic theme. |
+
+---
+
 ## 🎨 STYLING & ADAPTIVE THEME
 
 The player uses **biological aesthetics** with a reactive ambient lighting system. You can override global styles using the provided CSS variables:
