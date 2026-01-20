@@ -1,8 +1,27 @@
 {
     "name": "lorapok-player",
     "version": "1.2.0",
-    "description": "A cross-platform media player with Organic Intelligence aesthetic.",
+    "description": "High-performance React media engine with Organic Intelligence aesthetics. Supports HLS, DASH, and Hardware Acceleration.",
     "author": "Lorapok Team <team@lorapok.com>",
+    "license": "MIT",
+    "homepage": "https://maijied.github.io/Lorapok_Media_Player",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Maijied/Lorapok_Media_Player.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/issues"
+    },
+    "keywords": [
+        "video-player",
+        "react-component",
+        "hls",
+        "dash",
+        "media-engine",
+        "electron",
+        "neon",
+        "glassmorphism"
+    ],
     "type": "module",
     "main": "./dist/lorapok-player.js",
     "module": "./dist/lorapok-player.mjs",
