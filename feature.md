@@ -18,7 +18,7 @@
   - [x] 8K (Extreme HD) - Zero-copy decoding enabled.
 - **Playback Engine:** 
   - [x] Standard HTML5 Video (MP4, WebM, OGG).
-  - [ ] Planned: Native VLC/FFmpeg bindings for MKV, AVI, etc.
+  - [x] Neural Decode Core (FFmpeg Transcoding for MKV, AVI, FLV, WMV).
 - **Native OS Integration:**
   - [x] Frameless Window (Custom title bar).
   - [x] Native File Dialog (Open local files).

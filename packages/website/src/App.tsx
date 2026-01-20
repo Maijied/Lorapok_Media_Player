@@ -155,17 +155,17 @@ function App() {
                         {
                             icon: Globe,
                             title: "Universal Stream",
-                            desc: "Native support for HLS (.m3u8), DASH (.mpd), and direct MP4/WebM streaming."
+                            desc: "Robust support for HLS (.m3u8), DASH (.mpd), and network streams with seamless track switching."
                         },
                         {
                             icon: Zap,
                             title: "Hardware Accel",
-                            desc: "Optimized playback pipeline utilizing GPU acceleration for 4K/8K content."
+                            desc: "Optimized playback pipeline utilizing 4K/8K GPU acceleration for ultra-low latency."
                         },
                         {
                             icon: Cpu,
-                            title: "Workstation Tools",
-                            desc: "Phase 2: A-B Loop, Instant Segment Export ('Clip It'), and Burst Mode screenshots."
+                            title: "Neural Decode V2",
+                            desc: "Upgraded FFmpeg-powered engine for MKV/AVI/FLV with intelligent duration discovery."
                         },
                         {
                             icon: Zap,

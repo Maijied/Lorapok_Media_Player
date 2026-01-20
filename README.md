@@ -10,7 +10,7 @@
       <img src="https://img.shields.io/badge/⚡_TRY_LIVE_DEMO-00F3FF?style=for-the-badge&logo=googlechrome&logoColor=black&labelColor=white" height="40" alt="Live Demo" />
     </a>
     <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest">
-      <img src="https://img.shields.io/badge/⬇_DOWNLOAD_v1.1.0-BC13FE?style=for-the-badge&logo=windows&logoColor=white&labelColor=black" height="40" alt="Download" />
+      <img src="https://img.shields.io/badge/⬇_DOWNLOAD_v1.2.0-BC13FE?style=for-the-badge&logo=windows&logoColor=white&labelColor=black" height="40" alt="Download" />
     </a>
   </p>
 
@@ -37,13 +37,14 @@
 
 ## 🧬 CORE FEATURES
 
-- **Neural Decoding**: Advanced playback engine supporting all major formats (MKV, AVI, WMV) via FFmpeg integration.
+- **Neural Decoding**: Advanced playback engine supporting all major formats (MKV, AVI, WMV) via FFmpeg-powered server-side transcoding.
+- **Robust Duration**: Intelligent metadata probing (FFprobe) ensures accurate progress bar and total length for all streaming and buffered videos.
+- **Seamless Track Switching**: Runtime Audio and Subtitle track selection for HLS streams—switch instantly without re-buffering.
 - **Organic UI**: A "living" interface that reacts to media content with dynamic ambient lighting and micro-animations.
-- **Universal Drop**: Drag-and-drop any media file to instantly initialize the playback core.
+- **Universal Drop**: Drag-and-drop any media file or network URL to instantly initialize playback with automatic path normalization.
 - **Smart Resume**: Automatically remembers and resumes playback position for every media file.
 - **Screenshots**: High-resolution frame capture via the `S` shortcut (saved to `Pictures/Lorapok`).
 - **Theme Presets**: Switch between **Midnight Core**, **Cyber Bloom**, and **Quantum Pulse** aesthetics.
-- **Track Selection**: Full support for switching Audio and Subtitle tracks in adaptive streams.
 - **Aspect Ratio Control**: VLC-style aspect ratio cycling (16:9, 4:3, 5:4, 21:9, 1:1, etc.) using the `A` shortcut.
 - **Cross-Platform**: Optimized builds for Windows, macOS, and Linux.
 
