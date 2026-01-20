@@ -72,7 +72,7 @@ function App() {
                         </a>
                         <a href="#download" className="px-10 py-4 bg-[#bc13fe] text-white font-black rounded-none transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(188,19,254,0.3)] hover:bg-white hover:text-black hover:scale-105 active:scale-95">
                             <Download className="w-5 h-5" />
-                            <span className="tracking-tighter text-sm uppercase">Download v1.2.0</span>
+                            <span className="tracking-tighter text-sm uppercase">Download v1.3.0</span>
                         </a>
                     </div>
                 </section>
@@ -239,7 +239,7 @@ function App() {
                         <h2 className="text-3xl font-bold uppercase tracking-tight">Get Lorapok Desktop</h2>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div className="grid md:grid-cols-3 gap-6 mb-12">
                         {[
                             { os: 'Windows', ext: '.exe', desc: 'Windows 10/11 (x64)', file: 'Windows-Setup.exe' },
                             { os: 'macOS', ext: '.dmg', desc: 'Universal (Intel/Apple Silicon)', file: 'Mac-Installer.dmg' },
@@ -266,6 +266,28 @@ function App() {
                                 </div>
                             </a>
                         ))}
+                    </div>
+
+                    {/* Snap Store Integration */}
+                    <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-1 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
+                            <span className="text-xs font-bold tracking-[0.2em] text-white/50">OFFICIAL SNAP STORE PORTAL</span>
+                            <div className="flex gap-1">
+                                <div className="w-2 h-2 rounded-full bg-red-500/50" />
+                                <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
+                                <div className="w-2 h-2 rounded-full bg-green-500/50" />
+                            </div>
+                        </div>
+                        <div className="bg-black/20">
+                            <iframe
+                                src="https://snapcraft.io/lorapokmediaplayer/embedded?button=black&channels=true&summary=true"
+                                frameborder="0"
+                                width="100%"
+                                height="420px"
+                                style={{ border: 'none', borderRadius: '0px' }}
+                                title="Snap Store Installation"
+                            />
+                        </div>
                     </div>
                 </section>
 
