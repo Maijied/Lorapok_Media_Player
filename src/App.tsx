@@ -1,8 +1,16 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react'
-import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe, Ghost, Edit, Settings, Sliders, Menu, Film, FileVideo, Music, Image as ImageIcon, Monitor, Mic, Radio } from 'lucide-react'
+import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe, Ghost, Edit, Settings, Sliders, Menu, Film, FileVideo, Music, Image as ImageIcon, Monitor, Mic, Radio, Scissors } from 'lucide-react'
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
 import { motion, AnimatePresence } from 'framer-motion'
+
+interface Track {
+  index: number
+  type: 'audio' | 'subtitle'
+  codec: string
+  language: string
+  title: string
+}
 
 // Brand Logo Component (Embedded to prevent path issues)
 const Logo = ({ className = "w-12 h-12" }: { className?: string }) => (
@@ -98,6 +106,10 @@ function App() {
 
   const [isPlaying, setIsPlaying] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [tracks, setTracks] = useState<Track[]>([])
+  const [selectedAudio, setSelectedAudio] = useState<number | null>(null)
+  const [selectedSub, setSelectedSub] = useState<number | null>(null)
+  const [showTracks, setShowTracks] = useState(false)
   const [codecError, setCodecError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -147,6 +159,18 @@ function App() {
   const [showAspectNotification, setShowAspectNotification] = useState(false)
   const [showStreamInput, setShowStreamInput] = useState(false)
 
+  // A-B Loop State
+  const [loopA, setLoopA] = useState<number | null>(null)
+  const [loopB, setLoopB] = useState<number | null>(null)
+
+  // Audio Enhancement State
+  const [audioNormalization, setAudioNormalization] = useState<'none' | 'night' | 'voice' | 'ebu'>('none')
+  const audioCtxRef = useRef<AudioContext | null>(null)
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null)
+  const compressorNodeRef = useRef<DynamicsCompressorNode | null>(null)
+  const filterNodeRef = useRef<BiquadFilterNode | null>(null)
+  const analyserNodeRef = useRef<AnalyserNode | null>(null)
+
   // Theme Presets
   const themes = {
     'Midnight Core': { primary: '#00f3ff', secondary: '#bc13fe', bg: '#050510' },
@@ -173,6 +197,106 @@ function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const hlsRef = useRef<Hls | null>(null)
   const dashRef = useRef<dashjs.MediaPlayerClass | null>(null)
+
+  // Audio Setup Function
+  const setupAudio = () => {
+    if (!videoRef.current || audioCtxRef.current) return
+
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+      audioCtxRef.current = ctx
+
+      const source = ctx.createMediaElementSource(videoRef.current)
+      sourceNodeRef.current = source
+
+      const compressor = ctx.createDynamicsCompressor()
+      compressorNodeRef.current = compressor
+
+      const filter = ctx.createBiquadFilter()
+      filterNodeRef.current = filter
+
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 128
+      analyserNodeRef.current = analyser
+
+      // Connect to analyser by default
+      source.connect(analyser)
+      analyser.connect(ctx.destination)
+    } catch (err) {
+      console.error('Audio initialization failed:', err)
+    }
+  }
+
+  // Audio Normalization Effect
+  useEffect(() => {
+    if (!audioCtxRef.current || !sourceNodeRef.current || !compressorNodeRef.current || !filterNodeRef.current) return
+
+    const ctx = audioCtxRef.current
+    const source = sourceNodeRef.current
+    const compressor = compressorNodeRef.current
+    const filter = filterNodeRef.current
+
+    source.disconnect()
+    compressor.disconnect()
+    filter.disconnect()
+
+    switch (audioNormalization) {
+      case 'night':
+        compressor.threshold.setValueAtTime(-24, ctx.currentTime)
+        compressor.knee.setValueAtTime(30, ctx.currentTime)
+        compressor.ratio.setValueAtTime(12, ctx.currentTime)
+        compressor.attack.setValueAtTime(0.003, ctx.currentTime)
+        compressor.release.setValueAtTime(0.25, ctx.currentTime)
+        source.connect(compressor)
+        compressor.connect(ctx.destination)
+        break
+      case 'voice':
+        filter.type = 'peaking'
+        filter.frequency.setValueAtTime(2000, ctx.currentTime)
+        filter.Q.setValueAtTime(1, ctx.currentTime)
+        filter.gain.setValueAtTime(6, ctx.currentTime)
+        source.connect(filter)
+        filter.connect(compressor)
+        compressor.connect(ctx.destination)
+        break
+      case 'ebu':
+        compressor.threshold.setValueAtTime(-12, ctx.currentTime)
+        compressor.ratio.setValueAtTime(20, ctx.currentTime)
+        source.connect(compressor)
+        compressor.connect(ctx.destination)
+        break
+      default:
+        source.connect(ctx.destination)
+    }
+  }, [audioNormalization])
+
+  // Auto-init audio
+  useEffect(() => {
+    if (isPlaying && !audioCtxRef.current) {
+      setupAudio()
+    }
+  }, [isPlaying])
+
+  const exportSegment = async () => {
+    if (loopA === null || loopB === null || !filePath || !(window as any).ipcRenderer) return
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const filename = `lorapok-clip-${timestamp}.mp4`
+
+    try {
+      const savedPath = await (window as any).ipcRenderer.invoke('export-segment', {
+        filePath: filePath,
+        start: loopA,
+        end: loopB,
+        filename
+      })
+      console.log(`[Export] Saved to: ${savedPath}`)
+      alert(`Clip exported to: ${savedPath}`)
+    } catch (err) {
+      console.error('[Export] Failed:', err)
+      alert('Export failed. Check console for details.')
+    }
+  }
 
   // Load Playlist from localStorage
   useEffect(() => {
@@ -388,10 +512,22 @@ function App() {
           setIsMuted(prev => !prev)
           break
         case '[':
-          adjustPlaybackSpeed(-0.25)
+          if (e.shiftKey) {
+            setLoopA(currentTime)
+          } else {
+            adjustPlaybackSpeed(-0.25)
+          }
           break
         case ']':
-          adjustPlaybackSpeed(0.25)
+          if (e.shiftKey) {
+            setLoopB(currentTime)
+          } else {
+            adjustPlaybackSpeed(0.25)
+          }
+          break
+        case '\\':
+          setLoopA(null)
+          setLoopB(null)
           break
         case 'n':
           playNext()
@@ -443,12 +579,78 @@ function App() {
   // Smart Resume: Load saved position
   useEffect(() => {
     if (filePath && !incognitoMode) {
-      const savedTime = localStorage.getItem(`lorapok - resume - ${filePath} `)
+      const baseIp = filePath.split('?')[0]
+      const savedTime = localStorage.getItem(`lorapok - resume - ${baseIp} `)
       if (savedTime && videoRef.current) {
         const time = parseFloat(savedTime)
         videoRef.current.currentTime = time
         setCurrentTime(time)
       }
+    }
+  }, [filePath])
+
+  const lastBaseRef = useRef<string>('')
+  useEffect(() => {
+    const base = filePath?.split('?')[0]
+    if (base && base !== lastBaseRef.current && window.ipcRenderer) {
+      lastBaseRef.current = base
+      window.ipcRenderer.invoke('get-media-tracks', filePath).then((t: Track[]) => {
+        setTracks(t)
+        setSelectedAudio(null)
+        setSelectedSub(null)
+      })
+    }
+  }, [filePath])
+
+  const changeTrack = (type: 'audio' | 'subtitle', index: number) => {
+    const effectiveIndex = index === -1 ? null : index
+
+    if (type === 'audio') setSelectedAudio(effectiveIndex)
+    else setSelectedSub(effectiveIndex)
+
+    // Seamless HLS Track Switching
+    if (hlsRef.current) {
+      if (type === 'audio' && index !== -1) {
+        hlsRef.current.audioTrack = index
+        return
+      }
+      if (type === 'subtitle') {
+        hlsRef.current.subtitleTrack = index
+        return
+      }
+    }
+
+    if (filePath && filePath.startsWith('media://')) {
+      const base = filePath.split('?')[0]
+      const params = new URLSearchParams()
+      params.set('transcode', 'true')
+
+      const newAudio = type === 'audio' ? effectiveIndex : selectedAudio
+      const newSub = type === 'subtitle' ? effectiveIndex : selectedSub
+
+      if (newAudio !== null) params.set('audioStream', newAudio.toString())
+      if (newSub !== null) params.set('subStream', newSub.toString())
+
+      const currentTime = videoRef.current?.currentTime || 0;
+      let offset = 0;
+      const match = filePath.match(/[?&]t=([\d.]+)/);
+      if (match) offset = parseFloat(match[1]);
+      const absTime = currentTime + offset;
+
+      if (absTime > 5) params.set('t', absTime.toString())
+
+      setFilePath(`${base}?${params.toString()}`)
+    }
+  }
+
+  // Fetch Metadata (Duration) for transcoding support
+  useEffect(() => {
+    if (filePath && window.ipcRenderer) {
+      window.ipcRenderer.invoke('get-video-duration', filePath).then((dur: number) => {
+        if (dur > 0) {
+          setDuration(dur)
+        }
+      })
     }
   }, [filePath])
 
@@ -561,9 +763,27 @@ function App() {
   const handleTimeUpdate = () => {
     if (videoRef.current) {
       const time = videoRef.current.currentTime
-      setCurrentTime(time)
+      let offset = 0
+
+      if (filePath && filePath.startsWith('media://')) {
+        const match = filePath.match(/[?&]t=([\d.]+)/)
+        if (match) offset = parseFloat(match[1])
+      }
+
+      const absTime = time + offset
+
+      // A-B Loop Logic
+      if (loopA !== null && loopB !== null && absTime >= loopB) {
+        const targetRel = Math.max(0, loopA - offset)
+        videoRef.current.currentTime = targetRel
+        return
+      }
+
+      setCurrentTime(absTime)
       if (filePath && !incognitoMode) {
-        localStorage.setItem(`lorapok - resume - ${filePath} `, time.toString())
+        // Use full file identifier for resume
+        const baseIp = filePath.split('?')[0]
+        localStorage.setItem(`lorapok - resume - ${baseIp} `, absTime.toString())
       }
     }
   }
@@ -572,7 +792,16 @@ function App() {
     e.preventDefault()
     if (streamUrl) {
       setPlaylist([...playlist, streamUrl])
-      setFilePath(streamUrl)
+
+      let finalUrl = streamUrl
+      // Auto-detect complex formats that need transcoding (HEVC/MKV via Main Process)
+      const isComplex = streamUrl.match(/\.(mkv|avi|flv|wmv|mov)|x265|hevc/i)
+
+      if (isComplex && window.ipcRenderer) {
+        finalUrl = `media://${streamUrl}`
+      }
+
+      setFilePath(finalUrl)
       setIsPlaying(true)
       setCodecError(null)
       setShowStreamInput(false)
@@ -634,9 +863,20 @@ function App() {
       // @ts-ignore - 'path' exists in Electron
       const path = file.path
       if (path) {
-        // Replace playlist and play immediately
         setPlaylist([path])
         setFilePath(path)
+        setIsPlaying(true)
+        setCodecError(null)
+      }
+    } else {
+      const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain')
+      if (url) {
+        let finalUrl = url.trim().replace(/\.+$/, '')
+        if (finalUrl.match(/\.(mkv|avi|flv|wmv|mov|rmvb)|x265|hevc/i) && !finalUrl.startsWith('media://')) {
+          finalUrl = `media://${finalUrl}`
+        }
+        setPlaylist([finalUrl])
+        setFilePath(finalUrl)
         setIsPlaying(true)
         setCodecError(null)
       }
@@ -848,6 +1088,14 @@ function App() {
           errorMessage = "The video playback was aborted due to a corruption problem or because the video used features your browser does not support.";
           break;
         case videoElement.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+          // Auto-retry with transcoding for local files
+          if (filePath && !filePath.includes('transcode=true') && (window as any).ipcRenderer) {
+            console.log("⚠️ Native playback failed. Switching to Neural Decode...");
+            const sep = filePath.includes('?') ? '&' : '?';
+            setFilePath(`${filePath}${sep}transcode=true`);
+            setCodecError(null);
+            return;
+          }
           errorMessage = "The video could not be loaded, either because the server or network failed or because the format is not supported.";
           break;
         default:
@@ -871,8 +1119,17 @@ function App() {
 
       if (isFinite(totalDuration) && totalDuration > 0) {
         const newTime = percentage * totalDuration
-        videoRef.current.currentTime = newTime
-        setCurrentTime(newTime)
+
+        if (filePath && filePath.startsWith('media://')) {
+          // Transcoding Seek via URL reload (Backend Seek)
+          const base = filePath.split('?')[0]
+          setFilePath(`${base}?transcode=true&t=${newTime}`)
+          setCurrentTime(newTime)
+          setIsPlaying(true)
+        } else {
+          videoRef.current.currentTime = newTime
+          setCurrentTime(newTime)
+        }
       }
     }
   }
@@ -1287,6 +1544,7 @@ function App() {
                         ref={videoRef}
                         src={(() => {
                           if (filePath?.match(/^https?:\/\//)) return filePath;
+                          if (filePath?.startsWith('media://')) return filePath;
                           return `media://${filePath}`;
                         })()}
                         className="hidden"
@@ -1316,6 +1574,8 @@ function App() {
                           // Otherwise (MP4, etc), return the direct URL
                           return filePath;
                         }
+                        // Protocol check
+                        if (filePath?.startsWith('media://')) return filePath;
                         // Local file -> media protocol
                         return `media://${filePath}`;
                       })()}
@@ -1412,6 +1672,42 @@ function App() {
                         </motion.div>
                       )}
                     </AnimatePresence>
+
+                    {/* A-B Loop Overlay */}
+                    <AnimatePresence>
+                      {(loopA !== null || loopB !== null) && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          className="absolute top-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-black/60 backdrop-blur-md px-6 py-3 rounded-full border border-white/10 shadow-2xl"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Scissors className="w-4 h-4 text-neon-pink" />
+                            <div className="flex gap-1 font-mono text-sm">
+                              <span className={loopA !== null ? "text-neon-cyan" : "text-white/30"}>
+                                {loopA !== null ? formatTime(loopA) : 'A'}
+                              </span>
+                              <span className="text-white/30">-</span>
+                              <span className={loopB !== null ? "text-neon-cyan" : "text-white/30"}>
+                                {loopB !== null ? formatTime(loopB) : 'B'}
+                              </span>
+                            </div>
+                          </div>
+                          {loopA !== null && loopB !== null && (
+                            <button
+                              onClick={exportSegment}
+                              className="text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-colors flex items-center gap-1"
+                            >
+                              <span>CLIP IT</span>
+                            </button>
+                          )}
+                          <button onClick={() => { setLoopA(null); setLoopB(null) }} className="hover:text-red-400 transition-colors">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               })()}
@@ -1441,90 +1737,119 @@ function App() {
                 exit={{ opacity: 0, y: 20 }}
                 className="absolute bottom-0 left-0 right-0 h-24 px-6 pb-6 pt-2 z-50 pointer-events-auto"
               >
-                <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90">
-                  {/* Progress Bar */}
-                  <div
-                    className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden"
-                    onClick={handleSeek}
-                  >
-                    <div
-                      className="absolute top-0 left-0 h-full transition-all"
-                      style={{
-                        width: `${(currentTime / duration) * 100}%`,
-                        backgroundColor: theme.primary,
-                        boxShadow: `0 0 15px ${theme.primary}`
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90 relative overflow-hidden">
+                  <div className="absolute inset-x-0 bottom-0 h-12 opacity-20 pointer-events-none flex justify-center">
+                    <AudioVisualizer analyser={analyserNodeRef.current} />
                   </div>
-
-                  {/* Buttons Row */}
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center gap-4">
-                      <button onClick={playPrevious} className="text-white/50 hover:text-white transition-colors" title="Previous (P)"><SkipBack className="w-4 h-4" /></button>
-                      <button onClick={togglePlay} className="w-8 h-8 rounded-full bg-white text-midnight flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: theme.primary }}>
-                        {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-                      </button>
-                      <button onClick={playNext} className="text-white/50 hover:text-white transition-colors" title="Next (N)"><SkipForward className="w-4 h-4" /></button>
-                      <div className="font-mono text-[10px] text-white/50 ml-2">
-                        {formatTime(currentTime)} / {duration > 0 ? formatTime(duration) : '--:--'}
-                      </div>
+                  <div className="relative z-10 w-full flex flex-col gap-2">
+                    {/* Progress Bar */}
+                    <div
+                      className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden"
+                      onClick={handleSeek}
+                    >
+                      <div
+                        className="absolute top-0 left-0 h-full transition-all"
+                        style={{
+                          width: `${(currentTime / Math.max(duration || 0, (videoRef.current?.duration && isFinite(videoRef.current.duration)) ? videoRef.current.duration : 0, currentTime || 1)) * 100}%`,
+                          backgroundColor: theme.primary,
+                          boxShadow: `0 0 15px ${theme.primary}`
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2 group/volume relative">
-                        <button onClick={() => setIsMuted(!isMuted)} className="text-white/50 hover:text-white transition-colors">
-                          {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+                    {/* Buttons Row */}
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center gap-4">
+                        <button onClick={playPrevious} className="text-white/50 hover:text-white transition-colors" title="Previous (P)"><SkipBack className="w-4 h-4" /></button>
+                        <button onClick={togglePlay} className="w-8 h-8 rounded-full bg-white text-midnight flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: theme.primary }}>
+                          {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
                         </button>
-                        <div className="w-24 h-1.5 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar" onClick={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const val = (e.clientX - rect.left) / rect.width;
-                          setVolume(Math.max(0, Math.min(1, val)));
-                          setIsMuted(false);
-                        }}>
-                          <div className="absolute top-0 left-0 h-full" style={{ width: `${isMuted ? 0 : volume * 100}%`, backgroundColor: theme.primary }} />
-                          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
+                        <button onClick={playNext} className="text-white/50 hover:text-white transition-colors" title="Next (N)"><SkipForward className="w-4 h-4" /></button>
+                        <div className="font-mono text-[10px] text-white/50 ml-2">
+                          {formatTime(currentTime)} / {((duration && isFinite(duration) && duration > 0) || (videoRef.current?.duration && isFinite(videoRef.current.duration))) ? formatTime(Math.max(duration || 0, videoRef.current?.duration || 0, currentTime)) : '--:--'}
                         </div>
                       </div>
 
-                      {/* Theme Switcher */}
-                      <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
-                        {Object.keys(themes).map(t => (
-                          <button
-                            key={t}
-                            onClick={() => setCurrentTheme(t as any)}
-                            className={`w-4 h-4 rounded-full transition-all ${currentTheme === t ? 'scale-110 ring-1 ring-white' : 'opacity-40 hover:opacity-100'}`}
-                            style={{ backgroundColor: themes[t as keyof typeof themes].primary }}
-                            title={t}
-                          />
-                        ))}
-                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 group/volume relative">
+                          <button onClick={() => setIsMuted(!isMuted)} className="text-white/50 hover:text-white transition-colors">
+                            {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+                          </button>
+                          <div className="w-24 h-1.5 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar" onClick={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const val = (e.clientX - rect.left) / rect.width;
+                            setVolume(Math.max(0, Math.min(1, val)));
+                            setIsMuted(false);
+                          }}>
+                            <div className="absolute top-0 left-0 h-full" style={{ width: `${isMuted ? 0 : volume * 100}%`, backgroundColor: theme.primary }} />
+                            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
 
-                      <button onClick={cyclePlaybackSpeed} className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors" style={{ color: theme.primary, borderColor: `${theme.primary}50`, borderWidth: '1px' }}>
-                        {playbackRate}x
-                      </button>
-                      <button
-                        onClick={() => setIncognitoMode(!incognitoMode)}
-                        className="transition-colors mr-2 hover:text-white"
-                        style={{ color: incognitoMode ? '#ff0055' : 'rgba(255,255,255,0.3)' }}
-                        title="Incognito Mode"
-                      >
-                        <Ghost className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => setShowDebug(!showDebug)} className="transition-colors" style={{ color: showDebug ? theme.secondary : 'rgba(255,255,255,0.3)' }} title="Stats">
-                        <Info className="w-4 h-4" />
-                      </button>
-                      {window.ipcRenderer && (
-                        <button onClick={handleOpenFile} className="text-white/50 hover:text-neon-cyan transition-colors" title="Open File">
-                          <FolderOpen className="w-4 h-4" />
+                        {/* Track Selector */}
+                        {tracks.length > 0 && (
+                          <button
+                            onClick={() => setShowTracks(!showTracks)}
+                            className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors uppercase ${showTracks ? 'bg-white/20 text-white' : 'text-white/30 hover:text-white'}`}
+                            style={{ color: showTracks ? theme.primary : undefined, borderColor: showTracks ? theme.primary : 'rgba(255,255,255,0.1)', borderWidth: '1px' }}
+                          >
+                            TRK
+                          </button>
+                        )}
+
+                        {/* Audio Normalization */}
+                        <button
+                          onClick={() => {
+                            const modes: ('none' | 'night' | 'voice' | 'ebu')[] = ['none', 'night', 'voice', 'ebu']
+                            const next = modes[(modes.indexOf(audioNormalization) + 1) % modes.length]
+                            setAudioNormalization(next)
+                          }}
+                          className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors uppercase ${audioNormalization !== 'none' ? 'bg-white/20 text-white' : 'text-white/30 hover:text-white'}`}
+                          title={`Audio: ${audioNormalization}`}
+                        >
+                          {audioNormalization === 'none' ? 'EQ' : audioNormalization}
                         </button>
-                      )}
-                      <button onClick={() => setShowPlaylist(!showPlaylist)} className={`transition-colors ${showPlaylist ? 'text-neon-cyan' : 'text-white/30 hover:text-white/70'}`} title="Playlist">
-                        <List className="w-4 h-4" />
-                      </button>
-                      <button onClick={toggleFullscreen} className="text-white/50 hover:text-electric-purple transition-colors" title="Fullscreen">
-                        {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                      </button>
+
+                        {/* Theme Switcher */}
+                        <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
+                          {Object.keys(themes).map(t => (
+                            <button
+                              key={t}
+                              onClick={() => setCurrentTheme(t as any)}
+                              className={`w-4 h-4 rounded-full transition-all ${currentTheme === t ? 'scale-110 ring-1 ring-white' : 'opacity-40 hover:opacity-100'}`}
+                              style={{ backgroundColor: themes[t as keyof typeof themes].primary }}
+                              title={t}
+                            />
+                          ))}
+                        </div>
+
+                        <button onClick={cyclePlaybackSpeed} className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors" style={{ color: theme.primary, borderColor: `${theme.primary}50`, borderWidth: '1px' }}>
+                          {playbackRate}x
+                        </button>
+                        <button
+                          onClick={() => setIncognitoMode(!incognitoMode)}
+                          className="transition-colors mr-2 hover:text-white"
+                          style={{ color: incognitoMode ? '#ff0055' : 'rgba(255,255,255,0.3)' }}
+                          title="Incognito Mode"
+                        >
+                          <Ghost className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setShowDebug(!showDebug)} className="transition-colors" style={{ color: showDebug ? theme.secondary : 'rgba(255,255,255,0.3)' }} title="Stats">
+                          <Info className="w-4 h-4" />
+                        </button>
+                        {window.ipcRenderer && (
+                          <button onClick={handleOpenFile} className="text-white/50 hover:text-neon-cyan transition-colors" title="Open File">
+                            <FolderOpen className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button onClick={() => setShowPlaylist(!showPlaylist)} className={`transition-colors ${showPlaylist ? 'text-neon-cyan' : 'text-white/30 hover:text-white/70'}`} title="Playlist">
+                          <List className="w-4 h-4" />
+                        </button>
+                        <button onClick={toggleFullscreen} className="text-white/50 hover:text-electric-purple transition-colors" title="Fullscreen">
+                          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1532,6 +1857,70 @@ function App() {
             )
           }
         </AnimatePresence >
+
+        {/* Track Selection Modal */}
+        <AnimatePresence>
+          {showTracks && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="absolute bottom-28 right-6 z-50 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-4 shadow-2xl max-w-sm w-full"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Media Tracks</h3>
+                <button onClick={() => setShowTracks(false)}><X className="w-4 h-4 text-white/50 hover:text-white" /></button>
+              </div>
+
+              <div className="space-y-4 max-h-64 overflow-y-auto custom-scrollbar">
+                {/* Audio */}
+                <div>
+                  <div className="text-[10px] text-white/40 uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <Music className="w-3 h-3" /> Audio
+                  </div>
+                  <div className="space-y-1">
+                    {tracks.filter(t => t.type === 'audio').map(t => (
+                      <button
+                        key={t.index}
+                        onClick={() => changeTrack('audio', t.index)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-mono transition-colors flex justify-between items-center ${selectedAudio === t.index || (selectedAudio === null && tracks.filter(x => x.type === 'audio').indexOf(t) === 0) ? 'bg-white/20 text-white' : 'hover:bg-white/5 text-white/60'}`}
+                      >
+                        <span>{t.language?.toUpperCase()} - {t.codec} {t.title ? `(${t.title})` : ''}</span>
+                        {(selectedAudio === t.index || (selectedAudio === null && tracks.filter(x => x.type === 'audio').indexOf(t) === 0)) && <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Subtitles */}
+                <div>
+                  <div className="text-[10px] text-white/40 uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <FileVideo className="w-3 h-3" /> Subtitles
+                  </div>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => changeTrack('subtitle', -1)}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-xs font-mono transition-colors flex justify-between items-center ${selectedSub === null ? 'bg-white/20 text-white' : 'hover:bg-white/5 text-white/60'}`}
+                    >
+                      <span>None</span>
+                      {selectedSub === null && <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan" />}
+                    </button>
+                    {tracks.filter(t => t.type === 'subtitle').map(t => (
+                      <button
+                        key={t.index}
+                        onClick={() => changeTrack('subtitle', t.index)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-mono transition-colors flex justify-between items-center ${selectedSub === t.index ? 'bg-white/20 text-white' : 'hover:bg-white/5 text-white/60'}`}
+                      >
+                        <span>{t.language?.toUpperCase()} - {t.codec} {t.title ? `(${t.title})` : ''}</span>
+                        {selectedSub === t.index && <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Stream Input Modal */}
         <AnimatePresence>
@@ -1686,3 +2075,42 @@ const MetadataEditor = ({ filePath, onClose }: { filePath: string, onClose: () =
 }
 
 export default App
+
+const AudioVisualizer = ({ analyser }: { analyser: AnalyserNode | null }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (!analyser || !canvasRef.current) return
+
+    let animationFrame: number
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const bufferLength = analyser.frequencyBinCount
+    const dataArray = new Uint8Array(bufferLength)
+
+    const draw = () => {
+      animationFrame = requestAnimationFrame(draw)
+      analyser.getByteFrequencyData(dataArray)
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      const barWidth = (canvas.width / bufferLength) * 2
+      let barHeight
+      let x = 0
+
+      for (let i = 0; i < bufferLength; i++) {
+        barHeight = (dataArray[i] / 255) * canvas.height
+        const opacity = dataArray[i] / 255
+        ctx.fillStyle = `rgba(0, 243, 255, ${opacity * 0.5})`
+        ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight)
+        x += barWidth
+      }
+    }
+
+    draw()
+    return () => cancelAnimationFrame(animationFrame)
+  }, [analyser])
+
+  return <canvas ref={canvasRef} className="w-64 h-full opacity-50 block mr-4" width={256} height={48} />
+}

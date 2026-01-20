@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
-import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX, Subtitles, Languages, Scissors } from 'lucide-react'
+import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX, Subtitles, Languages, Scissors, SkipBack, SkipForward, X, HelpCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Logo } from '../components/Logo'
 import { Mascot } from '../components/Mascot'
@@ -62,17 +62,64 @@ export function LorapokPlayer({
         }
     }, [src, autoPlay])
 
+    // Dynamic Ambient Light Sampling
+    useEffect(() => {
+        if (!isPlaying || !currentSrc) return
+
+        const interval = setInterval(() => {
+            if (videoRef.current && ambientCanvasRef.current) {
+                const video = videoRef.current
+                const canvas = ambientCanvasRef.current
+                const ctx = canvas.getContext('2d', { willReadFrequently: true })
+
+                if (ctx && video.readyState >= 2) {
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+                    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+
+                    let r = 0, g = 0, b = 0
+                    for (let i = 0; i < data.length; i += 4) {
+                        r += data[i]
+                        g += data[i + 1]
+                        b += data[i + 2]
+                    }
+
+                    const count = data.length / 4
+                    if (count > 0) {
+                        r = Math.floor(r / count)
+                        g = Math.floor(g / count)
+                        b = Math.floor(b / count)
+                        setAmbientColor(`rgba(${r}, ${g}, ${b}, 0.3)`)
+                    }
+                }
+            }
+        }, 1000)
+
+        return () => clearInterval(interval)
+    }, [isPlaying, currentSrc])
+
     const [currentTime, setCurrentTime] = useState(0)
     const [duration, setDuration] = useState(0)
     const [showDebug, setShowDebug] = useState(false)
     const [isFullscreen, setIsFullscreen] = useState(false)
     const [ambientColor, setAmbientColor] = useState('rgba(0, 243, 255, 0.2)')
+    const ambientCanvasRef = useRef<HTMLCanvasElement | null>(null)
     const [isBuffering, setIsBuffering] = useState(false)
     const [volume, setVolume] = useState(0.8)
     const [isMuted, setIsMuted] = useState(false)
     const [showControls, setShowControls] = useState(true)
     const [aspectRatio, setAspectRatio] = useState<'original' | '1:1' | '4:3' | '5:4' | '16:9' | '16:10' | '21:9' | '2.35:1' | '2.39:1'>('original')
     const [showAspectNotification, setShowAspectNotification] = useState(false)
+    const [playbackRate, setPlaybackRate] = useState(1)
+    const [showHelp, setShowHelp] = useState(false)
+
+    // Theme Presets (matching standalone app)
+    const themes = {
+        'Midnight Core': { primary: '#00f3ff', secondary: '#bc13fe', bg: '#050510' },
+        'Cyber Bloom': { primary: '#ff007a', secondary: '#00f3ff', bg: '#100510' },
+        'Quantum Pulse': { primary: '#f0b429', secondary: '#00ccff', bg: '#051010' }
+    }
+    const [currentTheme, setCurrentTheme] = useState<keyof typeof themes>('Midnight Core')
+    const theme = themes[currentTheme]
 
     const exportSegment = async () => {
         if (loopA === null || loopB === null || !currentSrc || !(window as any).ipcRenderer) return
@@ -179,6 +226,16 @@ export function LorapokPlayer({
         setAspectRatio(aspectRatios[nextIdx])
         setShowAspectNotification(true)
         setTimeout(() => setShowAspectNotification(false), 2000)
+    }
+
+    const cyclePlaybackSpeed = () => {
+        const speeds = [0.5, 1, 1.25, 1.5, 2]
+        const nextIndex = (speeds.indexOf(playbackRate) + 1) % speeds.length
+        const newSpeed = speeds[nextIndex]
+        setPlaybackRate(newSpeed)
+        if (videoRef.current) {
+            videoRef.current.playbackRate = newSpeed
+        }
     }
 
     const videoRef = useRef<HTMLVideoElement>(null)
@@ -354,22 +411,60 @@ export function LorapokPlayer({
                 case 'f':
                     toggleFullscreen()
                     break
-                case '[':
-                    setLoopA(currentTime)
+                case 'h':
+                case '?':
+                    setShowHelp(prev => !prev)
                     break
-                case ']':
-                    setLoopB(currentTime)
+                case 'arrowright':
+                    if (videoRef.current) {
+                        e.preventDefault()
+                        const newTime = Math.min(duration, videoRef.current.currentTime + 10)
+                        videoRef.current.currentTime = newTime
+                        setCurrentTime(newTime)
+                    }
+                    break
+                case 'arrowleft':
+                    if (videoRef.current) {
+                        e.preventDefault()
+                        const newTime = Math.max(0, videoRef.current.currentTime - 10)
+                        videoRef.current.currentTime = newTime
+                        setCurrentTime(newTime)
+                    }
+                    break
+                case 'arrowup':
+                    e.preventDefault()
+                    setVolume(prev => Math.min(1, prev + 0.1))
+                    setIsMuted(false)
+                    break
+                case 'arrowdown':
+                    e.preventDefault()
+                    setVolume(prev => Math.max(0, prev - 0.1))
+                    break
+                case '{':
+                    // Speed down (Shift + [)
+                    cyclePlaybackSpeed()
+                    break
+                case '}':
+                    // Speed up (Shift + ])
+                    cyclePlaybackSpeed()
                     break
                 case '\\':
                     setLoopA(null)
                     setLoopB(null)
                     break
             }
+
+            // A-B Loop markers (uses unshifted [ and ])
+            if (e.key === '[' && !e.shiftKey) {
+                setLoopA(currentTime)
+            } else if (e.key === ']' && !e.shiftKey) {
+                setLoopB(currentTime)
+            }
         }
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [isPlaying, isMuted, volume, aspectRatio, isFullscreen]) // Refresh listener when state changes to capture newest values for cycle/toggle
+    }, [isPlaying, isMuted, volume, aspectRatio, isFullscreen, duration, currentTime, playbackRate]) // Refresh listener when state changes to capture newest values for cycle/toggle
 
     // Handle Drag & Drop (Web API File)
     const handleDrop = useCallback((e: React.DragEvent) => {
@@ -624,6 +719,9 @@ export function LorapokPlayer({
                                 </motion.div>
                             )}
 
+                            {/* Hidden sampling canvas */}
+                            <canvas ref={ambientCanvasRef} width="10" height="10" className="hidden" />
+
                             {/* Aspect Ratio Notification */}
                             <AnimatePresence>
                                 {showAspectNotification && (
@@ -645,149 +743,293 @@ export function LorapokPlayer({
                 </AnimatePresence>
             </main>
 
-            {/* Controls Bar */}
-            <footer
-                className={`h-20 bg-midnight/80 backdrop-blur-md border-t border-white/5 px-6 flex items-center justify-between gap-6 relative z-50 transition-transform duration-300 ${!showControls && isFullscreen ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
-                onMouseEnter={() => setShowControls(true)}
-            >
-                <div className="flex flex-col flex-1 gap-2">
-                    <div
-                        className="relative h-1 bg-white/10 rounded-full cursor-pointer group"
-                        onClick={handleSeek}
+            {/* Control Deck */}
+            <AnimatePresence>
+                {showControls && (
+                    <motion.footer
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className="absolute bottom-0 left-0 right-0 h-24 px-6 pb-6 pt-2 z-50 pointer-events-auto"
+                        onMouseEnter={() => setShowControls(true)}
                     >
-                        <div
-                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-purple to-neon-cyan rounded-full transition-all duration-100"
-                            style={{ width: `${(currentTime / duration) * 100}%` }}
-                        >
-                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-neon-cyan rounded-full shadow-[0_0_10px_#00f3ff] scale-0 group-hover:scale-100 transition-transform" />
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-2 text-xs font-mono text-neon-cyan/70">
-                            <span>{formatTime(currentTime)}</span>
-                            <span className="opacity-30">/</span>
-                            <span>{formatTime(duration)}</span>
-                        </div>
-
-                        <div className="flex-1 flex items-center justify-center relative h-12 overflow-hidden pointer-events-none">
-                            <AudioVisualizer analyser={analyserNodeRef.current} />
-                            <div className="flex items-center gap-6 relative z-10 pointer-events-auto">
-                                <button onClick={togglePlay} className="p-2 hover:bg-white/10 rounded-full text-neon-cyan hover:text-white transition-all hover:scale-110 active:scale-95">
-                                    {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2 group/vol">
-                                <button onClick={() => setIsMuted(!isMuted)} className="p-1.5 hover:text-neon-cyan transition-colors">
-                                    {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                                </button>
-                                <div className="w-0 group-hover/vol:w-20 overflow-hidden transition-all duration-300 flex items-center">
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="1"
-                                        step="0.05"
-                                        value={isMuted ? 0 : volume}
-                                        onChange={(e) => {
-                                            setVolume(parseFloat(e.target.value));
-                                            setIsMuted(parseFloat(e.target.value) === 0);
-                                        }}
-                                        className="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-neon-cyan"
-                                    />
-                                </div>
+                        <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90 relative overflow-hidden">
+                            {/* Audio Visualizer (Subtle Background) */}
+                            <div className="absolute inset-x-0 bottom-0 h-12 opacity-20 pointer-events-none">
+                                <AudioVisualizer analyser={analyserNodeRef.current} />
                             </div>
 
-                            {/* Normalization Mode Selector */}
-                            <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
-                                {['none', 'night', 'voice', 'ebu'].map((mode) => (
-                                    <button
-                                        key={mode}
-                                        onClick={() => setAudioNormalization(mode as any)}
-                                        className={`px-1.5 py-0.5 text-[8px] font-mono rounded transition-all ${audioNormalization === mode ? 'bg-neon-cyan text-midnight' : 'text-white/30 hover:text-white/60'}`}
-                                    >
-                                        {mode.toUpperCase()}
-                                    </button>
-                                ))}
+                            {/* Progress Bar */}
+                            <div
+                                className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden z-10"
+                                onClick={handleSeek}
+                            >
+                                <div
+                                    className="absolute top-0 left-0 h-full transition-all"
+                                    style={{
+                                        width: `${(currentTime / Math.max(duration || 0, (videoRef.current?.duration && isFinite(videoRef.current.duration)) ? videoRef.current.duration : 0, currentTime || 1)) * 100}%`,
+                                        backgroundColor: theme.primary,
+                                        boxShadow: `0 0 15px ${theme.primary}`
+                                    }}
+                                />
+                                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                             </div>
 
-                            {/* Audio Track Selector */}
-                            {audioTracks.length > 1 && (
-                                <div className="relative group/tracks">
-                                    <button className="p-1.5 hover:text-neon-cyan transition-colors" title="Audio Tracks">
-                                        <Languages className="w-4 h-4" />
-                                    </button>
-                                    <div className="absolute bottom-full right-0 mb-4 w-48 bg-midnight/90 backdrop-blur-xl border border-white/10 rounded-lg overflow-hidden opacity-0 group-hover/tracks:opacity-100 pointer-events-none group-hover/tracks:pointer-events-auto transition-all transform translate-y-2 group-hover/tracks:translate-y-0 shadow-2xl">
-                                        <div className="p-2 border-b border-white/5 bg-white/5">
-                                            <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest">Audio Tracks</span>
-                                        </div>
-                                        <div className="max-h-48 overflow-y-auto">
-                                            {audioTracks.map((track) => (
-                                                <button
-                                                    key={track.id}
-                                                    onClick={() => {
-                                                        if (hlsRef.current) hlsRef.current.audioTrack = track.id
-                                                    }}
-                                                    className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentAudioTrack === track.id ? 'text-neon-cyan' : 'text-white/60'}`}
-                                                >
-                                                    {track.name || `Track ${track.id}`}
-                                                </button>
-                                            ))}
-                                        </div>
+                            {/* Buttons Row */}
+                            <div className="flex items-center justify-between mt-1 z-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            onClick={() => {
+                                                const v = videoRef.current;
+                                                if (v) v.currentTime = Math.max(0, v.currentTime - 10);
+                                            }}
+                                            className="text-white/30 hover:text-white transition-colors"
+                                        >
+                                            <SkipBack className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={togglePlay} className="w-8 h-8 rounded-full text-midnight flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: theme.primary }}>
+                                            {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                const v = videoRef.current;
+                                                if (v) v.currentTime = Math.min(duration, v.currentTime + 10);
+                                            }}
+                                            className="text-white/30 hover:text-white transition-colors"
+                                        >
+                                            <SkipForward className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <div className="font-mono text-[10px] text-white/50 ml-2">
+                                        {formatTime(currentTime)} / {((duration && isFinite(duration) && duration > 0) || (videoRef.current?.duration && isFinite(videoRef.current.duration))) ? formatTime(Math.max(duration || 0, videoRef.current?.duration || 0, currentTime)) : '--:--'}
                                     </div>
                                 </div>
-                            )}
 
-                            {/* Subtitle Track Selector */}
-                            {subtitleTracks.length > 0 && (
-                                <div className="relative group/subs">
-                                    <button className="p-1.5 hover:text-neon-cyan transition-colors" title="Subtitles">
-                                        <Subtitles className="w-4 h-4" />
-                                    </button>
-                                    <div className="absolute bottom-full right-0 mb-4 w-48 bg-midnight/90 backdrop-blur-xl border border-white/10 rounded-lg overflow-hidden opacity-0 group-hover/subs:opacity-100 pointer-events-none group-hover/subs:pointer-events-auto transition-all transform translate-y-2 group-hover/subs:translate-y-0 shadow-2xl">
-                                        <div className="p-2 border-b border-white/5 bg-white/5">
-                                            <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest">Subtitles</span>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2 group/volume relative">
+                                        <button onClick={() => setIsMuted(!isMuted)} className="text-white/50 hover:text-white transition-colors">
+                                            {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+                                        </button>
+                                        <div className="w-20 h-1 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar" onClick={(e) => {
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            const val = (e.clientX - rect.left) / rect.width;
+                                            setVolume(Math.max(0, Math.min(1, val)));
+                                            setIsMuted(false);
+                                        }}>
+                                            <div className="absolute top-0 left-0 h-full" style={{ width: `${isMuted ? 0 : volume * 100}%`, backgroundColor: theme.primary }} />
+                                            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
                                         </div>
-                                        <div className="max-h-48 overflow-y-auto">
-                                            <button
-                                                onClick={() => {
-                                                    if (hlsRef.current) hlsRef.current.subtitleTrack = -1
-                                                }}
-                                                className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentSubtitleTrack === -1 ? 'text-neon-cyan' : 'text-white/60'}`}
-                                            >
-                                                DISABLED
+                                    </div>
+
+                                    {/* Audio Track Selector */}
+                                    {audioTracks.length > 1 && (
+                                        <div className="relative group/tracks">
+                                            <button className="text-white/30 hover:text-white transition-colors" title="Audio Tracks">
+                                                <Languages className="w-4 h-4" />
                                             </button>
-                                            {subtitleTracks.map((track) => (
-                                                <button
-                                                    key={track.id}
-                                                    onClick={() => {
-                                                        if (hlsRef.current) hlsRef.current.subtitleTrack = track.id
-                                                    }}
-                                                    className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentSubtitleTrack === track.id ? 'text-neon-cyan' : 'text-white/60'}`}
-                                                >
-                                                    {track.name || `Subtitle ${track.id}`}
-                                                </button>
+                                            <div className="absolute bottom-full right-0 mb-4 w-48 bg-midnight/95 backdrop-blur-2xl border border-white/10 rounded-xl overflow-hidden opacity-0 group-hover/tracks:opacity-100 pointer-events-none group-hover/tracks:pointer-events-auto transition-all transform translate-y-2 group-hover/tracks:translate-y-0 shadow-2xl z-50">
+                                                <div className="p-2 border-b border-white/5 bg-white/5">
+                                                    <span className="text-[9px] font-mono text-[#00f3ff] uppercase tracking-widest">Audio Tracks</span>
+                                                </div>
+                                                <div className="max-h-48 overflow-y-auto">
+                                                    {audioTracks.map((track) => (
+                                                        <button
+                                                            key={track.id}
+                                                            onClick={() => {
+                                                                if (hlsRef.current) hlsRef.current.audioTrack = track.id
+                                                            }}
+                                                            className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentAudioTrack === track.id ? 'text-[#00f3ff]' : 'text-white/60'}`}
+                                                        >
+                                                            {track.name || `Track ${track.id}`}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Subtitle Track Selector */}
+                                    {subtitleTracks.length > 0 && (
+                                        <div className="relative group/subs">
+                                            <button className="text-white/30 hover:text-white transition-colors" title="Subtitles">
+                                                <Subtitles className="w-4 h-4" />
+                                            </button>
+                                            <div className="absolute bottom-full right-0 mb-4 w-48 bg-midnight/95 backdrop-blur-2xl border border-white/10 rounded-xl overflow-hidden opacity-0 group-hover/subs:opacity-100 pointer-events-none group-hover/subs:pointer-events-auto transition-all transform translate-y-2 group-hover/subs:translate-y-0 shadow-2xl z-50">
+                                                <div className="p-2 border-b border-white/5 bg-white/5">
+                                                    <span className="text-[9px] font-mono text-[#00f3ff] uppercase tracking-widest">Subtitles</span>
+                                                </div>
+                                                <div className="max-h-48 overflow-y-auto">
+                                                    <button
+                                                        onClick={() => {
+                                                            if (hlsRef.current) hlsRef.current.subtitleTrack = -1
+                                                        }}
+                                                        className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentSubtitleTrack === -1 ? 'text-[#00f3ff]' : 'text-white/60'}`}
+                                                    >
+                                                        DISABLED
+                                                    </button>
+                                                    {subtitleTracks.map((track) => (
+                                                        <button
+                                                            key={track.id}
+                                                            onClick={() => {
+                                                                if (hlsRef.current) hlsRef.current.subtitleTrack = track.id
+                                                            }}
+                                                            className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentSubtitleTrack === track.id ? 'text-[#00f3ff]' : 'text-white/60'}`}
+                                                        >
+                                                            {track.name || `Subtitle ${track.id}`}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Normalization Mode Selector */}
+                                    <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
+                                        {['none', 'night', 'voice', 'ebu'].map((mode) => (
+                                            <button
+                                                key={mode}
+                                                onClick={() => setAudioNormalization(mode as any)}
+                                                className={`px-1.5 py-0.5 text-[8px] font-mono rounded transition-all`}
+                                                style={{
+                                                    backgroundColor: audioNormalization === mode ? theme.primary : 'transparent',
+                                                    color: audioNormalization === mode ? '#050510' : 'rgba(255,255,255,0.3)'
+                                                }}
+                                            >
+                                                {mode.toUpperCase()}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Theme Switcher */}
+                                    <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
+                                        {Object.keys(themes).map(t => (
+                                            <button
+                                                key={t}
+                                                onClick={() => setCurrentTheme(t as any)}
+                                                className={`w-4 h-4 rounded-full transition-all ${currentTheme === t ? 'scale-110 ring-1 ring-white' : 'opacity-40 hover:opacity-100'}`}
+                                                style={{ backgroundColor: themes[t as keyof typeof themes].primary }}
+                                                title={t}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Playback Speed Button */}
+                                    <button
+                                        onClick={cyclePlaybackSpeed}
+                                        className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors"
+                                        style={{ color: theme.primary, borderColor: `${theme.primary}50`, borderWidth: '1px' }}
+                                    >
+                                        {playbackRate}x
+                                    </button>
+
+                                    <button onClick={() => setShowDebug(!showDebug)} className="transition-colors" style={{ color: showDebug ? theme.secondary : 'rgba(255,255,255,0.3)' }} title="Stats">
+                                        <Info className="w-4 h-4" />
+                                    </button>
+                                    <button onClick={cycleAspectRatio} className="px-2 py-0.5 hover:bg-white/10 rounded transition-colors text-[9px] font-mono border" style={{ color: `${theme.primary}B3`, borderColor: `${theme.primary}33` }}>
+                                        {aspectRatio.toUpperCase()}
+                                    </button>
+                                    <button onClick={() => setShowHelp(true)} className="text-white/30 hover:text-white transition-colors" title="Help (?)">
+                                        <HelpCircle className="w-4 h-4" />
+                                    </button>
+                                    <button onClick={toggleFullscreen} className="text-white/50 hover:text-electric-purple transition-colors" title="Fullscreen">
+                                        {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.footer>
+                )}
+            </AnimatePresence>
+
+            {/* Help Modal */}
+            <AnimatePresence>
+                {showHelp && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="absolute inset-0 z-[100] bg-midnight/90 backdrop-blur-xl flex items-center justify-center p-8"
+                        onClick={() => setShowHelp(false)}
+                    >
+                        <div className="max-w-2xl w-full bg-black/50 border border-white/10 rounded-2xl p-8" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
+                                <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">KEYBOARD SHORTCUTS</h2>
+                                <button onClick={() => setShowHelp(false)}><X className="w-6 h-6 hover:text-red-500" /></button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-x-12 gap-y-8 text-[11px] font-mono">
+                                {/* Playback Column */}
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="font-black mb-2 tracking-widest text-[10px]" style={{ color: `${theme.primary}80` }}>PLAYBACK</h3>
+                                        <div className="space-y-1">
+                                            {[
+                                                { key: 'SPACE', desc: 'Play / Pause' },
+                                                { key: '← / →', desc: 'Seek 10s' },
+                                                { key: '[ / ]', desc: 'Set A-B Loop' },
+                                                { key: '\\', desc: 'Clear Loop' },
+                                            ].map((item, i) => (
+                                                <div key={i} className="flex justify-between items-center py-1 group">
+                                                    <span className="text-white font-bold">{item.key}</span>
+                                                    <span className="text-white/40">{item.desc}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="font-black mb-2 tracking-widest text-[10px]" style={{ color: `${theme.primary}80` }}>AUDIO</h3>
+                                        <div className="space-y-1">
+                                            {[
+                                                { key: '↑ / ↓', desc: 'Volume' },
+                                                { key: 'M', desc: 'Mute' },
+                                            ].map((item, i) => (
+                                                <div key={i} className="flex justify-between items-center py-1 group">
+                                                    <span className="text-white font-bold">{item.key}</span>
+                                                    <span className="text-white/40">{item.desc}</span>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
-                            )}
 
-                            <button onClick={() => setShowDebug(!showDebug)} className={`p-1.5 rounded hover:bg-white/10 transition-colors ${showDebug ? 'text-neon-cyan' : 'text-white/30'}`}>
-                                <Info className="w-4 h-4" />
-                            </button>
-                            <button onClick={cycleAspectRatio} className="p-1.5 hover:bg-white/10 rounded transition-colors text-[10px] font-mono text-neon-cyan/70 border border-neon-cyan/20">
-                                {aspectRatio.toUpperCase()}
-                            </button>
-                            <button onClick={toggleFullscreen} className="p-1.5 rounded hover:bg-white/10 text-white/50 hover:text-white transition-colors">
-                                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                            </button>
+                                {/* Tools Column */}
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="font-black mb-2 tracking-widest text-[10px]" style={{ color: `${theme.primary}80` }}>SPEED</h3>
+                                        <div className="space-y-1">
+                                            {[
+                                                { key: '{ / }', desc: 'Cycle Speed' },
+                                            ].map((item, i) => (
+                                                <div key={i} className="flex justify-between items-center py-1 group">
+                                                    <span className="text-white font-bold">{item.key}</span>
+                                                    <span className="text-white/40">{item.desc}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="font-black mb-2 tracking-widest text-[10px]" style={{ color: `${theme.primary}80` }}>WINDOW</h3>
+                                        <div className="space-y-1">
+                                            {[
+                                                { key: 'F', desc: 'Toggle Fullscreen' },
+                                                { key: 'A', desc: 'Aspect Ratio' },
+                                                { key: '?', desc: 'Toggle Help' },
+                                            ].map((item, i) => (
+                                                <div key={i} className="flex justify-between items-center py-1 group">
+                                                    <span className="text-white font-bold">{item.key}</span>
+                                                    <span className="text-white/40">{item.desc}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </footer>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* A-B Loop Overlay / Indicators */}
             {(loopA !== null || loopB !== null) && (

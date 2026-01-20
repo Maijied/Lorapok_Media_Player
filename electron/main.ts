@@ -20,6 +20,53 @@ function logToFile(message: string) {
   fs.appendFileSync(debugLogPath, `[${timestamp}] ${message}\n`);
 }
 
+/**
+ * Intelligent Path Decoder
+ * Handles various protocol prefixes, mixed slashes, and platform variances.
+ * - Strips media://, lorapok://, etc.
+ * - Detects valid Remote URLs (http/https) even if malformed with leading slashes.
+ * - Normalizes local paths for Windows/Linux.
+ */
+function decodeSmartPath(rawPath: string): string {
+  // 1. Intelligent Network Protocol Extraction
+  // This recovers the real URL even if wrapped in multiple layers like media://media//http://...
+  const networkMatch = rawPath.match(/((https?|smb|ftp|sftp|ftps|rtsp|rtp|mms|rtmp):\/\/.*)$/i);
+  if (networkMatch) {
+    let url = networkMatch[1];
+    // Strip internal player state parameters that shouldn't be passed to the remote server
+    url = url.replace(/([?&])(transcode|audioStream|subStream|t)=[^&]*&?/g, '$1').replace(/[?&]$/, '');
+    return url;
+  }
+
+  // 2. Local File Processing
+  // Strip Wrapper Protocols (media://, lorapok://, app://)
+  let clean = rawPath.replace(/^(media|lorapok|app):\/\//, '');
+
+  // Strip File Protocol if present
+  clean = clean.replace(/^file:\/\//, '');
+
+  // Strip query parameters
+  clean = clean.split('?')[0];
+
+  // Decode URI components
+  clean = decodeURIComponent(clean);
+
+  // 3. Platform specific normalization
+  if (process.platform === 'win32') {
+    // Handle /C:/path -> C:/path
+    if (clean.match(/^\/[a-zA-Z]:/)) {
+      clean = clean.substring(1);
+    }
+    return path.normalize(clean);
+  } else {
+    // Linux/Mac: Ensure absolute path for local files
+    if (!clean.startsWith('/') && !clean.includes('://')) {
+      clean = '/' + clean;
+    }
+    return clean;
+  }
+}
+
 process.env.APP_ROOT = path.join(__dirname, '..')
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
@@ -237,13 +284,8 @@ ipcMain.handle('export-segment', async (_event, { filePath, start, end, filename
   const savePath = path.join(lorapokPath, filename)
 
   // Convert lorapok:// path to real path if necessary
-  let realPath = filePath
-  if (filePath.startsWith('lorapok://')) {
-    realPath = filePath.replace('lorapok://', '')
-    if (process.platform === 'win32' && realPath.startsWith('/')) {
-      realPath = realPath.substring(1)
-    }
-  }
+  // Convert lorapok:// path to real path using smart decoder
+  const realPath = decodeSmartPath(filePath);
 
   return new Promise((resolve, reject) => {
     if (!ffmpeg) {
@@ -473,6 +515,27 @@ app.whenReady().then(async () => {
     } else {
       logToFile('⚠️ FFmpeg binary not found at static path, checking system path...');
     }
+
+    // Initialize FFprobe
+    try {
+      // @ts-ignore
+      const ffprobeStatic = (await import('ffprobe-static')).default
+      let ffprobePath = ffprobeStatic.path
+
+      // Fix for development environment where path might be mangled to point into dist-electron
+      if (!fs.existsSync(ffprobePath)) {
+        const nodeModulesBase = path.join(process.cwd(), 'node_modules')
+        const manualPath = path.join(nodeModulesBase, 'ffprobe-static', 'bin', process.platform, process.arch, process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe')
+        if (fs.existsSync(manualPath)) {
+          ffprobePath = manualPath
+        }
+      }
+
+      ffmpeg.setFfprobePath(ffprobePath)
+      logToFile(`✅ FFprobe Initialized: ${ffprobePath}`)
+    } catch (e) {
+      logToFile(`❌ FFprobe Init Error: ${e}`)
+    }
   } catch (err) {
     logToFile(`❌ FFmpeg Load failed: ${err}`);
   }
@@ -481,28 +544,79 @@ app.whenReady().then(async () => {
   const protocols = ['media', 'smb', 'sftp', 'nfs', 'webdav']
   protocols.forEach(p => {
     protocol.handle(p, async (request) => {
-      const url = request.url.replace(`${p}://`, '')
-      let decodedPath = decodeURIComponent(url)
+      logToFile(`[MEDIA DEBUG] Raw URL: ${request.url}`)
 
-      // Handle Windows drive letters (e.g., /C:/path -> C:/path)
-      if (process.platform === 'win32') {
-        // Remove leading slash if it precedes a drive letter (e.g. /C:)
-        if (decodedPath.match(/^\/[a-zA-Z]:/)) {
-          decodedPath = decodedPath.substring(1)
-        }
-      } else {
-        // Ensure leading slash for Linux/Mac
-        if (!decodedPath.startsWith('/')) {
-          decodedPath = '/' + decodedPath
-        }
-      }
+      const fullUrl = request.url.replace(`${p}://`, '') // Keep full URL for query string extraction
+      const [_, queryString] = fullUrl.split('?')
+
+      const decodedPath = decodeSmartPath(request.url);
+      const forceTranscode = queryString?.includes('transcode=true')
+
+      // Normalize logic is now in decodeSmartPath
+
 
       try {
-        const stats = fs.statSync(decodedPath)
-        const ext = path.extname(decodedPath).toLowerCase()
+        const isRemote = /^[a-z][a-z0-9+.-]+:\/\//i.test(decodedPath);
+        let stats;
+        let ext = '';
 
-        // Native Chromium support check
-        const nativeSupport = ['.mp4', '.webm', '.ogg', '.mp3', '.wav', '.aac', '.flac', '.m4a', '.opus'].includes(ext)
+        if (!isRemote) {
+          stats = fs.statSync(decodedPath)
+          ext = path.extname(decodedPath).toLowerCase()
+        } else {
+          // For remote URLs, infer extension from path or default to transcoding
+          try {
+            const urlObj = new URL(decodedPath);
+            ext = path.extname(urlObj.pathname).toLowerCase();
+          } catch {
+            ext = '';
+          }
+        }
+        // Native Chromium support check (Local files only, unless forced)
+        let nativeSupport = !forceTranscode && !isRemote && ['.mp4', '.webm', '.ogg', '.mp3', '.wav', '.aac', '.flac', '.m4a', '.opus'].includes(ext)
+
+        // 🧠 DEEP PROBE: Verify Codec Safety (Fix for HEVC/AC3 hiding in MP4s)
+        if (nativeSupport && ['.mp4', '.mov', '.mkv'].includes(ext)) {
+          try {
+            const isSafe = await new Promise<boolean>((resolve) => {
+              ffmpeg.ffprobe(decodedPath, (err: any, metadata: any) => {
+                if (err || !metadata) {
+                  logToFile(`Probe Failed: ${err}. Defaulting to Transcode.`);
+                  resolve(false);
+                  return;
+                }
+
+                // Check Video Codec
+                const video = metadata.streams.find((s: any) => s.codec_type === 'video');
+                if (video) {
+                  const vCodec = video.codec_name?.toLowerCase();
+                  if (!['h264', 'vp8', 'vp9', 'av1'].includes(vCodec)) {
+                    logToFile(`❌ Unsupported Video Codec: ${vCodec}. Transcoding.`);
+                    resolve(false);
+                    return;
+                  }
+                }
+
+                // Check Audio Codec
+                const audio = metadata.streams.find((s: any) => s.codec_type === 'audio');
+                if (audio) {
+                  const aCodec = audio.codec_name?.toLowerCase();
+                  if (['ac3', 'eac3', 'dts', 'truehd'].includes(aCodec)) {
+                    logToFile(`❌ Unsupported Audio Codec: ${aCodec}. Transcoding.`);
+                    resolve(false);
+                    return;
+                  }
+                }
+
+                resolve(true);
+              });
+            });
+            nativeSupport = isSafe;
+          } catch (e) {
+            logToFile(`Deep Probe Error: ${e}`);
+            nativeSupport = false;
+          }
+        }
 
         if (nativeSupport) {
           const range = request.headers.get('range')
@@ -511,7 +625,7 @@ app.whenReady().then(async () => {
               status: 200,
               headers: {
                 'Content-Type': 'video/mp4',
-                'Content-Length': stats.size.toString(),
+                'Content-Length': stats!.size.toString(),
                 'Accept-Ranges': 'bytes'
               }
             })
@@ -519,12 +633,12 @@ app.whenReady().then(async () => {
 
           const parts = range.replace(/bytes=/, "").split("-")
           const start = parseInt(parts[0], 10)
-          const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1
+          const end = parts[1] ? parseInt(parts[1], 10) : stats!.size - 1
           const chunksize = (end - start) + 1
           return new Response(fs.createReadStream(decodedPath, { start, end }) as any, {
             status: 206,
             headers: {
-              'Content-Range': `bytes ${start}-${end}/${stats.size}`,
+              'Content-Range': `bytes ${start}-${end}/${stats!.size}`,
               'Accept-Ranges': 'bytes',
               'Content-Length': chunksize.toString(),
               'Content-Type': 'video/mp4'
@@ -535,7 +649,30 @@ app.whenReady().then(async () => {
         // 🧠 NEURAL DECODE: FFmpeg Real-time Transcoding
         logToFile(`🧠 Universal Decode: ${ext} -> fMP4`);
 
-        const ffstream = ffmpeg(decodedPath)
+        const params = new URLSearchParams(queryString);
+        const startTime = params.get('t') || params.get('startTime');
+        const audioIndex = params.get('audioStream');
+        const subIndex = params.get('subStream');
+
+        // Ensure remote URLs are properly encoded for FFmpeg
+        const cleanPath = isRemote ? new URL(decodedPath).href : decodedPath;
+
+        let command = ffmpeg(cleanPath);
+        if (startTime) {
+          command = command.seekInput(startTime);
+          logToFile(`Seeking to ${startTime}s`);
+        }
+
+        if (audioIndex) {
+          command.outputOptions(['-map 0:v:0', `-map 0:${audioIndex}`]);
+        }
+
+        if (subIndex) {
+          const escapedPath = cleanPath.replace(/:/g, '\\:').replace(/'/g, "\\'");
+          command.complexFilter(`subtitles='${escapedPath}':si=${subIndex}`);
+        }
+
+        const ffstream = command
           .format('mp4')
           .videoCodec('libx264')
           .audioCodec('aac')
@@ -616,3 +753,57 @@ app.whenReady().then(async () => {
   }
   createWindow()
 })
+
+ipcMain.handle('get-video-duration', async (_event, filePath) => {
+  let targetPath = decodeSmartPath(filePath);
+
+  if (targetPath.startsWith('http')) {
+    // Re-encode for FFprobe
+    try { targetPath = new URL(targetPath).href } catch { }
+  }
+
+  return new Promise((resolve) => {
+    ffmpeg.ffprobe(targetPath, (err: any, metadata: any) => {
+      if (err || !metadata) {
+        resolve(0);
+      } else {
+        let dur = metadata.format.duration || 0;
+        if (!dur && metadata.streams) {
+          // Fallback to max duration from streams
+          const streamDurs = metadata.streams
+            .map((s: any) => parseFloat(s.duration))
+            .filter((d: any) => !isNaN(d) && isFinite(d));
+          if (streamDurs.length > 0) {
+            dur = Math.max(...streamDurs);
+          }
+        }
+        resolve(dur);
+      }
+    });
+  });
+});
+
+ipcMain.handle('get-media-tracks', async (_event, filePath) => {
+  let targetPath = decodeSmartPath(filePath);
+
+  if (targetPath.startsWith('http')) {
+    try { targetPath = new URL(targetPath).href } catch { }
+  }
+
+  return new Promise((resolve) => {
+    ffmpeg.ffprobe(targetPath, (err: any, metadata: any) => {
+      if (err || !metadata || !metadata.streams) {
+        resolve([]);
+        return;
+      }
+      const tracks = metadata.streams.map((s: any) => ({
+        index: s.index, // Absolute stream index
+        type: s.codec_type,
+        codec: s.codec_name,
+        language: s.tags?.language || 'und',
+        title: s.tags?.title || s.tags?.handler_name || `${s.codec_type} ${s.index}`
+      })).filter((t: any) => t.type === 'audio' || t.type === 'subtitle');
+      resolve(tracks);
+    });
+  });
+});
