@@ -794,7 +794,8 @@ function App() {
       setPlaylist([...playlist, streamUrl])
 
       let finalUrl = streamUrl
-      // Auto-detect complex formats that need transcoding (HEVC/MKV via Main Process)
+      // Auto-detect complex formats that need transcoding (HEVC/MKV via FFmpeg)
+      // This applies to BOTH local files AND remote streams
       const isComplex = streamUrl.match(/\.(mkv|avi|flv|wmv|mov)|x265|hevc/i)
 
       if (isComplex && window.ipcRenderer) {
@@ -872,6 +873,7 @@ function App() {
       const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain')
       if (url) {
         let finalUrl = url.trim().replace(/\.+$/, '')
+        // Always wrap complex codecs for transcoding (local or remote)
         if (finalUrl.match(/\.(mkv|avi|flv|wmv|mov|rmvb)|x265|hevc/i) && !finalUrl.startsWith('media://')) {
           finalUrl = `media://${finalUrl}`
         }

@@ -21,42 +21,90 @@ function logToFile(message: string) {
 }
 
 /**
- * Intelligent Path Decoder
- * Handles various protocol prefixes, mixed slashes, and platform variances.
- * - Strips media://, lorapok://, etc.
- * - Detects valid Remote URLs (http/https) even if malformed with leading slashes.
- * - Normalizes local paths for Windows/Linux.
+ * UNIVERSAL INTELLIGENT PATH DECODER
+ * 
+ * A comprehensive parser designed to handle any media URL format from various servers:
+ * - Network protocols: HTTP(S), FTP(S), SFTP, SMB, NFS, WebDAV, RTSP, RTMP, MMS, etc.
+ * - Electron protocol artifacts: Recovers stripped colons (http// -> http://)
+ * - Double/triple encoded URLs: Recursively decodes %25XX patterns
+ * - UNC paths: \\server\share format for Windows network drives
+ * - Special characters: Brackets, parentheses, spaces, unicode
+ * - Trailing garbage: Removes trailing dots, slashes, query fragments
+ * - Platform normalization: Windows drive letters, Unix absolute paths
  */
 function decodeSmartPath(rawPath: string): string {
-  // 1. Intelligent Network Protocol Extraction
-  // This recovers the real URL even if wrapped in multiple layers like media://media//http://...
-  const networkMatch = rawPath.match(/((https?|smb|ftp|sftp|ftps|rtsp|rtp|mms|rtmp):\/\/.*)$/i);
+  logToFile(`[PATH DECODE] Input: ${rawPath}`);
+
+  // Step 0: Clean trailing garbage (dots, whitespace, newlines)
+  let clean = rawPath.trim().replace(/\.+$/, '').replace(/[\r\n]+/g, '');
+
+  // Step 1: Fix Electron's protocol normalization artifact
+  // When nesting protocols like media://http://..., Electron can strip the inner colon
+  // Match patterns like http// https// ftp// etc. and restore the colon
+  clean = clean.replace(/(https?|ftp|ftps|sftp|smb|nfs|webdav|davs?|rtsp|rtmp|rtp|mms|mmsh)\/\//gi, '$1://');
+
+  // Step 2: Recursive URI decoding for double/triple encoded URLs
+  // Servers sometimes encode URLs multiple times (%2520 = %20 = space)
+  let maxIterations = 5; // Safety limit
+  while (maxIterations-- > 0 && /%[0-9A-Fa-f]{2}/.test(clean)) {
+    try {
+      const decoded = decodeURIComponent(clean);
+      if (decoded === clean) break; // No change, stop
+      clean = decoded;
+    } catch {
+      break; // Malformed encoding, stop
+    }
+  }
+
+  // Step 3: Network Protocol Detection (most comprehensive regex)
+  // Supports: http, https, ftp, ftps, sftp, smb, nfs, webdav, dav, davs, rtsp, rtmp, rtp, mms, mmsh
+  const networkProtocols = [
+    'https?', 'ftps?', 'sftp', 'smb', 'nfs', 'cifs',
+    'webdav', 'davs?', 'rtsp', 'rtmp', 'rtmps', 'rtp',
+    'mms', 'mmsh', 'mmst', 'udp', 'tcp', 'rtmpe', 'hls'
+  ].join('|');
+
+  const networkMatch = clean.match(new RegExp(`((${networkProtocols}):\\/\\/.*)$`, 'i'));
   if (networkMatch) {
     let url = networkMatch[1];
-    // Strip internal player state parameters that shouldn't be passed to the remote server
-    url = url.replace(/([?&])(transcode|audioStream|subStream|t)=[^&]*&?/g, '$1').replace(/[?&]$/, '');
+
+    // Strip internal player state parameters
+    url = url.replace(/([?&])(transcode|audioStream|subStream|t|startTime)=[^&]*&?/g, '$1');
+    url = url.replace(/[?&]$/, ''); // Remove trailing ? or &
+
+    // Ensure URL is properly formed for FFmpeg
+    try {
+      const parsed = new URL(url);
+      url = parsed.href; // Re-serialize to normalize
+    } catch {
+      // URL is malformed but might still work with FFmpeg
+    }
+
+    logToFile(`[PATH DECODE] Network URL: ${url}`);
     return url;
   }
 
-  // 2. Local File Processing
-  // Strip Wrapper Protocols (media://, lorapok://, app://)
-  let clean = rawPath.replace(/^(media|lorapok|app):\/\//, '');
+  // Step 4: UNC Path Detection (\\server\share\path)
+  if (clean.match(/^\\\\[^\\]+\\/)) {
+    logToFile(`[PATH DECODE] UNC Path: ${clean}`);
+    return clean;
+  }
 
-  // Strip File Protocol if present
-  clean = clean.replace(/^file:\/\//, '');
+  // Step 5: Local File Processing
+  // Strip Wrapper Protocols (media://, lorapok://, app://, file://)
+  clean = clean.replace(/^(media|lorapok|app|file):\/\//i, '');
 
-  // Strip query parameters
+  // Strip any remaining query parameters for local files
   clean = clean.split('?')[0];
+  clean = clean.split('#')[0]; // Also remove URL fragments
 
-  // Decode URI components
-  clean = decodeURIComponent(clean);
-
-  // 3. Platform specific normalization
+  // Step 6: Platform-specific normalization
   if (process.platform === 'win32') {
-    // Handle /C:/path -> C:/path
+    // Handle /C:/path -> C:/path (common with file:// URLs)
     if (clean.match(/^\/[a-zA-Z]:/)) {
       clean = clean.substring(1);
     }
+    // Convert forward slashes to backslashes for Windows
     return path.normalize(clean);
   } else {
     // Linux/Mac: Ensure absolute path for local files

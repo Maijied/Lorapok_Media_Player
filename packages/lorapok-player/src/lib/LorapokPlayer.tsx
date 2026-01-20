@@ -30,6 +30,35 @@ export interface LorapokPlayerProps {
     onError?: (error: any) => void;
 }
 
+/**
+ * Browser-compatible URL normalizer
+ * Handles common issues: trailing dots, double-encoding, whitespace
+ */
+function normalizeUrl(url: string): string {
+    // Clean trailing garbage and whitespace
+    let clean = url.trim().replace(/\.+$/, '').replace(/[\r\n]+/g, '');
+
+    // Recursive decode for double/triple encoded URLs
+    let maxIterations = 3;
+    while (maxIterations-- > 0 && /%[0-9A-Fa-f]{2}/.test(clean)) {
+        try {
+            const decoded = decodeURIComponent(clean);
+            if (decoded === clean) break;
+            clean = decoded;
+        } catch {
+            break;
+        }
+    }
+
+    // Re-encode for safe usage (properly encode spaces, brackets, etc.)
+    try {
+        const parsed = new URL(clean);
+        return parsed.href;
+    } catch {
+        return clean; // Return as-is if not a valid URL
+    }
+}
+
 export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
     src,
     poster,
@@ -44,7 +73,7 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
     const [isPlaying, setIsPlaying] = useState(autoPlay)
     const [isDragging, setIsDragging] = useState(false)
     const [codecError, setCodecError] = useState<string | null>(null)
-    const [currentSrc, setCurrentSrc] = useState<string | null>(src || null)
+    const [currentSrc, setCurrentSrc] = useState<string | null>(src ? normalizeUrl(src) : null)
 
     // A-B Loop State
     const [loopA, setLoopA] = useState<number | null>(null)
@@ -60,8 +89,9 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
 
     // Sync prop src changes & Reset State
     useEffect(() => {
-        if (src !== currentSrc) {
-            setCurrentSrc(src || null)
+        const normalizedSrc = src ? normalizeUrl(src) : null
+        if (normalizedSrc !== currentSrc) {
+            setCurrentSrc(normalizedSrc)
             setIsPlaying(autoPlay)
             setCurrentTime(0)
             setDuration(0)
