@@ -211,6 +211,16 @@ ipcMain.handle('set-window-size', async (_event, { width, height }) => {
   }
 })
 
+ipcMain.handle('save-screenshot', async (_event, { buffer, filename }) => {
+  const picturesPath = app.getPath('pictures')
+  const lorapokPath = path.join(picturesPath, 'Lorapok')
+  if (!fs.existsSync(lorapokPath)) fs.mkdirSync(lorapokPath)
+
+  const filePath = path.join(lorapokPath, filename)
+  fs.writeFileSync(filePath, buffer)
+  return filePath
+})
+
 // Window Control Handlers
 ipcMain.handle('window-minimize', () => {
   if (win && !win.isDestroyed()) win.minimize()

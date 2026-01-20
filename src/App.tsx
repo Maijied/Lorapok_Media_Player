@@ -63,12 +63,13 @@ const Logo = ({ className = "w-12 h-12" }: { className?: string }) => (
 );
 
 // Mascot Component (Meta-Grade Minimalist)
-const Mascot = memo(({ state }: { state: 'idle' | 'playing' | 'buffering' | 'error' }) => {
+const Mascot = memo(({ state }: { state: 'idle' | 'playing' | 'buffering' | 'error' | 'ended' }) => {
   return (
     <div className="relative w-48 h-48 flex items-center justify-center pointer-events-none select-none">
       <div className={`absolute inset-0 rounded-full blur-3xl transition-colors duration-1000 ${state === 'playing' ? 'bg-neon-cyan/10' :
         state === 'buffering' ? 'bg-electric-purple/10' :
-          state === 'error' ? 'bg-red-500/10' : 'bg-white/5'
+          state === 'error' ? 'bg-red-500/10' :
+            state === 'ended' ? 'bg-green-500/10' : 'bg-white/5'
         }`} />
 
       <Logo className="w-32 h-32 relative z-10" />
@@ -136,6 +137,16 @@ function App() {
   const [showHelp, setShowHelp] = useState(false)
   const [aspectRatio, setAspectRatio] = useState<'original' | '1:1' | '4:3' | '5:4' | '16:9' | '16:10' | '21:9' | '2.35:1' | '2.39:1'>('original')
   const [showAspectNotification, setShowAspectNotification] = useState(false)
+
+  // Theme Presets
+  const themes = {
+    'Midnight Core': { primary: '#00f3ff', secondary: '#bc13fe', bg: '#050510' },
+    'Cyber Bloom': { primary: '#ff007a', secondary: '#00f3ff', bg: '#100510' },
+    'Quantum Pulse': { primary: '#f0b429', secondary: '#00ccff', bg: '#051010' }
+  }
+  const [currentTheme, setCurrentTheme] = useState<keyof typeof themes>('Midnight Core')
+  const theme = themes[currentTheme]
+
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Set buffering state when file path changes to show initial loading
@@ -166,6 +177,34 @@ function App() {
   useEffect(() => {
     localStorage.setItem('lorapok-playlist', JSON.stringify(playlist))
   }, [playlist])
+
+  // Smart Resume: Save playback position
+  useEffect(() => {
+    if (!filePath || !currentTime) return
+    const saveProgress = () => {
+      const resumeData = JSON.parse(localStorage.getItem('lorapok-resume') || '{}')
+      resumeData[filePath] = currentTime
+      localStorage.setItem('lorapok-resume', JSON.stringify(resumeData))
+    }
+    const interval = setInterval(saveProgress, 5000)
+    return () => {
+      clearInterval(interval)
+      saveProgress()
+    }
+  }, [filePath, currentTime])
+
+  // Smart Resume: Restore playback position
+  useEffect(() => {
+    if (filePath && videoRef.current) {
+      const resumeData = JSON.parse(localStorage.getItem('lorapok-resume') || '{}')
+      const savedTime = resumeData[filePath]
+      if (savedTime && Math.abs(savedTime - currentTime) > 5) {
+        videoRef.current.currentTime = savedTime
+        setCurrentTime(savedTime)
+        console.log(`[SmartResume] Restored ${filePath} to ${savedTime}s`)
+      }
+    }
+  }, [filePath])
 
   // Ambient Glow Effect: Sample video color
   useEffect(() => {
@@ -252,6 +291,9 @@ function App() {
           break
         case 'a':
           cycleAspectRatio()
+          break
+        case 's':
+          takeScreenshot()
           break
         case 'h':
         case '?':
@@ -623,6 +665,32 @@ function App() {
     }
   }
 
+  const takeScreenshot = async () => {
+    if (!videoRef.current || !filePath) return
+
+    const video = videoRef.current
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+    // Convert canvas to blob then to buffer
+    canvas.toBlob(async (blob) => {
+      if (!blob || !window.ipcRenderer) return
+      const arrayBuffer = await blob.arrayBuffer()
+      const buffer = new Uint8Array(arrayBuffer)
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const filename = `lorapok-snap-${timestamp}.png`
+
+      const savedPath = await window.ipcRenderer.invoke('save-screenshot', { buffer, filename })
+      console.log(`[Screenshot] Saved to: ${savedPath}`)
+    }, 'image/png')
+  }
+
   const playNext = () => {
     if (playlist.length === 0) return
     const currentIndex = playlist.indexOf(filePath || '')
@@ -818,8 +886,7 @@ function App() {
       </header >
 
       {/* Main Viewport */}
-      < main className="flex-1 relative flex flex-col items-center justify-center overflow-hidden bg-black/50 transition-colors duration-1000" style={{ backgroundColor: ambientColor.replace('0.3', '0.05') }
-      }>
+      <main className="flex-1 relative flex flex-col items-center justify-center overflow-hidden transition-colors duration-1000" style={{ backgroundColor: theme.bg }}>
         {/* Hidden Canvas for sampling */}
         < canvas ref={canvasRef} width="10" height="10" className="hidden" />
 
@@ -911,7 +978,7 @@ function App() {
         {/* Codec Info Overlay */}
         {
           showDebug && (
-            <div className="absolute top-4 left-4 z-40 bg-black/80 border border-neon-cyan/30 p-4 rounded-lg font-mono text-xs text-neon-cyan backdrop-blur-md shadow-lg pointer-events-none max-w-sm overflow-hidden">
+            <div className="absolute top-4 left-4 z-40 bg-black/80 border p-4 rounded-lg font-mono text-xs backdrop-blur-md shadow-lg pointer-events-none max-w-sm overflow-hidden" style={{ borderColor: `${theme.primary}50`, color: theme.primary }}>
               <h3 className="font-bold border-b border-white/10 pb-2 mb-2 flex items-center gap-2">
                 <Info className="w-3 h-3" /> STATS_FOR_NERDS
               </h3>
@@ -989,7 +1056,7 @@ function App() {
             >
               {/* Mini Mascot Overlay */}
               <div className="absolute top-4 right-4 z-40 scale-[0.4] origin-top-right opacity-0 group-hover:opacity-100 transition-opacity">
-                <Mascot state={isBuffering ? 'buffering' : (isPlaying ? 'playing' : 'idle')} />
+                <Mascot state={isBuffering ? 'buffering' : (isPlaying ? 'playing' : (currentTime >= duration && duration > 0 ? 'ended' : 'idle'))} />
               </div>
 
               {(() => {
@@ -1198,8 +1265,12 @@ function App() {
                   onClick={handleSeek}
                 >
                   <div
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-electric-purple shadow-[0_0_15px_#00f3ff] transition-all"
-                    style={{ width: `${(currentTime / duration) * 100}%` }}
+                    className="absolute top-0 left-0 h-full transition-all"
+                    style={{
+                      width: `${(currentTime / duration) * 100}%`,
+                      backgroundColor: theme.primary,
+                      boxShadow: `0 0 15px ${theme.primary}`
+                    }}
                   />
                   <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
@@ -1208,7 +1279,7 @@ function App() {
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center gap-4">
                     <button onClick={playPrevious} className="text-white/50 hover:text-white transition-colors" title="Previous (P)"><SkipBack className="w-4 h-4" /></button>
-                    <button onClick={togglePlay} className="w-8 h-8 rounded-full bg-white text-midnight flex items-center justify-center hover:bg-neon-cyan transition-all">
+                    <button onClick={togglePlay} className="w-8 h-8 rounded-full bg-white text-midnight flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: theme.primary }}>
                       {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
                     </button>
                     <button onClick={playNext} className="text-white/50 hover:text-white transition-colors" title="Next (N)"><SkipForward className="w-4 h-4" /></button>
@@ -1228,15 +1299,28 @@ function App() {
                         setVolume(Math.max(0, Math.min(1, val)));
                         setIsMuted(false);
                       }}>
-                        <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-neon-cyan to-white" style={{ width: `${isMuted ? 0 : volume * 100}%` }} />
+                        <div className="absolute top-0 left-0 h-full" style={{ width: `${isMuted ? 0 : volume * 100}%`, backgroundColor: theme.primary }} />
                         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
                       </div>
                     </div>
 
-                    <button onClick={cyclePlaybackSpeed} className="text-[10px] font-mono font-bold text-neon-cyan border border-neon-cyan/30 px-1.5 py-0.5 rounded hover:bg-neon-cyan/10">
+                    {/* Theme Switcher */}
+                    <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
+                      {Object.keys(themes).map(t => (
+                        <button
+                          key={t}
+                          onClick={() => setCurrentTheme(t as any)}
+                          className={`w-4 h-4 rounded-full transition-all ${currentTheme === t ? 'scale-110 ring-1 ring-white' : 'opacity-40 hover:opacity-100'}`}
+                          style={{ backgroundColor: themes[t as keyof typeof themes].primary }}
+                          title={t}
+                        />
+                      ))}
+                    </div>
+
+                    <button onClick={cyclePlaybackSpeed} className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors" style={{ color: theme.primary, borderColor: `${theme.primary}50`, borderWidth: '1px' }}>
                       {playbackRate}x
                     </button>
-                    <button onClick={() => setShowDebug(!showDebug)} className={`transition-colors ${showDebug ? 'text-electric-purple' : 'text-white/30 hover:text-white/70'}`} title="Stats">
+                    <button onClick={() => setShowDebug(!showDebug)} className="transition-colors" style={{ color: showDebug ? theme.secondary : 'rgba(255,255,255,0.3)' }} title="Stats">
                       <Info className="w-4 h-4" />
                     </button>
                     {window.ipcRenderer && (

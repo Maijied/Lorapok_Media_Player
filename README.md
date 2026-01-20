@@ -40,8 +40,11 @@
 - **Neural Decoding**: Advanced playback engine supporting all major formats (MKV, AVI, WMV) via FFmpeg integration.
 - **Organic UI**: A "living" interface that reacts to media content with dynamic ambient lighting and micro-animations.
 - **Universal Drop**: Drag-and-drop any media file to instantly initialize the playback core.
-- **Network Stream**: Direct URL streaming with protocol-agnostic handling.
-- **Aspect Ratio Control**: VLC-style aspect ratio cycling (16:9, 4:3, 21:9, 1:1, Original) using the `A` shortcut.
+- **Smart Resume**: Automatically remembers and resumes playback position for every media file.
+- **Screenshots**: High-resolution frame capture via the `S` shortcut (saved to `Pictures/Lorapok`).
+- **Theme Presets**: Switch between **Midnight Core**, **Cyber Bloom**, and **Quantum Pulse** aesthetics.
+- **Track Selection**: Full support for switching Audio and Subtitle tracks in adaptive streams.
+- **Aspect Ratio Control**: VLC-style aspect ratio cycling (16:9, 4:3, 5:4, 21:9, 1:1, etc.) using the `A` shortcut.
 - **Cross-Platform**: Optimized builds for Windows, macOS, and Linux.
 
 ## 📦 COMPONENT LIBRARY

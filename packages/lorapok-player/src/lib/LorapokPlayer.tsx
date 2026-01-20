@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
-import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX } from 'lucide-react'
+import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX, Subtitles, Languages } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Logo } from '../components/Logo'
 import { Mascot } from '../components/Mascot'
@@ -63,6 +63,12 @@ export function LorapokPlayer({
     const [showControls, setShowControls] = useState(true)
     const [aspectRatio, setAspectRatio] = useState<'original' | '1:1' | '4:3' | '5:4' | '16:9' | '16:10' | '21:9' | '2.35:1' | '2.39:1'>('original')
     const [showAspectNotification, setShowAspectNotification] = useState(false)
+
+    // Track Selection State
+    const [audioTracks, setAudioTracks] = useState<{ id: number; name: string }[]>([])
+    const [subtitleTracks, setSubtitleTracks] = useState<{ id: number; name: string }[]>([])
+    const [currentAudioTrack, setCurrentAudioTrack] = useState(-1)
+    const [currentSubtitleTrack, setCurrentSubtitleTrack] = useState(-1)
 
     const cycleAspectRatio = () => {
         const aspectRatios = ['original', '1:1', '4:3', '5:4', '16:9', '16:10', '21:9', '2.35:1', '2.39:1'] as const
@@ -174,6 +180,21 @@ export function LorapokPlayer({
                             setIsBuffering(false)
                         }
                     })
+
+                    // Track Listeners
+                    hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_event, data) => {
+                        setAudioTracks(data.audioTracks.map(t => ({ id: t.id, name: t.name })))
+                    })
+                    hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, (_event, data) => {
+                        setSubtitleTracks(data.subtitleTracks.map(t => ({ id: t.id, name: t.name })))
+                    })
+                    hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, (_event, data) => {
+                        setCurrentAudioTrack(data.id)
+                    })
+                    hls.on(Hls.Events.SUBTITLE_TRACK_SWITCH, (_event, data) => {
+                        setCurrentSubtitleTrack(data.id)
+                    })
+
                     hlsRef.current = hls
                 } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
                     videoRef.current.src = currentSrc
@@ -556,6 +577,68 @@ export function LorapokPlayer({
                                     />
                                 </div>
                             </div>
+
+                            {/* Audio Track Selector */}
+                            {audioTracks.length > 1 && (
+                                <div className="relative group/tracks">
+                                    <button className="p-1.5 hover:text-neon-cyan transition-colors" title="Audio Tracks">
+                                        <Languages className="w-4 h-4" />
+                                    </button>
+                                    <div className="absolute bottom-full right-0 mb-4 w-48 bg-midnight/90 backdrop-blur-xl border border-white/10 rounded-lg overflow-hidden opacity-0 group-hover/tracks:opacity-100 pointer-events-none group-hover/tracks:pointer-events-auto transition-all transform translate-y-2 group-hover/tracks:translate-y-0 shadow-2xl">
+                                        <div className="p-2 border-b border-white/5 bg-white/5">
+                                            <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest">Audio Tracks</span>
+                                        </div>
+                                        <div className="max-h-48 overflow-y-auto">
+                                            {audioTracks.map((track) => (
+                                                <button
+                                                    key={track.id}
+                                                    onClick={() => {
+                                                        if (hlsRef.current) hlsRef.current.audioTrack = track.id
+                                                    }}
+                                                    className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentAudioTrack === track.id ? 'text-neon-cyan' : 'text-white/60'}`}
+                                                >
+                                                    {track.name || `Track ${track.id}`}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Subtitle Track Selector */}
+                            {subtitleTracks.length > 0 && (
+                                <div className="relative group/subs">
+                                    <button className="p-1.5 hover:text-neon-cyan transition-colors" title="Subtitles">
+                                        <Subtitles className="w-4 h-4" />
+                                    </button>
+                                    <div className="absolute bottom-full right-0 mb-4 w-48 bg-midnight/90 backdrop-blur-xl border border-white/10 rounded-lg overflow-hidden opacity-0 group-hover/subs:opacity-100 pointer-events-none group-hover/subs:pointer-events-auto transition-all transform translate-y-2 group-hover/subs:translate-y-0 shadow-2xl">
+                                        <div className="p-2 border-b border-white/5 bg-white/5">
+                                            <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest">Subtitles</span>
+                                        </div>
+                                        <div className="max-h-48 overflow-y-auto">
+                                            <button
+                                                onClick={() => {
+                                                    if (hlsRef.current) hlsRef.current.subtitleTrack = -1
+                                                }}
+                                                className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentSubtitleTrack === -1 ? 'text-neon-cyan' : 'text-white/60'}`}
+                                            >
+                                                DISABLED
+                                            </button>
+                                            {subtitleTracks.map((track) => (
+                                                <button
+                                                    key={track.id}
+                                                    onClick={() => {
+                                                        if (hlsRef.current) hlsRef.current.subtitleTrack = track.id
+                                                    }}
+                                                    className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentSubtitleTrack === track.id ? 'text-neon-cyan' : 'text-white/60'}`}
+                                                >
+                                                    {track.name || `Subtitle ${track.id}`}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             <button onClick={() => setShowDebug(!showDebug)} className={`p-1.5 rounded hover:bg-white/10 transition-colors ${showDebug ? 'text-neon-cyan' : 'text-white/30'}`}>
                                 <Info className="w-4 h-4" />
