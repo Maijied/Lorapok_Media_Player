@@ -5,6 +5,9 @@
   "description": "A cross-platform media player with Organic Intelligence aesthetic.",
   "author": "Lorapok Team <team@lorapok.com>",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
