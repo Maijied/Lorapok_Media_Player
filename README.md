@@ -2,26 +2,27 @@
 
   <img src="assets/logo.png" alt="Lorapok Player Logo" width="180" height="180" />
 
-  # LORAPOK PLAYER
-  ### SUPERCOMPUTING MEDIA ENGINE
-
-  [![Version](https://img.shields.io/badge/version-1.2.0-00F3FF?style=flat-square&labelColor=050510)](https://github.com/Maijied/Lorapok_Media_Player)
-  [![License](https://img.shields.io/badge/license-MIT-BC13FE?style=flat-square&labelColor=050510)](LICENSE)
-  [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-white?style=flat-square&labelColor=050510)](https://github.com/Maijied/Lorapok_Media_Player)
+  <h1 align="center" style="border-bottom: none;">LORAPOK PLAYER</h1>
+  <p align="center" style="font-weight: bold; color: #00F3FF; letter-spacing: 2px;">SUPERCOMPUTING MEDIA ENGINE</p>
 
   <p align="center">
+    <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/VERSION-1.2.0-BC13FE?style=for-the-badge&labelColor=050510" alt="Version" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-00F3FF?style=for-the-badge&labelColor=050510&logoColor=050510" alt="License" /></a>
+    <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/PLATFORM-ALL_OS-FFFFFF?style=for-the-badge&labelColor=050510" alt="Platform" /></a>
+  </p>
+
+  <p align="center" style="max-width: 600px; margin: 20px auto; line-height: 1.6; opacity: 0.8;">
     The next-generation media player blending <b>biological aesthetics</b> with <b>supercomputing performance</b>.
-    <br />
     Engineered for ultra-low latency playback and high-fidelity sensory experiences.
   </p>
 
-  <div align="center">
+  <div align="center" style="margin: 30px 0;">
     <a href="https://maijied.github.io/Lorapok_Media_Player/">
-      <img src="assets/btn-demo.svg" width="200" alt="Try Live Demo" />
+      <img src="assets/btn-demo.svg" width="220" alt="Try Live Demo" />
     </a>
     &nbsp;&nbsp;
     <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest">
-      <img src="assets/btn-download.svg" width="200" alt="Download Latest" />
+      <img src="assets/btn-download.svg" width="220" alt="Download Latest" />
     </a>
   </div>
 

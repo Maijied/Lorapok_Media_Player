@@ -15,6 +15,7 @@
     </filter>
   </defs>
   <rect x="5" y="5" width="210" height="50" rx="25" fill="url(#c)" filter="url(#cglow)" />
+  <path d="M5 25C5 13.9543 13.9543 5 25 5H195C206.046 5 215 13.9543 215 25V25C215 26.1046 214.105 27 213 27H7C5.89543 27 5 26.1046 5 25V25Z" fill="white" fill-opacity="0.2" />
   <path d="M35 22L48 30L35 38V22Z" fill="#050510" />
   <text x="60" y="37" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="18" fill="#050510">TRY LIVE DEMO</text>
 </svg>

@@ -34,7 +34,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Update Themed Button Version
+      - name: Update Themed Button Version (Linux Only)
+        if: runner.os == 'Linux'
         run: |
           VERSION=$(node -p "require('./package.json').version")
           sed "s/{{VERSION}}/$VERSION/g" assets/btn-download.svg.template > assets/btn-download.svg
