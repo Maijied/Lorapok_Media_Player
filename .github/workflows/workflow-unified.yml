@@ -3,6 +3,7 @@ name: Lorapok CI/CD
 on:
   push:
     branches: ["main"]
+    tags: ["v*"]
   workflow_dispatch:
 
 permissions:
@@ -74,12 +75,12 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: Create/Update Latest Release
+      - name: Create/Update Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: "Lorapok Player (Latest Build)"
-          body: "This is a rolling release of the latest successful build from the main branch."
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
+          name: ${{ github.ref_type == 'tag' && format('Lorapok Player {0}', github.ref_name) || 'Lorapok Player (Latest Build)' }}
+          body: ${{ github.ref_type == 'tag' && format('Official stable release {0}.', github.ref_name) || 'This is a rolling release of the latest successful build from the main branch.' }}
           files: |
             artifacts/*.exe
             artifacts/*.dmg
@@ -87,8 +88,8 @@ jobs:
             artifacts/*.deb
             artifacts/*.snap
             artifacts/*.zip
-          make_latest: "true"
-          prerelease: true
+          make_latest: ${{ github.ref_type == 'tag' && 'true' || 'false' }}
+          prerelease: ${{ github.ref_type != 'tag' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
