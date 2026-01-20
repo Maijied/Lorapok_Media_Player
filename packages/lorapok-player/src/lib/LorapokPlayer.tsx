@@ -32,9 +32,19 @@ export function LorapokPlayer({
     const [isPlaying, setIsPlaying] = useState(autoPlay)
     const [isDragging, setIsDragging] = useState(false)
     const [codecError, setCodecError] = useState<string | null>(null)
-
-    // Local state for internal player control logic
     const [currentSrc, setCurrentSrc] = useState<string | null>(src || null)
+
+    // A-B Loop State
+    const [loopA, setLoopA] = useState<number | null>(null)
+    const [loopB, setLoopB] = useState<number | null>(null)
+
+    // Audio Enhancement State
+    const [audioNormalization, setAudioNormalization] = useState<'none' | 'night' | 'voice' | 'ebu'>('none')
+    const audioCtxRef = useRef<AudioContext | null>(null)
+    const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null)
+    const compressorNodeRef = useRef<DynamicsCompressorNode | null>(null)
+    const filterNodeRef = useRef<BiquadFilterNode | null>(null)
+    const analyserNodeRef = useRef<AnalyserNode | null>(null)
 
     // Sync prop src changes & Reset State
     useEffect(() => {
@@ -161,17 +171,6 @@ export function LorapokPlayer({
         }
     }, [audioNormalization])
 
-    // A-B Loop State
-    const [loopA, setLoopA] = useState<number | null>(null)
-    const [loopB, setLoopB] = useState<number | null>(null)
-
-    // Audio Enhancement State
-    const [audioNormalization, setAudioNormalization] = useState<'none' | 'night' | 'voice' | 'ebu'>('none')
-    const audioCtxRef = useRef<AudioContext | null>(null)
-    const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null)
-    const compressorNodeRef = useRef<DynamicsCompressorNode | null>(null)
-    const filterNodeRef = useRef<BiquadFilterNode | null>(null)
-    const analyserNodeRef = useRef<AnalyserNode | null>(null)
 
     const cycleAspectRatio = () => {
         const aspectRatios = ['original', '1:1', '4:3', '5:4', '16:9', '16:10', '21:9', '2.35:1', '2.39:1'] as const
@@ -549,7 +548,7 @@ export function LorapokPlayer({
                             )}
 
                             <div className="absolute top-4 right-4 z-40 scale-[0.4] origin-top-right opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Mascot state={isBuffering ? 'buffering' : (isPlaying ? 'playing' : 'idle')} />
+                                <Mascot state={isBuffering ? 'buffering' : (isPlaying ? 'playing' : (currentTime >= duration && duration > 0 ? 'ended' : 'idle'))} />
                             </div>
 
                             <video

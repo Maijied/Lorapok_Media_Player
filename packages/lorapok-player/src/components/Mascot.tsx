@@ -3,12 +3,13 @@ import { motion } from 'framer-motion';
 import { Logo } from './Logo';
 
 // Mascot Component (Meta-Grade Minimalist)
-export const Mascot = memo(({ state }: { state: 'idle' | 'playing' | 'buffering' | 'error' }) => {
+export const Mascot = memo(({ state }: { state: 'idle' | 'playing' | 'buffering' | 'error' | 'ended' }) => {
     return (
         <div className="relative w-48 h-48 flex items-center justify-center pointer-events-none select-none">
             <div className={`absolute inset-0 rounded-full blur-3xl transition-colors duration-1000 ${state === 'playing' ? 'bg-neon-cyan/10' :
                 state === 'buffering' ? 'bg-electric-purple/10' :
-                    state === 'error' ? 'bg-red-500/10' : 'bg-white/5'
+                    state === 'error' ? 'bg-red-500/10' :
+                        state === 'ended' ? 'bg-green-500/10' : 'bg-white/5'
                 }`} />
 
             <Logo className="w-32 h-32 relative z-10" />
