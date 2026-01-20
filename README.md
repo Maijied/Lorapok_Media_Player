@@ -3,7 +3,7 @@
   <img src="assets/logo.png" alt="Lorapok Player Logo" width="200" height="200" />
 
   # LORAPOK PLAYER
-  ### ORGANIC INTELLIGENCE MEDIA ENGINE
+  ### SUPERCOMPUTING MEDIA ENGINE
 
   <p align="center">
     <a href="https://maijied.github.io/Lorapok_Media_Player/">
@@ -22,13 +22,14 @@
 
   <br />
 
-  <img src="assets/showcase-main.png" alt="Lorapok Main Interface" width="800" style="border-radius: 10px; box-shadow: 0 0 50px rgba(0, 243, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);" />
+  <img src="assets/showcase-video.png" alt="Lorapok Video Playback" width="800" style="border-radius: 10px; box-shadow: 0 0 50px rgba(0, 243, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);" />
   
   <br/><br/>
 
-  <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-     <img src="assets/showcase-neural.png" alt="Neural Decode" width="380" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
-     <img src="assets/audio-interface.png" alt="Audio Intelligence" width="380" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+  <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+     <img src="assets/showcase-empty.png" alt="Main Interface" width="260" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+     <img src="assets/showcase-audio.png" alt="Audio Intelligence" width="260" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+     <img src="assets/showcase-neural.png" alt="Neural Decoding" width="260" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
   </div>
 
 </div>
@@ -101,4 +102,4 @@ npm run dev
 
 ## 📜 LICENSE
 
-[MIT](LICENSE) © 2024 Lorapok Team
+[MIT](LICENSE) © 2026 Lorapok Team

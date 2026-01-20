@@ -209,7 +209,7 @@ function App() {
             </main>
 
             <footer className="py-8 text-center text-white/20 font-mono text-xs border-t border-white/5">
-                <p>&copy; 2024 LORAPOK TEAM. ALL RIGHTS RESERVED.</p>
+                <p>&copy; 2026 LORAPOK TEAM. ALL RIGHTS RESERVED.</p>
             </footer>
         </div>
     )
