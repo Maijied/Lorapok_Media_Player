@@ -79,48 +79,50 @@ function App() {
 
                 {/* Live Demo Section */}
                 <section id="demo" className="w-full max-w-5xl mx-auto scroll-mt-32">
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-6">
+                    <div className="flex flex-col gap-6 mb-8">
                         <h2 className="text-3xl font-bold flex items-center gap-3">
                             <Zap className="w-6 h-6 text-neon-cyan" />
                             LIVE_DEMO
                         </h2>
 
                         {/* URL Input Box */}
-                        <form onSubmit={handleCustomUrlPlay} className="flex-1 max-w-lg w-full flex gap-2">
+                        <form onSubmit={handleCustomUrlPlay} className="flex gap-2">
                             <input
                                 type="text"
                                 value={customUrl}
                                 onChange={(e) => setCustomUrl(e.target.value)}
-                                placeholder="Paste .m3u8, .mpd or video URL..."
+                                placeholder="Paste any .m3u8, .mpd, .mp4, .webm or network URL..."
                                 className="flex-1 bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-sm font-mono focus:outline-none focus:border-neon-cyan/50 transition-colors"
                             />
                             <button
                                 type="submit"
                                 className="px-4 py-2 bg-neon-cyan text-midnight font-bold rounded-lg text-sm hover:bg-white transition-colors uppercase"
                             >
-                                Test_Link
+                                Play
                             </button>
                         </form>
 
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setDemoUrl("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")}
-                                className={`px-3 py-1 text-xs font-mono border rounded ${demoUrl.includes('BigBuckBunny') ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50'}`}
-                            >
-                                MP4
-                            </button>
-                            <button
-                                onClick={() => setDemoUrl("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8")}
-                                className={`px-3 py-1 text-xs font-mono border rounded ${demoUrl.includes('.m3u8') ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50'}`}
-                            >
-                                HLS
-                            </button>
-                            <button
-                                onClick={() => setDemoUrl("https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd")}
-                                className={`px-3 py-1 text-xs font-mono border rounded ${demoUrl.includes('.mpd') ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50'}`}
-                            >
-                                DASH
-                            </button>
+                        {/* Sample Streams Gallery */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            {[
+                                { label: 'MP4 • Big Buck Bunny', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', type: 'MP4' },
+                                { label: 'MP4 • Sintel', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', type: 'MP4' },
+                                { label: 'WebM • Tears of Steel', url: 'https://media.xiph.org/tearsofsteel/tearsofsteel_720p.webm', type: 'WEBM' },
+                                { label: 'HLS • Mux Test', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'HLS' },
+                                { label: 'HLS • Apple Demo', url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8', type: 'HLS' },
+                                { label: 'HLS • Sintel', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', type: 'HLS' },
+                                { label: 'DASH • BBB 30fps', url: 'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd', type: 'DASH' },
+                                { label: 'DASH • Sintel', url: 'https://bitdash-a.akamaihd.net/content/sintel/sintel.mpd', type: 'DASH' },
+                            ].map((stream, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setDemoUrl(stream.url)}
+                                    className={`px-3 py-2 text-xs font-mono border rounded-lg transition-all text-left ${demoUrl === stream.url ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50 hover:border-white/30 hover:text-white/80'}`}
+                                >
+                                    <span className="block text-[10px] uppercase opacity-50">{stream.type}</span>
+                                    <span className="block truncate">{stream.label.split(' • ')[1]}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
 
