@@ -178,10 +178,16 @@ jobs:
           name: Binaries-ubuntu-latest
           path: release
 
+      - name: Resolve Snap Package
+        id: snap_resolver
+        run: |
+          SNAP_PATH=$(find release -name "*.snap" -type f | head -n 1)
+          echo "path=$SNAP_PATH" >> $GITHUB_OUTPUT
+
       - name: Publish to Snap Store
         uses: snapcore/action-publish@v1
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
         with:
-          snap: release/*.snap
+          snap: ${{ steps.snap_resolver.outputs.path }}
           release: stable
