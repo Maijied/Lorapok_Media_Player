@@ -61,6 +61,17 @@ export function LorapokPlayer({
     const [volume, setVolume] = useState(0.8)
     const [isMuted, setIsMuted] = useState(false)
     const [showControls, setShowControls] = useState(true)
+    const [aspectRatio, setAspectRatio] = useState<'original' | '1:1' | '4:3' | '5:4' | '16:9' | '16:10' | '21:9' | '2.35:1' | '2.39:1'>('original')
+    const [showAspectNotification, setShowAspectNotification] = useState(false)
+
+    const cycleAspectRatio = () => {
+        const aspectRatios = ['original', '1:1', '4:3', '5:4', '16:9', '16:10', '21:9', '2.35:1', '2.39:1'] as const
+        const currentIdx = aspectRatios.indexOf(aspectRatio)
+        const nextIdx = (currentIdx + 1) % aspectRatios.length
+        setAspectRatio(aspectRatios[nextIdx])
+        setShowAspectNotification(true)
+        setTimeout(() => setShowAspectNotification(false), 2000)
+    }
 
     const videoRef = useRef<HTMLVideoElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -195,11 +206,36 @@ export function LorapokPlayer({
             }
             if (dashRef.current) {
                 dashRef.current.reset()
-                dashRef.current = dashRef.current // Fix type confusion
                 dashRef.current = null
             }
         }
     }, [currentSrc, autoPlay])
+
+    // Keyboard Shortcuts Handler
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+            switch (e.key.toLowerCase()) {
+                case ' ':
+                    e.preventDefault()
+                    togglePlay()
+                    break
+                case 'a':
+                    cycleAspectRatio()
+                    break
+                case 'm':
+                    setIsMuted(prev => !prev)
+                    break
+                case 'f':
+                    toggleFullscreen()
+                    break
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [isPlaying, isMuted, volume, aspectRatio, isFullscreen]) // Refresh listener when state changes to capture newest values for cycle/toggle
 
     // Handle Drag & Drop (Web API File)
     const handleDrop = useCallback((e: React.DragEvent) => {
@@ -390,7 +426,11 @@ export function LorapokPlayer({
                                 })()}
                                 poster={poster}
                                 className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
-                                style={{ boxShadow: `0 0 80px -20px ${ambientColor}` }}
+                                style={{
+                                    boxShadow: `0 0 80px -20px ${ambientColor}`,
+                                    aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
+                                    objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
+                                }}
                                 onTimeUpdate={handleTimeUpdate}
                                 onLoadedMetadata={handleLoadedMetadata}
                                 onEnded={() => { setIsPlaying(false); onEnded?.() }}
@@ -444,6 +484,23 @@ export function LorapokPlayer({
                                     </div>
                                 </motion.div>
                             )}
+
+                            {/* Aspect Ratio Notification */}
+                            <AnimatePresence>
+                                {showAspectNotification && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] px-8 py-4 bg-black/80 backdrop-blur-xl border border-neon-cyan/30 rounded-2xl shadow-[0_0_50px_rgba(0,243,255,0.2)]"
+                                    >
+                                        <div className="flex flex-col items-center gap-2">
+                                            <span className="text-[10px] font-mono text-neon-cyan/50 tracking-[0.3em] uppercase">Aspect Ratio</span>
+                                            <span className="text-3xl font-black text-white tracking-tighter">{aspectRatio === 'original' ? 'ORIGINAL' : aspectRatio}</span>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -502,6 +559,9 @@ export function LorapokPlayer({
 
                             <button onClick={() => setShowDebug(!showDebug)} className={`p-1.5 rounded hover:bg-white/10 transition-colors ${showDebug ? 'text-neon-cyan' : 'text-white/30'}`}>
                                 <Info className="w-4 h-4" />
+                            </button>
+                            <button onClick={cycleAspectRatio} className="p-1.5 hover:bg-white/10 rounded transition-colors text-[10px] font-mono text-neon-cyan/70 border border-neon-cyan/20">
+                                {aspectRatio.toUpperCase()}
                             </button>
                             <button onClick={toggleFullscreen} className="p-1.5 rounded hover:bg-white/10 text-white/50 hover:text-white transition-colors">
                                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}

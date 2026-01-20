@@ -41,6 +41,7 @@
 - **Organic UI**: A "living" interface that reacts to media content with dynamic ambient lighting and micro-animations.
 - **Universal Drop**: Drag-and-drop any media file to instantly initialize the playback core.
 - **Network Stream**: Direct URL streaming with protocol-agnostic handling.
+- **Aspect Ratio Control**: VLC-style aspect ratio cycling (16:9, 4:3, 21:9, 1:1, Original) using the `A` shortcut.
 - **Cross-Platform**: Optimized builds for Windows, macOS, and Linux.
 
 ## 📦 COMPONENT LIBRARY

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { LorapokPlayer, Logo } from 'lorapok-player'
-import { Download, Terminal, Zap, Cpu, Globe } from 'lucide-react'
+import { Download, Zap, Cpu, Globe } from 'lucide-react'
 
 function App() {
     const [demoUrl, setDemoUrl] = useState("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
@@ -55,14 +55,14 @@ function App() {
                     </div>
 
                     <div className="flex flex-wrap gap-4 mt-8">
-                        <a href="#download" className="px-8 py-4 bg-neon-cyan text-midnight font-bold rounded-lg hover:bg-white transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(0,243,255,0.3)] hover:shadow-[0_0_40px_rgba(0,243,255,0.5)]">
-                            <Download className="w-5 h-5" />
-                            <span>DOWNLOAD APP</span>
+                        <a href="#demo" className="px-10 py-4 bg-neon-cyan text-midnight font-black rounded-none transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(0,243,255,0.3)] hover:bg-white hover:scale-105 active:scale-95">
+                            <Zap className="w-5 h-5 fill-current" />
+                            <span className="tracking-tighter text-sm">LIVE DEMO</span>
                         </a>
-                        <button className="px-8 py-4 bg-white/5 border border-white/10 text-white font-mono rounded-lg hover:bg-white/10 transition-all flex items-center gap-2">
-                            <Terminal className="w-5 h-5 text-electric-purple" />
-                            <span>npm i lorapok-player</span>
-                        </button>
+                        <a href="#download" className="px-10 py-4 bg-[#bc13fe] text-white font-black rounded-none transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(188,19,254,0.3)] hover:bg-white hover:text-black hover:scale-105 active:scale-95">
+                            <Download className="w-5 h-5" />
+                            <span className="tracking-tighter text-sm">DOWNLOAD LATEST</span>
+                        </a>
                     </div>
                 </section>
 

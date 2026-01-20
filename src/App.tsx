@@ -134,6 +134,8 @@ function App() {
   const [showStreamInput, setShowStreamInput] = useState(false)
   const [streamUrl, setStreamUrl] = useState('')
   const [showHelp, setShowHelp] = useState(false)
+  const [aspectRatio, setAspectRatio] = useState<'original' | '1:1' | '4:3' | '5:4' | '16:9' | '16:10' | '21:9' | '2.35:1' | '2.39:1'>('original')
+  const [showAspectNotification, setShowAspectNotification] = useState(false)
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Set buffering state when file path changes to show initial loading
@@ -248,6 +250,13 @@ function App() {
         case 'escape':
           if (isFullscreen) toggleFullscreen()
           break
+        case 'a':
+          cycleAspectRatio()
+          break
+        case 'h':
+        case '?':
+          setShowHelp(prev => !prev)
+          break
         case 'arrowright':
           if (videoRef.current) {
             e.preventDefault()
@@ -298,16 +307,12 @@ function App() {
         case 'p':
           playPrevious()
           break
-        case 'h':
-        case '?':
-          setShowHelp(prev => !prev)
-          break
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isPlaying, isFullscreen, playbackRate, playlist, filePath, duration])
+  }, [isPlaying, isFullscreen, playbackRate, playlist, filePath, duration, aspectRatio, volume, isMuted])
 
   // Sync volume with video element
   useEffect(() => {
@@ -586,6 +591,38 @@ function App() {
     }
   }
 
+  const aspectRatios = ['original', '1:1', '4:3', '5:4', '16:9', '16:10', '21:9', '2.35:1', '2.39:1'] as const
+  const cycleAspectRatio = () => {
+    const currentIdx = aspectRatios.indexOf(aspectRatio)
+    const nextIdx = (currentIdx + 1) % aspectRatios.length
+    const nextRatio = aspectRatios[nextIdx]
+    setAspectRatio(nextRatio)
+    setShowAspectNotification(true)
+    setTimeout(() => setShowAspectNotification(false), 2000)
+
+    // Dynamic Window Resizing for Electron (VLC Style)
+    if (window.ipcRenderer && !isFullscreen && videoRef.current) {
+      const { videoWidth, videoHeight } = videoRef.current
+      if (videoWidth > 0 && videoHeight > 0) {
+        let targetWidth = videoWidth
+        let targetHeight = videoHeight
+
+        if (nextRatio !== 'original') {
+          const [rw, rh] = nextRatio.split(':').map(Number)
+          const ratio = rw / rh
+          // Adjust height to match the new ratio while keeping width (or vice versa)
+          // VLC typically keeps the width and adjusts height
+          targetHeight = targetWidth / ratio
+        }
+
+        window.ipcRenderer.invoke('set-window-size', {
+          width: Math.round(targetWidth),
+          height: Math.round(targetHeight) + 40 // +40 for titlebar
+        })
+      }
+    }
+  }
+
   const playNext = () => {
     if (playlist.length === 0) return
     const currentIndex = playlist.indexOf(filePath || '')
@@ -720,15 +757,24 @@ function App() {
                 <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">KEYBOARD SHORTCUTS</h2>
                 <button onClick={() => setShowHelp(false)}><X className="w-6 h-6 hover:text-red-500" /></button>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm font-mono text-white/70">
-                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">SPACE</span> <span>Play / Pause</span></div>
-                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">F</span> <span>Toggle Fullscreen</span></div>
-                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">← / →</span> <span>Seek -/+ 10s</span></div>
-                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">↑ / ↓</span> <span>Volume</span></div>
-                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">M</span> <span>Mute</span></div>
-                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">[ / ]</span> <span>Speed Control</span></div>
-                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">N / P</span> <span>Next / Prev</span></div>
-                <div className="flex justify-between p-2 hover:bg-white/5 rounded"><span className="text-neon-cyan">ESC</span> <span>Exit Fullscreen</span></div>
+              <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-[11px] font-mono">
+                {[
+                  { key: 'A', desc: 'Cycle Aspect Ratio' },
+                  { key: 'SPACE', desc: 'Play / Pause' },
+                  { key: 'F', desc: 'Toggle Fullscreen' },
+                  { key: 'M', desc: 'Mute / Unmute' },
+                  { key: '← / →', desc: 'Seek 10s' },
+                  { key: '↑ / ↓', desc: 'Volume' },
+                  { key: 'N / P', desc: 'Next / Prev' },
+                  { key: '[ / ]', desc: 'Speed Control' },
+                  { key: 'ESC', desc: 'Exit Fullscreen' },
+                  { key: '? / H', desc: 'Toggle Help' }
+                ].map((item, i) => (
+                  <div key={i} className="flex justify-between items-center py-2 border-b border-white/5 group hover:border-neon-cyan/30 transition-colors">
+                    <span className="text-neon-cyan font-black tracking-widest">{item.key}</span>
+                    <span className="text-white/40 group-hover:text-white/80 transition-colors">{item.desc}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </motion.div>
@@ -1025,7 +1071,11 @@ function App() {
                         return `media://${filePath}`;
                       })()}
                       className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
-                      style={{ boxShadow: `0 0 80px -20px ${ambientColor}` }}
+                      style={{
+                        boxShadow: `0 0 80px -20px ${ambientColor}`,
+                        aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
+                        objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
+                      }}
                       onTimeUpdate={handleTimeUpdate}
                       onLoadedMetadata={handleLoadedMetadata}
                       onEnded={() => setIsPlaying(false)}
@@ -1096,6 +1146,23 @@ function App() {
                         </div>
                       </motion.div>
                     )}
+
+                    {/* Aspect Ratio Notification */}
+                    <AnimatePresence>
+                      {showAspectNotification && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] px-8 py-4 bg-black/80 backdrop-blur-xl border border-neon-cyan/30 rounded-2xl shadow-[0_0_50px_rgba(0,243,255,0.2)]"
+                        >
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-[10px] font-mono text-neon-cyan/50 tracking-[0.3em] uppercase">Aspect Ratio</span>
+                            <span className="text-3xl font-black text-white tracking-tighter">{aspectRatio === 'original' ? 'ORIGINAL' : aspectRatio}</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               })()}
