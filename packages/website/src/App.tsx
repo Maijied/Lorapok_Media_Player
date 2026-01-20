@@ -52,8 +52,8 @@ function App() {
                         <Logo className="w-48 h-48 relative z-10 drop-shadow-[0_0_50px_rgba(0,243,255,0.5)]" />
                     </motion.div>
 
-                    <div className="space-y-4 max-w-3xl">
-                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 leading-[0.9] uppercase">
+                    <div className="space-y-4 max-w-5xl px-4">
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-[calc(-0.02em)] text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 leading-[0.95] uppercase break-words">
                             Supercomputing
                             <br />
                             Media Engine
