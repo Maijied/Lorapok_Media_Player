@@ -19,5 +19,5 @@
   <g transform="translate(30, 18) scale(0.6)" fill="white">
      <path d="M22 17.5l-10 10-10-10H10V3h4v14.5h8zM24 33H0v4h24v-4z"/>
   </g>
-  <text x="75" y="37" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="18" fill="white">DOWNLOAD v1.3.0</text>
+  <text x="75" y="37" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="18" fill="white">DOWNLOAD v1.4.0</text>
 </svg>
