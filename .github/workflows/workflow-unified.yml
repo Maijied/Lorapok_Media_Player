@@ -59,6 +59,8 @@ jobs:
             release/**/*.exe
             release/**/*.dmg
             release/**/*.AppImage
+            release/**/*.deb
+            release/**/*.snap
             release/**/*.zip
 
   release-rolling:
@@ -82,6 +84,8 @@ jobs:
             artifacts/*.exe
             artifacts/*.dmg
             artifacts/*.AppImage
+            artifacts/*.deb
+            artifacts/*.snap
             artifacts/*.zip
           make_latest: "true"
           prerelease: true
@@ -158,3 +162,26 @@ jobs:
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-snap:
+    name: Publish to Snap Store
+    needs: build-desktop
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Snap Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Binaries-ubuntu-latest
+          path: release
+
+      - name: Publish to Snap Store
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        with:
+          snap: release/LorapokMediaPlayer-Linux.snap
+          release: stable

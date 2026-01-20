@@ -33,9 +33,15 @@
     "deleteAppDataOnUninstall": false
   },
   "linux": {
-    "target": ["AppImage", "deb"],
+    "target": ["AppImage", "deb", "snap"],
     "category": "AudioVideo",
     "artifactName": "${productName}-Linux.${ext}",
     "icon": "public/icon.png"
+  },
+  "snap": {
+    "publish": ["snap-store"],
+    "confinement": "strict",
+    "summary": "Biological UI Media Engine for Pro Computing.",
+    "description": "Lorapok Player is a high-performance media engine with biological UI aesthetics. Engineered for ultra-low latency playback and high-fidelity sensory experiences across Windows, Mac, and Linux."
   }
 }
