@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
-import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX, Subtitles, Languages } from 'lucide-react'
+import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX, Subtitles, Languages, Scissors } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Logo } from '../components/Logo'
 import { Mascot } from '../components/Mascot'
@@ -64,11 +64,114 @@ export function LorapokPlayer({
     const [aspectRatio, setAspectRatio] = useState<'original' | '1:1' | '4:3' | '5:4' | '16:9' | '16:10' | '21:9' | '2.35:1' | '2.39:1'>('original')
     const [showAspectNotification, setShowAspectNotification] = useState(false)
 
+    const exportSegment = async () => {
+        if (loopA === null || loopB === null || !currentSrc || !(window as any).ipcRenderer) return
+
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+        const filename = `lorapok-clip-${timestamp}.mp4`
+
+        try {
+            const savedPath = await (window as any).ipcRenderer.invoke('export-segment', {
+                filePath: currentSrc,
+                start: loopA,
+                end: loopB,
+                filename
+            })
+            console.log(`[Export] Saved to: ${savedPath}`)
+            alert(`Clip exported to: ${savedPath}`)
+        } catch (err) {
+            console.error('[Export] Failed:', err)
+            alert('Export failed. Check console for details.')
+        }
+    }
+
     // Track Selection State
     const [audioTracks, setAudioTracks] = useState<{ id: number; name: string }[]>([])
     const [subtitleTracks, setSubtitleTracks] = useState<{ id: number; name: string }[]>([])
     const [currentAudioTrack, setCurrentAudioTrack] = useState(-1)
     const [currentSubtitleTrack, setCurrentSubtitleTrack] = useState(-1)
+
+    const setupAudio = () => {
+        if (!videoRef.current || audioCtxRef.current) return
+
+        try {
+            const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+            audioCtxRef.current = ctx
+
+            const source = ctx.createMediaElementSource(videoRef.current)
+            sourceNodeRef.current = source
+
+            const compressor = ctx.createDynamicsCompressor()
+            compressorNodeRef.current = compressor
+
+            const filter = ctx.createBiquadFilter()
+            filterNodeRef.current = filter
+
+            const analyser = ctx.createAnalyser()
+            analyser.fftSize = 128
+            analyserNodeRef.current = analyser
+
+            // Connect to analyser by default
+            source.connect(analyser)
+            analyser.connect(ctx.destination)
+        } catch (err) {
+            console.error('Audio initialization failed:', err)
+        }
+    }
+
+    useEffect(() => {
+        if (!audioCtxRef.current || !sourceNodeRef.current || !compressorNodeRef.current || !filterNodeRef.current) return
+
+        const ctx = audioCtxRef.current
+        const source = sourceNodeRef.current
+        const compressor = compressorNodeRef.current
+        const filter = filterNodeRef.current
+
+        source.disconnect()
+        compressor.disconnect()
+        filter.disconnect()
+
+        switch (audioNormalization) {
+            case 'night':
+                compressor.threshold.setValueAtTime(-24, ctx.currentTime)
+                compressor.knee.setValueAtTime(30, ctx.currentTime)
+                compressor.ratio.setValueAtTime(12, ctx.currentTime)
+                compressor.attack.setValueAtTime(0.003, ctx.currentTime)
+                compressor.release.setValueAtTime(0.25, ctx.currentTime)
+                source.connect(compressor)
+                compressor.connect(ctx.destination)
+                break
+            case 'voice':
+                filter.type = 'peaking'
+                filter.frequency.setValueAtTime(2000, ctx.currentTime)
+                filter.Q.setValueAtTime(1, ctx.currentTime)
+                filter.gain.setValueAtTime(6, ctx.currentTime)
+                source.connect(filter)
+                filter.connect(compressor)
+                compressor.connect(ctx.destination)
+                break
+            case 'ebu':
+                compressor.threshold.setValueAtTime(-12, ctx.currentTime)
+                compressor.ratio.setValueAtTime(20, ctx.currentTime)
+                source.connect(compressor)
+                compressor.connect(ctx.destination)
+                break
+            default:
+                source.connect(ctx.destination)
+        }
+    }, [audioNormalization])
+
+    // A-B Loop State
+    const [loopA, setLoopA] = useState<number | null>(null)
+    const [loopB, setLoopB] = useState<number | null>(null)
+
+    // Audio Enhancement State
+    const [audioNormalization, setAudioNormalization] = useState<'none' | 'night' | 'voice' | 'ebu'>('none')
+    const audioCtxRef = useRef<AudioContext | null>(null)
+    const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null)
+    const compressorNodeRef = useRef<DynamicsCompressorNode | null>(null)
+    const filterNodeRef = useRef<BiquadFilterNode | null>(null)
+    const analyserNodeRef = useRef<AnalyserNode | null>(null)
 
     const cycleAspectRatio = () => {
         const aspectRatios = ['original', '1:1', '4:3', '5:4', '16:9', '16:10', '21:9', '2.35:1', '2.39:1'] as const
@@ -128,11 +231,12 @@ export function LorapokPlayer({
 
     const togglePlay = () => {
         if (videoRef.current) {
+            setupAudio()
             if (isPlaying) {
                 videoRef.current.pause()
                 onPause?.()
             } else {
-                videoRef.current.play()
+                videoRef.current.play().catch(() => { })
                 onPlay?.()
             }
             setIsPlaying(!isPlaying)
@@ -251,6 +355,16 @@ export function LorapokPlayer({
                 case 'f':
                     toggleFullscreen()
                     break
+                case '[':
+                    setLoopA(currentTime)
+                    break
+                case ']':
+                    setLoopB(currentTime)
+                    break
+                case '\\':
+                    setLoopA(null)
+                    setLoopB(null)
+                    break
             }
         }
 
@@ -304,8 +418,13 @@ export function LorapokPlayer({
     }
 
     const handleTimeUpdate = () => {
-        if (videoRef.current) {
-            setCurrentTime(videoRef.current.currentTime)
+        if (!videoRef.current) return
+        const time = videoRef.current.currentTime
+        setCurrentTime(time)
+
+        // A-B Loop Logic
+        if (loopA !== null && loopB !== null && time >= loopB) {
+            videoRef.current.currentTime = loopA
         }
     }
 
@@ -545,15 +664,19 @@ export function LorapokPlayer({
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <button onClick={togglePlay} className="p-2 hover:bg-white/10 rounded-full text-neon-cyan hover:text-white transition-all hover:scale-110 active:scale-95">
-                                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
-                            </button>
-                            <div className="flex items-center gap-2 text-xs font-mono text-neon-cyan/70">
-                                <span>{formatTime(currentTime)}</span>
-                                <span className="opacity-30">/</span>
-                                <span>{formatTime(duration)}</span>
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2 text-xs font-mono text-neon-cyan/70">
+                            <span>{formatTime(currentTime)}</span>
+                            <span className="opacity-30">/</span>
+                            <span>{formatTime(duration)}</span>
+                        </div>
+
+                        <div className="flex-1 flex items-center justify-center relative h-12 overflow-hidden pointer-events-none">
+                            <AudioVisualizer analyser={analyserNodeRef.current} />
+                            <div className="flex items-center gap-6 relative z-10 pointer-events-auto">
+                                <button onClick={togglePlay} className="p-2 hover:bg-white/10 rounded-full text-neon-cyan hover:text-white transition-all hover:scale-110 active:scale-95">
+                                    {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+                                </button>
                             </div>
                         </div>
 
@@ -576,6 +699,19 @@ export function LorapokPlayer({
                                         className="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-neon-cyan"
                                     />
                                 </div>
+                            </div>
+
+                            {/* Normalization Mode Selector */}
+                            <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
+                                {['none', 'night', 'voice', 'ebu'].map((mode) => (
+                                    <button
+                                        key={mode}
+                                        onClick={() => setAudioNormalization(mode as any)}
+                                        className={`px-1.5 py-0.5 text-[8px] font-mono rounded transition-all ${audioNormalization === mode ? 'bg-neon-cyan text-midnight' : 'text-white/30 hover:text-white/60'}`}
+                                    >
+                                        {mode.toUpperCase()}
+                                    </button>
+                                ))}
                             </div>
 
                             {/* Audio Track Selector */}
@@ -653,6 +789,75 @@ export function LorapokPlayer({
                     </div>
                 </div>
             </footer>
+
+            {/* A-B Loop Overlay / Indicators */}
+            {(loopA !== null || loopB !== null) && (
+                <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-1.5 bg-midnight/60 backdrop-blur-md border border-white/10 rounded-full font-mono text-[10px] text-neon-cyan select-none">
+                    <div className="flex items-center gap-1">
+                        <span className="opacity-50">A:</span>
+                        <span>{loopA !== null ? formatTime(loopA) : '--:--'}</span>
+                    </div>
+                    <div className="w-px h-2 bg-white/10 mx-1" />
+                    <div className="flex items-center gap-1">
+                        <span className="opacity-50">B:</span>
+                        <span>{loopB !== null ? formatTime(loopB) : '--:--'}</span>
+                    </div>
+                    {loopA !== null && loopB !== null && (window as any).ipcRenderer && (
+                        <button
+                            onClick={exportSegment}
+                            className="ml-2 px-2 py-0.5 bg-neon-cyan/20 hover:bg-neon-cyan/40 text-neon-cyan rounded flex items-center gap-1 transition-all"
+                        >
+                            <Scissors className="w-3 h-3" />
+                            <span>CLIP IT</span>
+                        </button>
+                    )}
+                    <button
+                        onClick={() => { setLoopA(null); setLoopB(null); }}
+                        className="ml-2 hover:text-white transition-colors"
+                    >
+                        CLEAR
+                    </button>
+                </div>
+            )}
         </div>
     )
+}
+
+const AudioVisualizer = ({ analyser }: { analyser: AnalyserNode | null }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+
+    useEffect(() => {
+        if (!analyser || !canvasRef.current) return
+
+        let animationFrame: number
+        const canvas = canvasRef.current
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+
+        const bufferLength = analyser.frequencyBinCount
+        const dataArray = new Uint8Array(bufferLength)
+
+        const draw = () => {
+            animationFrame = requestAnimationFrame(draw)
+            analyser.getByteFrequencyData(dataArray)
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            const barWidth = (canvas.width / bufferLength) * 2
+            let barHeight
+            let x = 0
+
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = (dataArray[i] / 255) * canvas.height
+                const opacity = dataArray[i] / 255
+                ctx.fillStyle = `rgba(0, 243, 255, ${opacity * 0.5})`
+                ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight)
+                x += barWidth
+            }
+        }
+
+        draw()
+        return () => cancelAnimationFrame(animationFrame)
+    }, [analyser])
+
+    return <canvas ref={canvasRef} className="w-64 h-full" width={256} height={48} />
 }

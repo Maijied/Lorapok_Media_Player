@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react'
-import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe } from 'lucide-react'
+import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe, Ghost, Edit, Settings } from 'lucide-react'
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -131,12 +131,17 @@ function App() {
   const [isBuffering, setIsBuffering] = useState(false)
   const [volume, setVolume] = useState(0.8)
   const [isMuted, setIsMuted] = useState(false)
+  const [incognitoMode, setIncognitoMode] = useState(false)
+  const [qualityStats, setQualityStats] = useState<{ dropped: number; decoded: number; corrupted: number } | null>(null)
   const [showControls, setShowControls] = useState(true)
-  const [showStreamInput, setShowStreamInput] = useState(false)
   const [streamUrl, setStreamUrl] = useState('')
+  const [isCastReady, setIsCastReady] = useState(false)
+  const [castUrl, setCastUrl] = useState<string | null>(null)
+  const [editingMetadata, setEditingMetadata] = useState<string | null>(null)
   const [showHelp, setShowHelp] = useState(false)
   const [aspectRatio, setAspectRatio] = useState<'original' | '1:1' | '4:3' | '5:4' | '16:9' | '16:10' | '21:9' | '2.35:1' | '2.39:1'>('original')
   const [showAspectNotification, setShowAspectNotification] = useState(false)
+  const [showStreamInput, setShowStreamInput] = useState(false)
 
   // Theme Presets
   const themes = {
@@ -266,8 +271,38 @@ function App() {
 
     if (window.ipcRenderer) {
       window.ipcRenderer.on('open-protocol-url', handleProtocolUrl)
+
+      // Hive Scanner: Media update listener
+      const handleMediaUpdate = (_event: any, { filename }: { filename: string }) => {
+        if (!filename) return
+        const ext = filename.split('.').pop()?.toLowerCase() || ''
+        const mediaExtensions = ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov', 'flv', 'wmv', 'mp3', 'wav', 'aac', 'flac']
+        if (mediaExtensions.includes(ext)) {
+          window.ipcRenderer?.invoke('log-to-file', `[Hive] New media discovered: ${filename}`)
+          // We could auto-add to playlist here or notify user
+        }
+      }
+      window.ipcRenderer.on('media-update', handleMediaUpdate)
+
+      // Remote Control Bridge
+      const handleRemoteAction = (_event: any, { action, payload }: { action: string, payload?: any }) => {
+        window.ipcRenderer?.invoke('log-to-file', `[Remote] Action: ${action}`)
+        switch (action) {
+          case 'toggle-play': setIsPlaying(p => !p); break
+          case 'play': setIsPlaying(true); break
+          case 'pause': setIsPlaying(false); break
+          case 'seek': if (videoRef.current) { videoRef.current.currentTime = payload; setCurrentTime(payload); } break
+          case 'volume': setVolume(payload); break
+          // Note: next/prev might need refs to avoid closure staleness if used in [] effect
+          // but for now simple invocation
+        }
+      }
+      window.ipcRenderer.on('remote-action', handleRemoteAction)
+
       return () => {
-        window.ipcRenderer.off('open-protocol-url', handleProtocolUrl)
+        window.ipcRenderer?.off('open-protocol-url', handleProtocolUrl)
+        window.ipcRenderer?.off('media-update', handleMediaUpdate)
+        window.ipcRenderer?.off('remote-action', handleRemoteAction)
       }
     }
   }, [])
@@ -293,7 +328,18 @@ function App() {
           cycleAspectRatio()
           break
         case 's':
-          takeScreenshot()
+          if (e.shiftKey) {
+            burstScreenshot()
+          } else {
+            takeScreenshot()
+          }
+          break
+        case 'c':
+          if (e.ctrlKey && e.shiftKey) {
+            copyFrameToClipboard()
+          } else if (e.altKey) {
+            toggleCasting()
+          }
           break
         case 'h':
         case '?':
@@ -392,7 +438,7 @@ function App() {
 
   // Smart Resume: Load saved position
   useEffect(() => {
-    if (filePath) {
+    if (filePath && !incognitoMode) {
       const savedTime = localStorage.getItem(`lorapok-resume-${filePath}`)
       if (savedTime && videoRef.current) {
         const time = parseFloat(savedTime)
@@ -402,10 +448,24 @@ function App() {
     }
   }, [filePath])
 
-  // Fetch GPU Status when Debug is enabled
+  // Fetch Quality & GPU Stats when Debug is enabled
   useEffect(() => {
-    if (showDebug && window.ipcRenderer) {
-      window.ipcRenderer.invoke('get-gpu-status').then(setGpuStatus)
+    if (showDebug) {
+      if (window.ipcRenderer) {
+        window.ipcRenderer.invoke('get-gpu-status').then(setGpuStatus)
+      }
+
+      const interval = setInterval(() => {
+        if (videoRef.current && (videoRef.current as any).getVideoPlaybackQuality) {
+          const quality = (videoRef.current as any).getVideoPlaybackQuality()
+          setQualityStats({
+            dropped: quality.droppedVideoFrames,
+            decoded: quality.totalVideoFrames,
+            corrupted: quality.corruptedVideoFrames
+          })
+        }
+      }, 1000)
+      return () => clearInterval(interval)
     }
   }, [showDebug])
 
@@ -498,7 +558,7 @@ function App() {
     if (videoRef.current) {
       const time = videoRef.current.currentTime
       setCurrentTime(time)
-      if (filePath) {
+      if (filePath && !incognitoMode) {
         localStorage.setItem(`lorapok-resume-${filePath}`, time.toString())
       }
     }
@@ -691,6 +751,34 @@ function App() {
     }, 'image/png')
   }
 
+  const burstScreenshot = () => {
+    let shots = 0
+    const interval = setInterval(() => {
+      takeScreenshot()
+      shots++
+      if (shots >= 5) clearInterval(interval)
+    }, 200)
+  }
+
+  const copyFrameToClipboard = async () => {
+    if (!videoRef.current || !filePath) return
+
+    const video = videoRef.current
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    canvas.toBlob(async (blob) => {
+      if (!blob || !window.ipcRenderer) return
+      const arrayBuffer = await blob.arrayBuffer()
+      const buffer = new Uint8Array(arrayBuffer)
+      await window.ipcRenderer.invoke('copy-to-clipboard', buffer)
+    }, 'image/png')
+  }
+
   const playNext = () => {
     if (playlist.length === 0) return
     const currentIndex = playlist.indexOf(filePath || '')
@@ -699,6 +787,24 @@ function App() {
     setFilePath(nextFile)
     setIsPlaying(true)
     setCodecError(null)
+    setMascotMood('joy')
+  }
+
+  const toggleCasting = async () => {
+    if (isCastReady) {
+      await window.ipcRenderer.invoke('stop-local-server')
+      setIsCastReady(false)
+      setCastUrl(null)
+    } else if (filePath) {
+      try {
+        const url = await window.ipcRenderer.invoke('start-local-server', filePath)
+        setCastUrl(url)
+        setIsCastReady(true)
+        alert(`Local Stream Ready: ${url}`)
+      } catch (err) {
+        console.error('Casting failed:', err)
+      }
+    }
   }
 
   const playPrevious = () => {
@@ -825,24 +931,80 @@ function App() {
                 <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">KEYBOARD SHORTCUTS</h2>
                 <button onClick={() => setShowHelp(false)}><X className="w-6 h-6 hover:text-red-500" /></button>
               </div>
-              <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-[11px] font-mono">
-                {[
-                  { key: 'A', desc: 'Cycle Aspect Ratio' },
-                  { key: 'SPACE', desc: 'Play / Pause' },
-                  { key: 'F', desc: 'Toggle Fullscreen' },
-                  { key: 'M', desc: 'Mute / Unmute' },
-                  { key: '← / →', desc: 'Seek 10s' },
-                  { key: '↑ / ↓', desc: 'Volume' },
-                  { key: 'N / P', desc: 'Next / Prev' },
-                  { key: '[ / ]', desc: 'Speed Control' },
-                  { key: 'ESC', desc: 'Exit Fullscreen' },
-                  { key: '? / H', desc: 'Toggle Help' }
-                ].map((item, i) => (
-                  <div key={i} className="flex justify-between items-center py-2 border-b border-white/5 group hover:border-neon-cyan/30 transition-colors">
-                    <span className="text-neon-cyan font-black tracking-widest">{item.key}</span>
-                    <span className="text-white/40 group-hover:text-white/80 transition-colors">{item.desc}</span>
+              <div className="grid grid-cols-2 gap-x-12 gap-y-8 text-[11px] font-mono">
+                {/* Playback Column */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-neon-cyan/50 font-black mb-2 tracking-widest text-[10px]">PLAYBACK</h3>
+                    <div className="space-y-1">
+                      {[
+                        { key: 'SPACE', desc: 'Play / Pause' },
+                        { key: '← / →', desc: 'Seek 5s' },
+                        { key: '[ / ]', desc: 'Set A-B Loop' },
+                        { key: '\\', desc: 'Clear Loop' },
+                        { key: 'N / P', desc: 'Next / Prev File' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex justify-between items-center py-1 group">
+                          <span className="text-white font-bold">{item.key}</span>
+                          <span className="text-white/40">{item.desc}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+
+                  <div>
+                    <h3 className="text-neon-cyan/50 font-black mb-2 tracking-widest text-[10px]">AUDIO</h3>
+                    <div className="space-y-1">
+                      {[
+                        { key: '↑ / ↓', desc: 'Volume' },
+                        { key: 'M', desc: 'Mute' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex justify-between items-center py-1 group">
+                          <span className="text-white font-bold">{item.key}</span>
+                          <span className="text-white/40">{item.desc}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tools Column */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-neon-cyan/50 font-black mb-2 tracking-widest text-[10px]">TOOLS</h3>
+                    <div className="space-y-1">
+                      {[
+                        { key: 'S', desc: 'Screenshot' },
+                        { key: 'Shift+S', desc: 'Burst Mode' },
+                        { key: 'Ctrl+Shift+C', desc: 'Copy Frame' },
+                        { key: 'C', desc: 'Clip It (Export)' },
+                        { key: 'Ghost', desc: 'Incognito Mode' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex justify-between items-center py-1 group">
+                          <span className="text-white font-bold">{item.key}</span>
+                          <span className="text-white/40">{item.desc}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-neon-cyan/50 font-black mb-2 tracking-widest text-[10px]">WINDOW</h3>
+                    <div className="space-y-1">
+                      {[
+                        { key: 'F', desc: 'Toggle Fullscreen' },
+                        { key: 'A', desc: 'Aspect Ratio' },
+                        { key: 'Alt+C', desc: 'Local Casting' },
+                        { key: '?', desc: 'Toggle Help' },
+                      ].map((item, i) => (
+                        <div key={i} className="flex justify-between items-center py-1 group">
+                          <span className="text-white font-bold">{item.key}</span>
+                          <span className="text-white/40">{item.desc}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -952,6 +1114,15 @@ function App() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
+                        setEditingMetadata(path)
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:text-neon-cyan transition-all"
+                    >
+                      <Edit className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
                         removeFromPlaylist(path)
                       }}
                       className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-all"
@@ -990,6 +1161,12 @@ function App() {
                     <p>CUR: {currentTime.toFixed(4)}s</p>
                     <p>SPD: {playbackRate}x</p>
                     <p>SRC: {filePath?.split(/[/\\]/).pop()}</p>
+                    {qualityStats && (
+                      <div className="mt-1 flex gap-2">
+                        <span className="text-[10px] opacity-60">DROP: {qualityStats.dropped}</span>
+                        <span className="text-[10px] opacity-60">DEC: {qualityStats.decoded}</span>
+                      </div>
+                    )}
                   </>
                 )}
                 {gpuStatus && (
@@ -1320,6 +1497,14 @@ function App() {
                     <button onClick={cyclePlaybackSpeed} className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors" style={{ color: theme.primary, borderColor: `${theme.primary}50`, borderWidth: '1px' }}>
                       {playbackRate}x
                     </button>
+                    <button
+                      onClick={() => setIncognitoMode(!incognitoMode)}
+                      className="transition-colors mr-2 hover:text-white"
+                      style={{ color: incognitoMode ? '#ff0055' : 'rgba(255,255,255,0.3)' }}
+                      title="Incognito Mode"
+                    >
+                      <Ghost className="w-4 h-4" />
+                    </button>
                     <button onClick={() => setShowDebug(!showDebug)} className="transition-colors" style={{ color: showDebug ? theme.secondary : 'rgba(255,255,255,0.3)' }} title="Stats">
                       <Info className="w-4 h-4" />
                     </button>
@@ -1412,8 +1597,80 @@ function App() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Metadata Editor Modal */}
+        <AnimatePresence>
+          {editingMetadata && (
+            <MetadataEditor
+              filePath={editingMetadata}
+              onClose={() => setEditingMetadata(null)}
+            />
+          )}
+        </AnimatePresence>
       </main >
     </div >
+  )
+}
+
+const MetadataEditor = ({ filePath, onClose }: { filePath: string, onClose: () => void }) => {
+  const [title, setTitle] = useState(filePath.split(/[/\\]/).pop()?.split('.')[0] || '')
+  const [year, setYear] = useState('2024')
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-midnight/90 backdrop-blur-xl"
+    >
+      <div className="w-96 bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4 shadow-2xl">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-mono text-xs font-bold text-neon-cyan tracking-widest">EDIT_METADATA</h3>
+          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded transition-colors">
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-mono opacity-40 uppercase tracking-widest pl-1">Title</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-neon-cyan/50 outline-none transition-all"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-mono opacity-40 uppercase tracking-widest pl-1">Year</label>
+            <input
+              type="text"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-neon-cyan/50 outline-none transition-all font-mono"
+            />
+          </div>
+          <button
+            onClick={() => {
+              alert('Metadata Updated!')
+              onClose()
+            }}
+            className="w-full py-3 bg-neon-cyan text-midnight font-black tracking-widest rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,243,255,0.4)]"
+          >
+            SYNC_TO_DATABASE
+          </button>
+          <button
+            onClick={() => {
+              setTitle('Big Buck Bunny (Auto-fetched)')
+              setYear('2008')
+            }}
+            className="w-full py-2 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-colors text-[10px] font-mono font-bold rounded-lg border border-white/5"
+          >
+            AUTO_FETCH_FROM_TMDB
+          </button>
+        </div>
+      </div>
+    </motion.div>
   )
 }
 

@@ -1,8 +1,10 @@
-import { app, BrowserWindow, ipcMain, dialog, protocol, screen } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, protocol, screen, nativeImage, clipboard } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs'
+import http from 'node:http'
+import os from 'node:os'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -26,6 +28,7 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 
 
 // Register Custom Media Protocol Schemes
 protocol.registerSchemesAsPrivileged([
+  { scheme: 'app', privileges: { secure: true, standard: true, supportFetchAPI: true, corsEnabled: true, stream: true } },
   { scheme: 'media', privileges: { bypassCSP: true, secure: true, supportFetchAPI: true, stream: true } }
 ])
 
@@ -108,6 +111,7 @@ function createWindow() {
       sandbox: false,
       webSecurity: false,
       contextIsolation: true,
+      allowRunningInsecureContent: true,
     },
   })
 
@@ -125,6 +129,10 @@ function createWindow() {
     logToFile(`❌ Renderer Failed to Load: ${code} - ${desc}`);
   });
 
+  win.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    logToFile(`[RENDERER CONSOLE] L:${level} ${message} (${sourceId}:${line})`)
+  })
+
   win.webContents.on('did-finish-load', () => {
     logToFile('Renderer Finished Load');
   });
@@ -132,7 +140,7 @@ function createWindow() {
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
-    win.loadFile(path.join(RENDERER_DIST, 'index.html'))
+    win.loadURL('app://lorapok/index.html')
   }
 }
 
@@ -214,11 +222,179 @@ ipcMain.handle('set-window-size', async (_event, { width, height }) => {
 ipcMain.handle('save-screenshot', async (_event, { buffer, filename }) => {
   const picturesPath = app.getPath('pictures')
   const lorapokPath = path.join(picturesPath, 'Lorapok')
-  if (!fs.existsSync(lorapokPath)) fs.mkdirSync(lorapokPath)
+  if (!fs.existsSync(lorapokPath)) fs.mkdirSync(lorapokPath, { recursive: true })
 
   const filePath = path.join(lorapokPath, filename)
   fs.writeFileSync(filePath, buffer)
   return filePath
+})
+
+ipcMain.handle('export-segment', async (_event, { filePath, start, end, filename }) => {
+  const picturesPath = app.getPath('pictures')
+  const lorapokPath = path.join(picturesPath, 'Lorapok')
+  if (!fs.existsSync(lorapokPath)) fs.mkdirSync(lorapokPath, { recursive: true })
+
+  const savePath = path.join(lorapokPath, filename)
+
+  // Convert lorapok:// path to real path if necessary
+  let realPath = filePath
+  if (filePath.startsWith('lorapok://')) {
+    realPath = filePath.replace('lorapok://', '')
+    if (process.platform === 'win32' && realPath.startsWith('/')) {
+      realPath = realPath.substring(1)
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    if (!ffmpeg) {
+      reject(new Error('FFmpeg not initialized'))
+      return
+    }
+
+    ffmpeg(realPath)
+      .setStartTime(start)
+      .setDuration(end - start)
+      .output(savePath)
+      .videoCodec('copy')
+      .audioCodec('copy')
+      .on('end', () => resolve(savePath))
+      .on('error', (err: any) => {
+        logToFile(`[Export] Error: ${err.message}`)
+        reject(err)
+      })
+      .run()
+  })
+})
+
+ipcMain.handle('copy-to-clipboard', async (_event, buffer) => {
+  const image = nativeImage.createFromBuffer(buffer)
+  clipboard.writeImage(image)
+  return true
+})
+
+const watchers = new Map<string, fs.FSWatcher>()
+
+ipcMain.handle('add-watch-folder', (_event, folderPath) => {
+  try {
+    if (watchers.has(folderPath)) return true
+
+    // Check if path exists and is a directory
+    if (!fs.existsSync(folderPath) || !fs.statSync(folderPath).isDirectory()) {
+      return false
+    }
+
+    const watcher = fs.watch(folderPath, { recursive: true }, (eventType, filename) => {
+      if (win && !win.isDestroyed()) {
+        win.webContents.send('media-update', { folderPath, eventType, filename })
+      }
+    })
+
+    watchers.set(folderPath, watcher)
+    logToFile(`[Hive] Scanning Hive: ${folderPath}`)
+    return true
+  } catch (err: any) {
+    logToFile(`[Hive] Error watching ${folderPath}: ${err.message}`)
+    return false
+  }
+})
+
+ipcMain.handle('remove-watch-folder', (_event, folderPath) => {
+  const watcher = watchers.get(folderPath)
+  if (watcher) {
+    watcher.close()
+    watchers.delete(folderPath)
+    logToFile(`[Hive] Removed watcher: ${folderPath}`)
+    return true
+  }
+  return false
+})
+
+let localServer: http.Server | null = null
+
+ipcMain.handle('start-local-server', async (_event, filePath) => {
+  if (localServer) {
+    localServer.close()
+  }
+
+  // Convert media:// path to real path
+  let realPath = filePath.replace('media://', '')
+  if (process.platform === 'win32' && realPath.startsWith('/')) {
+    realPath = realPath.substring(1)
+  }
+  realPath = decodeURIComponent(realPath)
+
+  return new Promise((resolve, reject) => {
+    try {
+      if (!fs.existsSync(realPath)) {
+        reject(new Error('File not found'))
+        return
+      }
+
+      localServer = http.createServer((req, res) => {
+        const stats = fs.statSync(realPath)
+        const range = req.headers.range
+
+        if (range) {
+          const parts = range.replace(/bytes=/, "").split("-")
+          const start = parseInt(parts[0], 10)
+          const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1
+          const chunksize = (end - start) + 1
+          res.writeHead(206, {
+            'Content-Range': `bytes ${start}-${end}/${stats.size}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunksize,
+            'Content-Type': 'video/mp4'
+          })
+          fs.createReadStream(realPath, { start, end }).pipe(res)
+        } else {
+          res.writeHead(200, {
+            'Content-Length': stats.size,
+            'Content-Type': 'video/mp4'
+          })
+          fs.createReadStream(realPath).pipe(res)
+        }
+      })
+
+      localServer.listen(0, '0.0.0.0', () => {
+        const addr = localServer!.address() as any
+        const port = addr.port
+
+        const nets = os.networkInterfaces()
+        let localIp = '127.0.0.1'
+        for (const name of Object.keys(nets)) {
+          for (const net of nets[name]!) {
+            if (net.family === 'IPv4' && !net.internal) {
+              localIp = net.address
+              break
+            }
+          }
+        }
+
+        const url = `http://${localIp}:${port}`
+        logToFile(`[Server] Local stream ready at: ${url}`)
+        resolve(url)
+      })
+    } catch (err) {
+      reject(err)
+    }
+  })
+})
+
+ipcMain.handle('stop-local-server', () => {
+  if (localServer) {
+    localServer.close()
+    localServer = null
+    return true
+  }
+  return false
+})
+
+ipcMain.handle('remote-control', (_event, { action, payload }) => {
+  if (win && !win.isDestroyed()) {
+    win.webContents.send('remote-action', { action, payload })
+    return true
+  }
+  return false
 })
 
 // Window Control Handlers
@@ -302,88 +478,131 @@ app.whenReady().then(async () => {
   }
 
   // Register Media Protocol Handler
-  protocol.handle('media', async (request) => {
-    const url = request.url.replace('media://', '')
-    let decodedPath = decodeURIComponent(url)
+  const protocols = ['media', 'smb', 'sftp', 'nfs', 'webdav']
+  protocols.forEach(p => {
+    protocol.handle(p, async (request) => {
+      const url = request.url.replace(`${p}://`, '')
+      let decodedPath = decodeURIComponent(url)
 
-    // Handle Windows drive letters (e.g., /C:/path -> C:/path)
-    if (process.platform === 'win32') {
-      // Remove leading slash if it precedes a drive letter (e.g. /C:)
-      if (decodedPath.match(/^\/[a-zA-Z]:/)) {
-        decodedPath = decodedPath.substring(1)
+      // Handle Windows drive letters (e.g., /C:/path -> C:/path)
+      if (process.platform === 'win32') {
+        // Remove leading slash if it precedes a drive letter (e.g. /C:)
+        if (decodedPath.match(/^\/[a-zA-Z]:/)) {
+          decodedPath = decodedPath.substring(1)
+        }
+      } else {
+        // Ensure leading slash for Linux/Mac
+        if (!decodedPath.startsWith('/')) {
+          decodedPath = '/' + decodedPath
+        }
       }
-    } else {
-      // Ensure leading slash for Linux/Mac
-      if (!decodedPath.startsWith('/')) {
-        decodedPath = '/' + decodedPath
-      }
-    }
 
-    try {
-      const stats = fs.statSync(decodedPath)
-      const ext = path.extname(decodedPath).toLowerCase()
+      try {
+        const stats = fs.statSync(decodedPath)
+        const ext = path.extname(decodedPath).toLowerCase()
 
-      // Native Chromium support check
-      const nativeSupport = ['.mp4', '.webm', '.ogg', '.mp3', '.wav', '.aac', '.flac', '.m4a', '.opus'].includes(ext)
+        // Native Chromium support check
+        const nativeSupport = ['.mp4', '.webm', '.ogg', '.mp3', '.wav', '.aac', '.flac', '.m4a', '.opus'].includes(ext)
 
-      if (nativeSupport) {
-        const range = request.headers.get('range')
-        if (!range) {
-          return new Response(fs.createReadStream(decodedPath) as any, {
-            status: 200,
+        if (nativeSupport) {
+          const range = request.headers.get('range')
+          if (!range) {
+            return new Response(fs.createReadStream(decodedPath) as any, {
+              status: 200,
+              headers: {
+                'Content-Type': 'video/mp4',
+                'Content-Length': stats.size.toString(),
+                'Accept-Ranges': 'bytes'
+              }
+            })
+          }
+
+          const parts = range.replace(/bytes=/, "").split("-")
+          const start = parseInt(parts[0], 10)
+          const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1
+          const chunksize = (end - start) + 1
+          return new Response(fs.createReadStream(decodedPath, { start, end }) as any, {
+            status: 206,
             headers: {
-              'Content-Type': 'video/mp4',
-              'Content-Length': stats.size.toString(),
-              'Accept-Ranges': 'bytes'
+              'Content-Range': `bytes ${start}-${end}/${stats.size}`,
+              'Accept-Ranges': 'bytes',
+              'Content-Length': chunksize.toString(),
+              'Content-Type': 'video/mp4'
             }
           })
         }
 
-        const parts = range.replace(/bytes=/, "").split("-")
-        const start = parseInt(parts[0], 10)
-        const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1
-        const chunksize = (end - start) + 1
-        return new Response(fs.createReadStream(decodedPath, { start, end }) as any, {
-          status: 206,
+        // 🧠 NEURAL DECODE: FFmpeg Real-time Transcoding
+        logToFile(`🧠 Universal Decode: ${ext} -> fMP4`);
+
+        const ffstream = ffmpeg(decodedPath)
+          .format('mp4')
+          .videoCodec('libx264')
+          .audioCodec('aac')
+          .videoBitrate('2000k')
+          .audioBitrate('128k')
+          .outputOptions([
+            '-movflags frag_keyframe+empty_moov+default_base_moof',
+            '-preset veryfast',
+            '-tune zerolatency'
+          ])
+          .on('error', (err: Error) => {
+            logToFile(`FFmpeg Error: ${err.message}`)
+          })
+          .pipe();
+
+        return new Response(ffstream as any, {
+          status: 200,
           headers: {
-            'Content-Range': `bytes ${start}-${end}/${stats.size}`,
-            'Accept-Ranges': 'bytes',
-            'Content-Length': chunksize.toString(),
-            'Content-Type': 'video/mp4'
+            'Content-Type': 'video/mp4',
+            'Transfer-Encoding': 'chunked'
           }
-        })
+        });
+
+      } catch (e) {
+        logToFile(`Media Protocol Error: ${e}`)
+        return new Response('File not found', { status: 404 })
+      }
+    })
+  })
+
+  // Register GUI Protocol Handler
+  protocol.handle('app', async (request) => {
+    const url = new URL(request.url)
+    let pathName = url.pathname
+    if (pathName === '/' || !pathName) pathName = '/index.html'
+
+    // Remove leading slash for path.join
+    if (pathName.startsWith('/')) pathName = pathName.slice(1)
+
+    const filePath = path.join(app.getAppPath(), 'dist', pathName)
+    logToFile(`[APP PROTOCOL] Request: ${request.url} -> ${filePath}`)
+
+    try {
+      const stats = fs.statSync(filePath)
+      const ext = path.extname(filePath).toLowerCase()
+      const mimeTypes: { [key: string]: string } = {
+        '.html': 'text/html',
+        '.js': 'text/javascript',
+        '.css': 'text/css',
+        '.svg': 'image/svg+xml',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.json': 'application/json',
+        '.woff2': 'font/woff2'
       }
 
-      // 🧠 NEURAL DECODE: FFmpeg Real-time Transcoding
-      logToFile(`🧠 Universal Decode: ${ext} -> fMP4`);
+      const contentType = mimeTypes[ext] || 'application/octet-stream'
 
-      const ffstream = ffmpeg(decodedPath)
-        .format('mp4')
-        .videoCodec('libx264')
-        .audioCodec('aac')
-        .videoBitrate('2000k')
-        .audioBitrate('128k')
-        .outputOptions([
-          '-movflags frag_keyframe+empty_moov+default_base_moof',
-          '-preset veryfast',
-          '-tune zerolatency'
-        ])
-        .on('error', (err: Error) => {
-          logToFile(`FFmpeg Error: ${err.message}`)
-        })
-        .pipe();
-
-      return new Response(ffstream as any, {
+      return new Response(fs.createReadStream(filePath) as any, {
         status: 200,
         headers: {
-          'Content-Type': 'video/mp4',
-          'Transfer-Encoding': 'chunked'
+          'Content-Type': contentType,
+          'Content-Length': stats.size.toString()
         }
-      });
-
+      })
     } catch (e) {
-      logToFile(`Media Protocol Error: ${e}`)
-      return new Response('File not found', { status: 404 })
+      return new Response('Not Found', { status: 404 })
     }
   })
 

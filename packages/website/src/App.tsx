@@ -161,6 +161,21 @@ function App() {
                             icon: Zap,
                             title: "Hardware Accel",
                             desc: "Optimized playback pipeline utilizing GPU acceleration for 4K/8K content."
+                        },
+                        {
+                            icon: Cpu,
+                            title: "Workstation Tools",
+                            desc: "Phase 2: A-B Loop, Instant Segment Export ('Clip It'), and Burst Mode screenshots."
+                        },
+                        {
+                            icon: Zap,
+                            title: "Audio Intelligence",
+                            desc: "Real-time Normalization (Night Mode), Voice Boost, and Spectrum Visualization."
+                        },
+                        {
+                            icon: Globe,
+                            title: "Network Hive",
+                            desc: "Universal Protocol Browser (SMB/SFTP) and Local Network Casting."
                         }
                     ].map((feature, i) => (
                         <div key={i} className="p-8 rounded-2xl bg-white/5 border border-white/5 hover:border-neon-cyan/30 transition-all group">
