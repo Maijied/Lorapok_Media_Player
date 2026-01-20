@@ -183,5 +183,5 @@ jobs:
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
         with:
-          snap: release/LorapokMediaPlayer-Linux.snap
+          snap: release/*.snap
           release: stable

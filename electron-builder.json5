@@ -39,6 +39,7 @@
     "icon": "public/icon.png"
   },
   "snap": {
+    "name": "lorapokmediaplayer",
     "publish": ["snap-store"],
     "confinement": "strict",
     "summary": "Biological UI Media Engine for Pro Computing.",
