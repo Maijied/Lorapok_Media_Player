@@ -1,0 +1,39 @@
+<svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00F3FF"></stop>
+            <stop offset="100%" stop-color="#BC13FE"></stop>
+        </linearGradient>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#050A15"></stop>
+            <stop offset="100%" stop-color="#101B2E"></stop>
+        </linearGradient>
+        <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="15" result="blur"></feGaussianBlur>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"></feComposite>
+        </filter>
+    </defs>
+
+    {/* Matte Midnight Rounded Platform */}
+    <circle cx="256" cy="256" r="250" fill="url(#bgGradient)"></circle>
+    <circle cx="256" cy="256" r="248" stroke="url(#brandGradient)" stroke-width="3" opacity="0.1"></circle>
+    
+    {/* Concentric Design Elements */}
+    <circle cx="256" cy="256" r="230" stroke="url(#brandGradient)" stroke-width="1" stroke-dasharray="12 24" opacity="0.15"></circle>
+
+    <g transform="translate(45, 45) scale(0.82)" filter="url(#glow)">
+        <circle cx="377.9236741357539" cy="381.5373159074165" r="65" fill="url(#brandGradient)" fill-opacity="1"></circle>
+        <circle cx="311.18141341917203" cy="422.0723083872276" r="60" fill="url(#brandGradient)" fill-opacity="0.92"></circle>
+        <circle cx="233.45221349828316" cy="429.541341829182" r="55" fill="url(#brandGradient)" fill-opacity="0.84"></circle>
+        <circle cx="160.21240854095248" cy="402.4572883897371" r="50" fill="url(#brandGradient)" fill-opacity="0.76"></circle>
+        <circle cx="106.0444681604342" cy="346.21274006875626" r="45" fill="url(#brandGradient)" fill-opacity="0.68"></circle>
+        <circle cx="81.73354320566429" cy="272.0063123906765" r="40" fill="url(#brandGradient)" fill-opacity="0.6"></circle>
+        <circle cx="92.12007972411064" cy="194.61293515431652" r="35" fill="url(#brandGradient)" fill-opacity="0.52"></circle>
+        <circle cx="135.13605810191117" cy="129.44207828486037" r="30" fill="url(#brandGradient)" fill-opacity="0.44"></circle>
+        <circle cx="202.21674775377662" cy="89.46963706933471" r="25" fill="url(#brandGradient)" fill-opacity="0.36"></circle>
+        
+        <circle cx="387.9236741357539" cy="371.5373159074165" r="14" fill="#00F3FF"></circle>
+        
+        <path d="M260 240 L245 255 L260 270 M300 240 L315 255 L300 270" stroke="white" stroke-width="6" stroke-linecap="round" stroke-opacity="0.7" transform="translate(97.53893930860315, 100.42985272593319) rotate(30)"></path>
+    </g>
+</svg>

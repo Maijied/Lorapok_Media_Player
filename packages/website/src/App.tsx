@@ -72,7 +72,7 @@ function App() {
                         </a>
                         <a href="#download" className="px-10 py-4 bg-[#bc13fe] text-white font-black rounded-none transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(188,19,254,0.3)] hover:bg-white hover:text-black hover:scale-105 active:scale-95">
                             <Download className="w-5 h-5" />
-                            <span className="tracking-tighter text-sm uppercase">Download v1.3.0</span>
+                            <span className="tracking-tighter text-sm uppercase">Download v1.4.0</span>
                         </a>
                     </div>
                 </section>
@@ -236,7 +236,15 @@ function App() {
                 <section id="download" className="w-full max-w-5xl mx-auto scroll-mt-32">
                     <div className="flex items-center gap-4 mb-8">
                         <Download className="w-8 h-8 text-neon-cyan" />
-                        <h2 className="text-3xl font-bold uppercase tracking-tight">Get Lorapok Desktop</h2>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <h2 className="text-3xl font-bold uppercase tracking-tight">Get Lorapok Desktop</h2>
+                            <div className="flex gap-2 items-center">
+                                <span className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-mono text-cyan-400 border border-white/10 uppercase tracking-widest">Stable v1.4.0</span>
+                                <a href="https://www.npmjs.com/package/lorapok-player" target="_blank" rel="noopener noreferrer">
+                                    <img src="https://img.shields.io/npm/v/lorapok-player?style=flat-square&color=BC13FE&label=NPM" alt="NPM Version" className="h-5" />
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-6 mb-12">
@@ -278,14 +286,14 @@ function App() {
                                 <div className="w-2 h-2 rounded-full bg-green-500/50" />
                             </div>
                         </div>
-                        <div className="bg-black/20">
+                        <div className="bg-black/20 h-[420px]">
                             <iframe
+                                title="Publicise card"
                                 src="https://snapcraft.io/lorapokmediaplayer/embedded?button=black&channels=true&summary=true"
-                                frameborder="0"
+                                frameBorder="0"
                                 width="100%"
-                                height="420px"
-                                style={{ border: 'none', borderRadius: '0px' }}
-                                title="Snap Store Installation"
+                                height="100%"
+                                style={{ border: '1px solid #CCC', borderRadius: '2px' }}
                             />
                         </div>
                     </div>

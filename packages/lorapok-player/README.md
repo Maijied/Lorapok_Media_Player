@@ -3,9 +3,20 @@
 
 [![NPM Version](https://img.shields.io/npm/v/lorapok-player?style=flat-square&color=BC13FE)](https://www.npmjs.com/package/lorapok-player)
 [![Bundle Size](https://img.shields.io/bundlephobia/minzip/lorapok-player?style=flat-square&color=00F3FF)](https://bundlephobia.com/package/lorapok-player)
-[![Peer Dependencies](https://img.shields.io/badge/react-18.x-white?style=flat-square&labelColor=050510)](https://react.dev)
+[![NPM Downloads](https://img.shields.io/npm/dm/lorapok-player?style=flat-square&color=white&labelColor=050510)](https://www.npmjs.com/package/lorapok-player)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square&labelColor=050510)](LICENSE)
 
 **Lorapok Player** is a high-performance React media engine engineered for ultra-low latency playback and biological aesthetics. It seamlessly handles MP4, HLS, and DASH streams with 4K/8K hardware acceleration.
+
+---
+
+## 🧬 FEATURES
+
+- **Adaptive Multi-Platform**: Native support for HLS (.m3u8), DASH (.mpd), and standard Mp4.
+- **Organic UI Engine**: Biological aesthetics with real-time reactive ambient lighting.
+- **Hardware Acceleration**: GPU-optimized rasterization for buttery smooth 8K playback.
+- **Neural Probing**: Accurate duration and metadata discovery using supercomputing pipelines.
+- **Theme Injection**: Runtime theme switching with zero-latency visual transition.
 
 ---
 
@@ -83,6 +94,9 @@ const MyComponent = () => {
     
     // Seek to 30 seconds
     playerRef.current?.seek(30);
+    
+    // Switch themes on the fly
+    playerRef.current?.setTheme('Cyber Bloom');
   };
 
   return <LorapokPlayer ref={playerRef} src="..." />;
@@ -100,7 +114,7 @@ const MyComponent = () => {
 | **seek** | `(time: number) => void` | Jumps to a specific timestamp (seconds). |
 | **setVolume** | `(v: number) => void` | Sets volume level (0.0 to 1.0). |
 | **setMuted** | `(m: boolean) => void` | Toggles or sets mute state. |
-| **setTheme** | `(name: string) => void` | Switches the biological aesthetic theme. |
+| **setTheme** | `(name: 'Midnight Core' | 'Cyber Bloom' | 'Quantum Pulse') => void` | Switches visual styling. |
 
 ---
 
@@ -132,11 +146,11 @@ The library comes with a built-in interactive help system and standard shortcuts
 
 ---
 
-## 🏗 TECH STACK
+## 🛠 TECH STACK
 - **React 18** (Functional Components & Hooks)
 - **HLS.js / Dash.js** (Adaptive Streaming)
 - **Framer Motion** (Organic Transitions)
-- **FFmpeg Integration** (Optimized for Electron runtimes)
+- **Vite** (Next-gen Bundling)
 
 ---
 

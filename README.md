@@ -6,7 +6,9 @@
   <p align="center" style="font-weight: bold; color: #00F3FF; letter-spacing: 2px;">SUPERCOMPUTING MEDIA ENGINE</p>
 
   <p align="center">
-    <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/VERSION-1.3.0-BC13FE?style=for-the-badge&labelColor=050510" alt="Version" /></a>
+    <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/VERSION-1.4.0-BC13FE?style=for-the-badge&labelColor=050510" alt="Version" /></a>
+    <a href="https://snapcraft.io/lorapokmediaplayer"><img src="https://snapcraft.io/lorapokmediaplayer/badge.svg" alt="Snap Store" height="28" /></a>
+    <a href="https://snapcraft.io/lorapokmediaplayer"><img src="https://snapcraft.io/lorapokmediaplayer/trending.svg?name=0" alt="Trending" height="28" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-050510?style=for-the-badge&labelColor=050510&logoColor=050510" alt="License" /></a>
     <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/PLATFORM-ALL_OS-FFFFFF?style=for-the-badge&labelColor=050510" alt="Platform" /></a>
   </p>
