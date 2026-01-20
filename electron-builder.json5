@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "com.lorapok.mediaplayer",
   "asar": true,
-  "compression": "maximum",
+  "compression": "normal",
   "productName": "LorapokMediaPlayer",
   "directories": {
     "output": "release"
@@ -13,7 +13,7 @@
   ],
   "mac": {
     "target": ["dmg", "zip"],
-    "artifactName": "${productName}-Mac-${version}-Installer.${ext}",
+    "artifactName": "${productName}-Mac-Installer.${ext}",
     "icon": "public/icon.png"
   },
   "win": {
@@ -23,7 +23,7 @@
         "arch": ["x64"]
       }
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}",
+    "artifactName": "${productName}-Windows-Setup.${ext}",
     "icon": "public/icon.png"
   },
   "nsis": {
@@ -35,7 +35,7 @@
   "linux": {
     "target": ["AppImage", "deb"],
     "category": "AudioVideo",
-    "artifactName": "${productName}-Linux-${version}.${ext}",
+    "artifactName": "${productName}-Linux.${ext}",
     "icon": "public/icon.png"
   }
 }

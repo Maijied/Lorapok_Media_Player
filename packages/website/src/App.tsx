@@ -75,13 +75,13 @@ function App() {
 
                     <div className="grid md:grid-cols-3 gap-6">
                         {[
-                            { os: 'Windows', ext: '.exe', desc: 'Windows 10/11 (x64)', icon: 'blocks' },
-                            { os: 'macOS', ext: '.dmg', desc: 'Universal (Intel/Apple Silicon)', icon: 'command' },
-                            { os: 'Linux', ext: '.AppImage', desc: 'Most Distributions (x64)', icon: 'terminal' }
+                            { os: 'Windows', ext: '.exe', desc: 'Windows 10/11 (x64)', file: 'Windows-Setup.exe' },
+                            { os: 'macOS', ext: '.dmg', desc: 'Universal (Intel/Apple Silicon)', file: 'Mac-Installer.dmg' },
+                            { os: 'Linux', ext: '.AppImage', desc: 'Most Distributions (x64)', file: 'Linux.AppImage' }
                         ].map((build) => (
                             <a
                                 key={build.os}
-                                href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest"
+                                href={`https://github.com/Maijied/Lorapok_Media_Player/releases/download/latest/LorapokMediaPlayer-${build.file}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-6 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:border-neon-cyan/50 transition-all group flex flex-col gap-4"
