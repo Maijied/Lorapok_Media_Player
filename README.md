@@ -7,7 +7,7 @@
 
   <p align="center">
     <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/VERSION-1.2.0-BC13FE?style=for-the-badge&labelColor=050510" alt="Version" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-00F3FF?style=for-the-badge&labelColor=050510&logoColor=050510" alt="License" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-050510?style=for-the-badge&labelColor=050510&logoColor=050510" alt="License" /></a>
     <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/PLATFORM-ALL_OS-FFFFFF?style=for-the-badge&labelColor=050510" alt="Platform" /></a>
   </p>
 
@@ -18,11 +18,11 @@
 
   <div align="center" style="margin: 30px 0;">
     <a href="https://maijied.github.io/Lorapok_Media_Player/">
-      <img src="assets/btn-demo.svg" width="220" alt="Try Live Demo" />
+      <img src="assets/btn-demo.svg" width="260" alt="Try Live Demo" />
     </a>
     &nbsp;&nbsp;
     <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest">
-      <img src="assets/btn-download.svg" width="220" alt="Download Latest" />
+      <img src="assets/btn-download.svg" width="260" alt="Download Latest" />
     </a>
   </div>
 
@@ -74,6 +74,32 @@
 
 ---
 
+## 🎹 KEYBOARD SHORTCUTS
+
+### Playback
+- `SPACE` : Play / Pause
+- `← / →` : Seek 5s
+- `[ / ]` : Set A-B Loop
+- `\` : Clear Loop
+- `N / P` : Next / Prev File
+
+### Tools
+- `S` : Screenshot
+- `Shift + S` : Burst Mode
+- `Ctrl + Shift + C` : Copy Frame
+- `C` : Clip It (Export)
+- `Ghost` : Incognito Mode
+
+### Audio & Window
+- `↑ / ↓` : Volume Up / Down
+- `M` : Mute
+- `F` : Toggle Fullscreen
+- `A` : Aspect Ratio
+- `Alt + C` : Local Casting
+- `?` : Toggle Help
+
+---
+
 ## 📦 INSTALLATION & USAGE
 
 ### 1. Download Pre-built (Recommended)
@@ -113,21 +139,6 @@ npm run dev:electron
 # Build production binaries
 npm run build
 ```
-
----
-
-## 🎹 KEYBOARD SHORTCUTS
-
-| Key | Action |
-| :---: | :--- |
-| `Space` / `K` | Play / Pause |
-| `Left` / `Right` | Seek Backward / Forward (10s) |
-| `Up` / `Down` | Volume Up / Down |
-| `F` | Toggle Fullscreen |
-| `M` | Mute / Unmute |
-| `S` | Take Screenshot (Saved to Pictures/Lorapok) |
-| `A` | Cycle Aspect Ratio (16:9, 4:3, etc.) |
-| `N` / `P` | Next / Previous Track |
 
 ---
 

@@ -39,10 +39,11 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           sed "s/{{VERSION}}/$VERSION/g" assets/btn-download.svg.template > assets/btn-download.svg
+          sed -i "s/VERSION-[0-9.]*-BC13FE/VERSION-$VERSION-BC13FE/g" README.md
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add assets/btn-download.svg
-          git commit -m "build: update download button version to v$VERSION [skip ci]" || echo "No changes to commit"
+          git add assets/btn-download.svg README.md
+          git commit -m "build: update version to v$VERSION in assets and documentation [skip ci]" || echo "No changes to commit"
           git push origin main || echo "No changes to push"
 
       - name: Build Electron App
