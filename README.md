@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="packages/website/public/logo.png" alt="Lorapok Player Logo" width="200" height="200" />
+  <img src="assets/logo.png" alt="Lorapok Player Logo" width="200" height="200" />
 
   # LORAPOK PLAYER
   ### ORGANIC INTELLIGENCE MEDIA ENGINE
@@ -26,8 +26,9 @@
   
   <br/><br/>
 
-  <div style="display: flex; justify-content: center; gap: 20px;">
+  <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
      <img src="assets/showcase-neural.png" alt="Neural Decode" width="380" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+     <img src="assets/audio-interface.png" alt="Audio Intelligence" width="380" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
   </div>
 
 </div>

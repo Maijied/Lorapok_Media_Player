@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Hls from 'hls.js'
-import * as dashjs from 'dashjs'
+import { MediaPlayer } from 'dashjs'
 import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Logo } from '../components/Logo'
@@ -44,7 +44,8 @@ export function LorapokPlayer({
             setCurrentTime(0)
             setDuration(0)
             setCodecError(null)
-            setIsBuffering(false)
+            // Show buffering when new source is loading
+            setIsBuffering(!!src)
             if (!autoPlay) {
                 setShowControls(true)
             }
@@ -143,18 +144,47 @@ export function LorapokPlayer({
         if (isStream) {
             if (isM3U8) {
                 if (Hls.isSupported()) {
-                    const hls = new Hls()
+                    const hls = new Hls({
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                    })
                     hls.loadSource(currentSrc)
                     hls.attachMedia(videoRef.current)
                     hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        setIsBuffering(false)
                         if (autoPlay || isPlaying) videoRef.current?.play().catch(() => { })
                     })
+                    hls.on(Hls.Events.FRAG_LOADED, () => {
+                        setIsBuffering(false)
+                    })
+                    hls.on(Hls.Events.ERROR, (_event, data) => {
+                        if (data.fatal) {
+                            setCodecError(`Stream Error: ${data.details}`)
+                            setIsBuffering(false)
+                        }
+                    })
                     hlsRef.current = hls
+                } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+                    videoRef.current.src = currentSrc
+                    setIsBuffering(false)
                 }
             } else if (isMPD) {
-                const player = dashjs.MediaPlayer().create()
+                const player = MediaPlayer().create()
                 player.initialize(videoRef.current, currentSrc, autoPlay || isPlaying)
+                player.on(MediaPlayer.events.PLAYBACK_STARTED, () => {
+                    setIsBuffering(false)
+                })
+                player.on(MediaPlayer.events.CAN_PLAY, () => {
+                    setIsBuffering(false)
+                })
+                player.on(MediaPlayer.events.ERROR, (e: any) => {
+                    setCodecError(`DASH Error: ${e.error?.message || 'Unknown error'}`)
+                    setIsBuffering(false)
+                })
                 dashRef.current = player
+            } else {
+                // Direct stream (MP4, etc) - video element handles it
+                setIsBuffering(false)
             }
         }
 
@@ -165,6 +195,7 @@ export function LorapokPlayer({
             }
             if (dashRef.current) {
                 dashRef.current.reset()
+                dashRef.current = dashRef.current // Fix type confusion
                 dashRef.current = null
             }
         }
@@ -350,8 +381,11 @@ export function LorapokPlayer({
                                 src={(() => {
                                     const isStream = currentSrc?.match(/^https?:\/\//);
                                     const isAdaptive = currentSrc?.includes('.m3u8') || currentSrc?.includes('.mpd');
-                                    if (isStream && isAdaptive && Hls.isSupported()) return undefined;
-                                    if (isStream && isAdaptive && currentSrc?.includes('.mpd')) return undefined;
+
+                                    if (isStream) {
+                                        if (isAdaptive && (Hls.isSupported() || currentSrc?.includes('.mpd'))) return undefined;
+                                        return currentSrc || undefined;
+                                    }
                                     return currentSrc || undefined;
                                 })()}
                                 poster={poster}
@@ -365,12 +399,50 @@ export function LorapokPlayer({
                                 onError={handleVideoError}
                                 onDoubleClick={toggleFullscreen}
                                 autoPlay={autoPlay}
+                                crossOrigin={currentSrc?.match(/^https?:\/\//) ? "anonymous" : undefined}
                             />
 
+                            {/* Buffering Overlay */}
+                            {isBuffering && !codecError && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-midnight/80 backdrop-blur-md"
+                                >
+                                    <div className="relative">
+                                        <motion.div
+                                            animate={{ rotate: 360 }}
+                                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                            className="w-20 h-20 border-4 border-neon-cyan/20 border-t-neon-cyan rounded-full"
+                                        />
+                                        <Logo className="absolute inset-2 w-12 h-12 m-auto" />
+                                    </div>
+                                    <p className="mt-6 font-mono text-xs text-neon-cyan/60 tracking-widest">BUFFERING...</p>
+                                </motion.div>
+                            )}
+
                             {codecError && (
-                                <div className="absolute inset-0 z-50 flex items-center justify-center bg-midnight/90 backdrop-blur-xl">
-                                    <p className="text-red-500">{codecError}</p>
-                                </div>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-midnight/90 backdrop-blur-xl"
+                                >
+                                    <div className="text-center space-y-4 max-w-sm px-6">
+                                        <div className="relative w-20 h-20 mx-auto">
+                                            <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full animate-pulse" />
+                                            <Logo className="w-full h-full relative z-10" />
+                                        </div>
+                                        <h3 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">STREAM ERROR</h3>
+                                        <p className="text-white/40 text-xs font-mono">{codecError}</p>
+                                        <button
+                                            onClick={() => { setCurrentSrc(null); setCodecError(null); }}
+                                            className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-white border border-white/10 transition-all mt-4"
+                                        >
+                                            Back to Home
+                                        </button>
+                                    </div>
+                                </motion.div>
                             )}
                         </motion.div>
                     )}

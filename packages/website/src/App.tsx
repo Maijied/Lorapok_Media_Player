@@ -118,13 +118,13 @@ function App() {
                                 MP4
                             </button>
                             <button
-                                onClick={() => setDemoUrl("https://live-hls-abr-cdn.livepush.io/live/bigbuckbunnyclip/index.m3u8")}
+                                onClick={() => setDemoUrl("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8")}
                                 className={`px-3 py-1 text-xs font-mono border rounded ${demoUrl.includes('.m3u8') ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50'}`}
                             >
                                 HLS
                             </button>
                             <button
-                                onClick={() => setDemoUrl("https://live-hls-abr-cdn.livepush.io/live/bigbuckbunnyclip/index.mpd")}
+                                onClick={() => setDemoUrl("https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd")}
                                 className={`px-3 py-1 text-xs font-mono border rounded ${demoUrl.includes('.mpd') ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' : 'border-white/10 text-white/50'}`}
                             >
                                 DASH
