@@ -7,10 +7,10 @@
 
   <p align="center">
     <a href="https://maijied.github.io/Lorapok_Media_Player/">
-      <img src="https://img.shields.io/badge/⚡_TRY_LIVE_DEMO-00F3FF?style=for-the-badge&logo=googlechrome&logoColor=black&labelColor=white" height="40" alt="Live Demo" />
+      <img src="assets/btn-demo.png" height="50" alt="Live Demo" />
     </a>
     <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest">
-      <img src="https://img.shields.io/badge/⬇_DOWNLOAD_v1.2.0-BC13FE?style=for-the-badge&logo=windows&logoColor=white&labelColor=black" height="40" alt="Download" />
+      <img src="assets/btn-download.png" height="50" alt="Download" />
     </a>
   </p>
 
