@@ -129,7 +129,7 @@ function createWindow() {
     logToFile(`❌ Renderer Failed to Load: ${code} - ${desc}`);
   });
 
-  win.webContents.on('console-message', (event, level, message, line, sourceId) => {
+  win.webContents.on('console-message', (_event, level, message, line, sourceId) => {
     logToFile(`[RENDERER CONSOLE] L:${level} ${message} (${sourceId}:${line})`)
   })
 

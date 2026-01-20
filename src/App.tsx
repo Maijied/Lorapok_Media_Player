@@ -1,5 +1,6 @@
+```typescript
 import { useState, useRef, useEffect, useCallback, memo } from 'react'
-import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe, Ghost, Edit, Settings } from 'lucide-react'
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize, Minimize, Settings as SettingsIcon, X, Plus, FolderOpen, Sliders, Menu, Film, FileVideo, Music, Image as ImageIcon, Ghost, Monitor, Mic, Radio, Square, Minus } from 'lucide-react'
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -56,7 +57,7 @@ const Logo = ({ className = "w-12 h-12" }: { className?: string }) => (
         strokeWidth="6"
         strokeLinecap="round"
         strokeOpacity="0.7"
-        transform={`translate(${Math.cos(0.8) * 140}, ${Math.sin(0.8) * 140}) rotate(30)`}
+        transform={`translate(${ Math.cos(0.8) * 140 }, ${ Math.sin(0.8) * 140 }) rotate(30)`}
       />
     </g>
   </svg>
@@ -66,11 +67,12 @@ const Logo = ({ className = "w-12 h-12" }: { className?: string }) => (
 const Mascot = memo(({ state }: { state: 'idle' | 'playing' | 'buffering' | 'error' | 'ended' }) => {
   return (
     <div className="relative w-48 h-48 flex items-center justify-center pointer-events-none select-none">
-      <div className={`absolute inset-0 rounded-full blur-3xl transition-colors duration-1000 ${state === 'playing' ? 'bg-neon-cyan/10' :
-        state === 'buffering' ? 'bg-electric-purple/10' :
-          state === 'error' ? 'bg-red-500/10' :
-            state === 'ended' ? 'bg-green-500/10' : 'bg-white/5'
-        }`} />
+      <div className={`absolute inset - 0 rounded - full blur - 3xl transition - colors duration - 1000 ${
+  state === 'playing' ? 'bg-neon-cyan/10' :
+  state === 'buffering' ? 'bg-electric-purple/10' :
+    state === 'error' ? 'bg-red-500/10' :
+      state === 'ended' ? 'bg-green-500/10' : 'bg-white/5'
+} `} />
 
       <Logo className="w-32 h-32 relative z-10" />
 
@@ -84,7 +86,7 @@ const Mascot = memo(({ state }: { state: 'idle' | 'playing' | 'buffering' | 'err
           rotate: { duration: 10, repeat: Infinity, ease: "linear" },
           scale: { duration: 2, repeat: Infinity }
         }}
-        className={`absolute inset-0 border-2 rounded-full border-t-white/20 border-r-white/5 border-b-white/5 border-l-white/20 ${state === 'error' ? 'border-red-500/40' : ''}`}
+        className={`absolute inset - 0 border - 2 rounded - full border - t - white / 20 border - r - white / 5 border - b - white / 5 border - l - white / 20 ${ state === 'error' ? 'border-red-500/40' : '' } `}
       />
     </div>
   )
@@ -107,7 +109,7 @@ function App() {
     const handleError = (error: any) => {
       console.error('LORAPOK_UI_ERROR:', error);
       if (window.ipcRenderer) {
-        window.ipcRenderer.invoke('log-to-file', `RENDERER_ERROR: ${error.message || error}`);
+        window.ipcRenderer.invoke('log-to-file', `RENDERER_ERROR: ${ error.message || error } `);
       }
     }
     window.addEventListener('error', handleError);
@@ -136,8 +138,9 @@ function App() {
   const [showControls, setShowControls] = useState(true)
   const [streamUrl, setStreamUrl] = useState('')
   const [isCastReady, setIsCastReady] = useState(false)
-  const [castUrl, setCastUrl] = useState<string | null>(null)
+  const [isCastReady, setIsCastReady] = useState(false)
   const [editingMetadata, setEditingMetadata] = useState<string | null>(null)
+  const [mascotMood, setMascotMood] = useState<'idle' | 'happy' | 'sleeping' | 'surprised' | 'joy'>('idle')
   const [showHelp, setShowHelp] = useState(false)
   const [aspectRatio, setAspectRatio] = useState<'original' | '1:1' | '4:3' | '5:4' | '16:9' | '16:10' | '21:9' | '2.35:1' | '2.39:1'>('original')
   const [showAspectNotification, setShowAspectNotification] = useState(false)
@@ -206,7 +209,7 @@ function App() {
       if (savedTime && Math.abs(savedTime - currentTime) > 5) {
         videoRef.current.currentTime = savedTime
         setCurrentTime(savedTime)
-        console.log(`[SmartResume] Restored ${filePath} to ${savedTime}s`)
+        console.log(`[SmartResume] Restored ${ filePath } to ${ savedTime } s`)
       }
     }
   }, [filePath])
@@ -237,7 +240,7 @@ function App() {
           g = Math.floor(g / count)
           b = Math.floor(b / count)
 
-          setAmbientColor(`rgba(${r}, ${g}, ${b}, 0.3)`)
+          setAmbientColor(`rgba(${ r }, ${ g }, ${ b }, 0.3)`)
         }
       }
     }, 1000) // Sample every second
@@ -278,7 +281,7 @@ function App() {
         const ext = filename.split('.').pop()?.toLowerCase() || ''
         const mediaExtensions = ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov', 'flv', 'wmv', 'mp3', 'wav', 'aac', 'flac']
         if (mediaExtensions.includes(ext)) {
-          window.ipcRenderer?.invoke('log-to-file', `[Hive] New media discovered: ${filename}`)
+          window.ipcRenderer?.invoke('log-to-file', `[Hive] New media discovered: ${ filename } `)
           // We could auto-add to playlist here or notify user
         }
       }
@@ -286,7 +289,7 @@ function App() {
 
       // Remote Control Bridge
       const handleRemoteAction = (_event: any, { action, payload }: { action: string, payload?: any }) => {
-        window.ipcRenderer?.invoke('log-to-file', `[Remote] Action: ${action}`)
+        window.ipcRenderer?.invoke('log-to-file', `[Remote] Action: ${ action } `)
         switch (action) {
           case 'toggle-play': setIsPlaying(p => !p); break
           case 'play': setIsPlaying(true); break
@@ -439,7 +442,7 @@ function App() {
   // Smart Resume: Load saved position
   useEffect(() => {
     if (filePath && !incognitoMode) {
-      const savedTime = localStorage.getItem(`lorapok-resume-${filePath}`)
+      const savedTime = localStorage.getItem(`lorapok - resume - ${ filePath } `)
       if (savedTime && videoRef.current) {
         const time = parseFloat(savedTime)
         videoRef.current.currentTime = time
@@ -508,7 +511,7 @@ function App() {
           })
           hls.on(Hls.Events.ERROR, (_event, data) => {
             if (data.fatal) {
-              setCodecError(`Stream Error: ${data.details}`)
+              setCodecError(`Stream Error: ${ data.details } `)
               setIsBuffering(false)
             }
           })
@@ -528,7 +531,7 @@ function App() {
           setIsBuffering(false)
         })
         player.on(MediaPlayer.events.ERROR, (e: any) => {
-          setCodecError(`DASH Error: ${e.error?.message || 'Unknown error'}`)
+          setCodecError(`DASH Error: ${ e.error?.message || 'Unknown error' } `)
           setIsBuffering(false)
         })
         dashRef.current = player
@@ -559,7 +562,7 @@ function App() {
       const time = videoRef.current.currentTime
       setCurrentTime(time)
       if (filePath && !incognitoMode) {
-        localStorage.setItem(`lorapok-resume-${filePath}`, time.toString())
+        localStorage.setItem(`lorapok - resume - ${ filePath } `, time.toString())
       }
     }
   }
@@ -744,10 +747,10 @@ function App() {
       const buffer = new Uint8Array(arrayBuffer)
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-      const filename = `lorapok-snap-${timestamp}.png`
+      const filename = `lorapok - snap - ${ timestamp }.png`
 
       const savedPath = await window.ipcRenderer.invoke('save-screenshot', { buffer, filename })
-      console.log(`[Screenshot] Saved to: ${savedPath}`)
+      console.log(`[Screenshot] Saved to: ${ savedPath } `)
     }, 'image/png')
   }
 
@@ -800,7 +803,7 @@ function App() {
         const url = await window.ipcRenderer.invoke('start-local-server', filePath)
         setCastUrl(url)
         setIsCastReady(true)
-        alert(`Local Stream Ready: ${url}`)
+        alert(`Local Stream Ready: ${ url } `)
       } catch (err) {
         console.error('Casting failed:', err)
       }
@@ -849,7 +852,7 @@ function App() {
           errorMessage = "The video could not be loaded, either because the server or network failed or because the format is not supported.";
           break;
         default:
-          errorMessage = `An unknown video error occurred (Code: ${videoElement.error.code}).`;
+          errorMessage = `An unknown video error occurred(Code: ${ videoElement.error.code }).`;
           break;
       }
     }
@@ -879,7 +882,7 @@ function App() {
     if (isNaN(time) || !isFinite(time)) return '0:00'
     const minutes = Math.floor(time / 60)
     const seconds = Math.floor(time % 60)
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`
+    return `${ minutes }:${ seconds.toString().padStart(2, '0') } `
   }
 
   return (
@@ -1012,7 +1015,7 @@ function App() {
       </AnimatePresence>
 
       {/* Title Bar / Header */}
-      <header className={`h-10 flex items-center justify-between px-4 border-b border-white/5 bg-midnight/50 backdrop-blur-md select-none drag-region z-[60] transition-opacity duration-500 ${!showControls && isFullscreen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <header className={`h - 10 flex items - center justify - between px - 4 border - b border - white / 5 bg - midnight / 50 backdrop - blur - md select - none drag - region z - [60] transition - opacity duration - 500 ${ !showControls && isFullscreen ? 'opacity-0 pointer-events-none' : 'opacity-100' } `}>
         <div className="flex items-center gap-3 no-drag">
           <Logo className="w-5 h-5" />
           <span className="font-mono text-xs tracking-tighter font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f3ff] to-[#bc13fe]">
@@ -1098,7 +1101,7 @@ function App() {
                 {playlist.map((path, idx) => (
                   <div
                     key={path}
-                    className={`group flex items-center gap-2 p-2 rounded-lg transition-all cursor-pointer ${filePath === path ? 'bg-neon-cyan/10 border border-neon-cyan/30' : 'hover:bg-white/5 border border-transparent'}`}
+                    className={`group flex items - center gap - 2 p - 2 rounded - lg transition - all cursor - pointer ${ filePath === path ? 'bg-neon-cyan/10 border border-neon-cyan/30' : 'hover:bg-white/5 border border-transparent' } `}
                     onClick={() => {
                       setFilePath(path)
                       setIsPlaying(true)
@@ -1106,7 +1109,7 @@ function App() {
                   >
                     <div className="text-[10px] font-mono opacity-30 w-4">{idx + 1}</div>
                     <div className="flex-1 min-w-0">
-                      <div className={`text-xs truncate ${filePath === path ? 'text-neon-cyan font-bold' : 'text-white/70'}`}>
+                      <div className={`text - xs truncate ${ filePath === path ? 'text-neon-cyan font-bold' : 'text-white/70' } `}>
                         {path.split(/[/\\]/).pop()}
                       </div>
                       <div className="text-[8px] font-mono opacity-20 truncate">{path}</div>
@@ -1149,7 +1152,7 @@ function App() {
         {/* Codec Info Overlay */}
         {
           showDebug && (
-            <div className="absolute top-4 left-4 z-40 bg-black/80 border p-4 rounded-lg font-mono text-xs backdrop-blur-md shadow-lg pointer-events-none max-w-sm overflow-hidden" style={{ borderColor: `${theme.primary}50`, color: theme.primary }}>
+            <div className="absolute top-4 left-4 z-40 bg-black/80 border p-4 rounded-lg font-mono text-xs backdrop-blur-md shadow-lg pointer-events-none max-w-sm overflow-hidden" style={{ borderColor: `${ theme.primary } 50`, color: theme.primary }}>
               <h3 className="font-bold border-b border-white/10 pb-2 mb-2 flex items-center gap-2">
                 <Info className="w-3 h-3" /> STATS_FOR_NERDS
               </h3>
@@ -1283,330 +1286,336 @@ function App() {
                         src={(() => {
                           if (filePath?.match(/^https?:\/\//)) return filePath;
                           return `media://${filePath}`;
-                        })()}
-                        className="hidden"
-                        onTimeUpdate={handleTimeUpdate}
-                        onLoadedMetadata={handleLoadedMetadata}
-                        onEnded={() => setIsPlaying(false)}
-                        onWaiting={() => setIsBuffering(true)}
-                        onPlaying={() => setIsBuffering(false)}
-                        onError={handleVideoError}
-                        autoPlay
-                      />
-                    </div>
+                        }) ()}
+className = "hidden"
+onTimeUpdate = { handleTimeUpdate }
+onLoadedMetadata = { handleLoadedMetadata }
+onEnded = {() => setIsPlaying(false)}
+onWaiting = {() => setIsBuffering(true)}
+onPlaying = {() => setIsBuffering(false)}
+onError = { handleVideoError }
+autoPlay
+  />
+                    </div >
                   );
                 }
 
-                return (
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <video
-                      ref={videoRef}
-                      src={(() => {
-                        const isStream = filePath?.match(/^https?:\/\//);
-                        const isAdaptive = filePath?.includes('.m3u8') || filePath?.includes('.mpd');
+return (
+  <div className="relative w-full h-full flex items-center justify-center">
+    <video
+      ref={videoRef}
+      src={(() => {
+        const isStream = filePath?.match(/^https?:\/\//);
+        const isAdaptive = filePath?.includes('.m3u8') || filePath?.includes('.mpd');
 
-                        if (isStream) {
-                          // If adaptive, let HLS.js/Dash.js handle it (src = undefined usually works best for HLS.js attached media)
-                          if (isAdaptive && (Hls.isSupported() || filePath?.includes('.mpd'))) return undefined;
-                          // Otherwise (MP4, etc), return the direct URL
-                          return filePath;
-                        }
-                        // Local file -> media protocol
-                        return `media://${filePath}`;
-                      })()}
-                      className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
-                      style={{
-                        boxShadow: `0 0 80px -20px ${ambientColor}`,
-                        aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
-                        objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
-                      }}
-                      onTimeUpdate={handleTimeUpdate}
-                      onLoadedMetadata={handleLoadedMetadata}
-                      onEnded={() => setIsPlaying(false)}
-                      onWaiting={() => setIsBuffering(true)}
-                      onPlaying={() => setIsBuffering(false)}
-                      onError={handleVideoError}
-                      onDoubleClick={toggleFullscreen}
-                      autoPlay
-                      // IMPORTANT: Only anonymous if stream, to prevent canvas tainting
-                      crossOrigin={filePath?.match(/^https?:\/\//) ? "anonymous" : undefined}
-                    />
+        if (isStream) {
+          // If adaptive, let HLS.js/Dash.js handle it (src = undefined usually works best for HLS.js attached media)
+          if (isAdaptive && (Hls.isSupported() || filePath?.includes('.mpd'))) return undefined;
+          // Otherwise (MP4, etc), return the direct URL
+          return filePath;
+        }
+        // Local file -> media protocol
+        return `media://${filePath}`;
+      })()}
+      className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
+      style={{
+        boxShadow: `0 0 80px -20px ${ambientColor}`,
+        aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
+        objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
+      }}
+      onTimeUpdate={handleTimeUpdate}
+      onLoadedMetadata={handleLoadedMetadata}
+      onEnded={() => setIsPlaying(false)}
+      onWaiting={() => setIsBuffering(true)}
+      onPlaying={() => setIsBuffering(false)}
+      onError={handleVideoError}
+      onDoubleClick={toggleFullscreen}
+      autoPlay
+      // IMPORTANT: Only anonymous if stream, to prevent canvas tainting
+      crossOrigin={filePath?.match(/^https?:\/\//) ? "anonymous" : undefined}
+    />
 
-                    {/* Buffering Overlay */}
-                    {isBuffering && !codecError && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-midnight/80 backdrop-blur-md"
-                      >
-                        <div className="relative">
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                            className="w-20 h-20 border-4 border-neon-cyan/20 border-t-neon-cyan rounded-full"
-                          />
-                          <Logo className="absolute inset-2 w-12 h-12 m-auto" />
-                        </div>
-                        <p className="mt-6 font-mono text-xs text-neon-cyan/60 tracking-widest">BUFFERING...</p>
-                      </motion.div>
-                    )}
+    {/* Buffering Overlay */}
+    {isBuffering && !codecError && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-midnight/80 backdrop-blur-md"
+      >
+        <div className="relative">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-20 h-20 border-4 border-neon-cyan/20 border-t-neon-cyan rounded-full"
+          />
+          <Logo className="absolute inset-2 w-12 h-12 m-auto" />
+        </div>
+        <p className="mt-6 font-mono text-xs text-neon-cyan/60 tracking-widest">BUFFERING...</p>
+      </motion.div>
+    )}
 
-                    {/* Professional Codec Error / Neural Decode Overlay */}
-                    {codecError && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="absolute inset-0 z-50 flex items-center justify-center bg-midnight/90 backdrop-blur-xl rounded-lg border border-white/10"
-                      >
-                        <div className="text-center space-y-6 max-w-md px-8">
-                          <div className="relative w-24 h-24 mx-auto">
-                            <div className="absolute inset-0 bg-neon-cyan/20 blur-2xl rounded-full scale-150 animate-pulse" />
-                            <Logo className="w-full h-full relative z-10" />
-                          </div>
-                          <div className="space-y-2">
-                            <h3 className="text-xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple uppercase">
-                              Neural Decode Initializing
-                            </h3>
-                            <p className="text-white/40 text-xs font-mono leading-relaxed px-4">
-                              {codecError.includes('supported')
-                                ? "Handshaking with Neural Decoder to enable universal playback for this format..."
-                                : codecError}
-                            </p>
-                          </div>
-                          <div className="pt-4 flex flex-col gap-3">
-                            <div className="flex items-center justify-center gap-3 py-2 px-4 bg-white/5 rounded-full border border-white/5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                              <span className="text-[10px] font-mono text-white/50 tracking-widest uppercase">Stream Connection Failed</span>
-                            </div>
-                            <button
-                              onClick={() => { setFilePath(null); setCodecError(null); }}
-                              className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-white tracking-widest uppercase border border-white/10 transition-all shadow-xl backdrop-blur-md"
-                            >
-                              Back to Home
-                            </button>
-                            <p className="text-[10px] text-white/20 font-mono mt-4">ERROR_CODE: 0xDEADBEEF</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {/* Aspect Ratio Notification */}
-                    <AnimatePresence>
-                      {showAspectNotification && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] px-8 py-4 bg-black/80 backdrop-blur-xl border border-neon-cyan/30 rounded-2xl shadow-[0_0_50px_rgba(0,243,255,0.2)]"
-                        >
-                          <div className="flex flex-col items-center gap-2">
-                            <span className="text-[10px] font-mono text-neon-cyan/50 tracking-[0.3em] uppercase">Aspect Ratio</span>
-                            <span className="text-3xl font-black text-white tracking-tighter">{aspectRatio === 'original' ? 'ORIGINAL' : aspectRatio}</span>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })()}
-
-              {/* Overlay Overlay when playing/paused */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 pointer-events-none">
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  whileHover={{ scale: 1.1 }}
-                  className="bg-midnight/60 p-4 rounded-full border border-white/10 backdrop-blur-sm pointer-events-auto cursor-pointer"
-                  onClick={togglePlay}
-                >
-                  {isPlaying ? <Pause className="w-8 h-8 text-white" /> : <Play className="w-8 h-8 text-white ml-1" />}
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Control Deck (Absolute to main viewport to avoid layout shifts) */}
-        <AnimatePresence>
-          {showControls && (
-            <motion.footer
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="absolute bottom-0 left-0 right-0 h-24 px-6 pb-6 pt-2 z-50 pointer-events-auto"
+    {/* Professional Codec Error / Neural Decode Overlay */}
+    {codecError && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="absolute inset-0 z-50 flex items-center justify-center bg-midnight/90 backdrop-blur-xl rounded-lg border border-white/10"
+      >
+        <div className="text-center space-y-6 max-w-md px-8">
+          <div className="relative w-24 h-24 mx-auto">
+            <div className="absolute inset-0 bg-neon-cyan/20 blur-2xl rounded-full scale-150 animate-pulse" />
+            <Logo className="w-full h-full relative z-10" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple uppercase">
+              Neural Decode Initializing
+            </h3>
+            <p className="text-white/40 text-xs font-mono leading-relaxed px-4">
+              {codecError.includes('supported')
+                ? "Handshaking with Neural Decoder to enable universal playback for this format..."
+                : codecError}
+            </p>
+          </div>
+          <div className="pt-4 flex flex-col gap-3">
+            <div className="flex items-center justify-center gap-3 py-2 px-4 bg-white/5 rounded-full border border-white/5">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+              <span className="text-[10px] font-mono text-white/50 tracking-widest uppercase">Stream Connection Failed</span>
+            </div>
+            <button
+              onClick={() => { setFilePath(null); setCodecError(null); }}
+              className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-white tracking-widest uppercase border border-white/10 transition-all shadow-xl backdrop-blur-md"
             >
-              <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90">
-                {/* Progress Bar */}
-                <div
-                  className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden"
-                  onClick={handleSeek}
-                >
-                  <div
-                    className="absolute top-0 left-0 h-full transition-all"
-                    style={{
-                      width: `${(currentTime / duration) * 100}%`,
-                      backgroundColor: theme.primary,
-                      boxShadow: `0 0 15px ${theme.primary}`
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
+              Back to Home
+            </button>
+            <p className="text-[10px] text-white/20 font-mono mt-4">ERROR_CODE: 0xDEADBEEF</p>
+          </div>
+        </div>
+      </motion.div>
+    )}
 
-                {/* Buttons Row */}
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center gap-4">
-                    <button onClick={playPrevious} className="text-white/50 hover:text-white transition-colors" title="Previous (P)"><SkipBack className="w-4 h-4" /></button>
-                    <button onClick={togglePlay} className="w-8 h-8 rounded-full bg-white text-midnight flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: theme.primary }}>
-                      {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-                    </button>
-                    <button onClick={playNext} className="text-white/50 hover:text-white transition-colors" title="Next (N)"><SkipForward className="w-4 h-4" /></button>
-                    <div className="font-mono text-[10px] text-white/50 ml-2">
-                      {formatTime(currentTime)} / {duration > 0 ? formatTime(duration) : '--:--'}
-                    </div>
-                  </div>
+    {/* Aspect Ratio Notification */}
+    <AnimatePresence>
+      {showAspectNotification && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: -20 }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] px-8 py-4 bg-black/80 backdrop-blur-xl border border-neon-cyan/30 rounded-2xl shadow-[0_0_50px_rgba(0,243,255,0.2)]"
+        >
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-[10px] font-mono text-neon-cyan/50 tracking-[0.3em] uppercase">Aspect Ratio</span>
+            <span className="text-3xl font-black text-white tracking-tighter">{aspectRatio === 'original' ? 'ORIGINAL' : aspectRatio}</span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
+              }) ()}
 
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 group/volume relative">
-                      <button onClick={() => setIsMuted(!isMuted)} className="text-white/50 hover:text-white transition-colors">
-                        {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
-                      </button>
-                      <div className="w-24 h-1.5 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar" onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const val = (e.clientX - rect.left) / rect.width;
-                        setVolume(Math.max(0, Math.min(1, val)));
-                        setIsMuted(false);
-                      }}>
-                        <div className="absolute top-0 left-0 h-full" style={{ width: `${isMuted ? 0 : volume * 100}%`, backgroundColor: theme.primary }} />
-                        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
-                      </div>
-                    </div>
-
-                    {/* Theme Switcher */}
-                    <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
-                      {Object.keys(themes).map(t => (
-                        <button
-                          key={t}
-                          onClick={() => setCurrentTheme(t as any)}
-                          className={`w-4 h-4 rounded-full transition-all ${currentTheme === t ? 'scale-110 ring-1 ring-white' : 'opacity-40 hover:opacity-100'}`}
-                          style={{ backgroundColor: themes[t as keyof typeof themes].primary }}
-                          title={t}
-                        />
-                      ))}
-                    </div>
-
-                    <button onClick={cyclePlaybackSpeed} className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors" style={{ color: theme.primary, borderColor: `${theme.primary}50`, borderWidth: '1px' }}>
-                      {playbackRate}x
-                    </button>
-                    <button
-                      onClick={() => setIncognitoMode(!incognitoMode)}
-                      className="transition-colors mr-2 hover:text-white"
-                      style={{ color: incognitoMode ? '#ff0055' : 'rgba(255,255,255,0.3)' }}
-                      title="Incognito Mode"
-                    >
-                      <Ghost className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => setShowDebug(!showDebug)} className="transition-colors" style={{ color: showDebug ? theme.secondary : 'rgba(255,255,255,0.3)' }} title="Stats">
-                      <Info className="w-4 h-4" />
-                    </button>
-                    {window.ipcRenderer && (
-                      <button onClick={handleOpenFile} className="text-white/50 hover:text-neon-cyan transition-colors" title="Open File">
-                        <FolderOpen className="w-4 h-4" />
-                      </button>
-                    )}
-                    <button onClick={() => setShowPlaylist(!showPlaylist)} className={`transition-colors ${showPlaylist ? 'text-neon-cyan' : 'text-white/30 hover:text-white/70'}`} title="Playlist">
-                      <List className="w-4 h-4" />
-                    </button>
-                    <button onClick={toggleFullscreen} className="text-white/50 hover:text-electric-purple transition-colors" title="Fullscreen">
-                      {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.footer>
+{/* Overlay Overlay when playing/paused */ }
+<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 pointer-events-none">
+  <motion.div
+    initial={{ scale: 0.8, opacity: 0 }}
+    whileHover={{ scale: 1.1 }}
+    className="bg-midnight/60 p-4 rounded-full border border-white/10 backdrop-blur-sm pointer-events-auto cursor-pointer"
+    onClick={togglePlay}
+  >
+    {isPlaying ? <Pause className="w-8 h-8 text-white" /> : <Play className="w-8 h-8 text-white ml-1" />}
+  </motion.div>
+</div>
+            </motion.div >
           )}
-        </AnimatePresence>
+        </AnimatePresence >
 
-        {/* Stream Input Modal */}
-        <AnimatePresence>
-          {showStreamInput && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+  {/* Control Deck (Absolute to main viewport to avoid layout shifts) */ }
+  <AnimatePresence>
+{
+  showControls && (
+    <motion.footer
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="absolute bottom-0 left-0 right-0 h-24 px-6 pb-6 pt-2 z-50 pointer-events-auto"
+    >
+      <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90">
+        {/* Progress Bar */}
+        <div
+          className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden"
+          onClick={handleSeek}
+        >
+          <div
+            className="absolute top-0 left-0 h-full transition-all"
+            style={{
+              width: `${(currentTime / duration) * 100}%`,
+              backgroundColor: theme.primary,
+              boxShadow: `0 0 15px ${theme.primary}`
+            }}
+          />
+          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+
+        {/* Buttons Row */}
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center gap-4">
+            <button onClick={playPrevious} className="text-white/50 hover:text-white transition-colors" title="Previous (P)"><SkipBack className="w-4 h-4" /></button>
+            <button onClick={togglePlay} className="w-8 h-8 rounded-full bg-white text-midnight flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: theme.primary }}>
+              {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+            </button>
+            <button onClick={playNext} className="text-white/50 hover:text-white transition-colors" title="Next (N)"><SkipForward className="w-4 h-4" /></button>
+            <div className="font-mono text-[10px] text-white/50 ml-2">
+              {formatTime(currentTime)} / {duration > 0 ? formatTime(duration) : '--:--'}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 group/volume relative">
+              <button onClick={() => setIsMuted(!isMuted)} className="text-white/50 hover:text-white transition-colors">
+                {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+              <div className="w-24 h-1.5 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar" onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const val = (e.clientX - rect.left) / rect.width;
+                setVolume(Math.max(0, Math.min(1, val)));
+                setIsMuted(false);
+              }}>
+                <div className="absolute top-0 left-0 h-full" style={{ width: `${isMuted ? 0 : volume * 100}%`, backgroundColor: theme.primary }} />
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
+              </div>
+            </div>
+
+            {/* Theme Switcher */}
+            <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
+              {Object.keys(themes).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setCurrentTheme(t as any)}
+                  className={`w-4 h-4 rounded-full transition-all ${currentTheme === t ? 'scale-110 ring-1 ring-white' : 'opacity-40 hover:opacity-100'}`}
+                  style={{ backgroundColor: themes[t as keyof typeof themes].primary }}
+                  title={t}
+                />
+              ))}
+            </div>
+
+            <button onClick={cyclePlaybackSpeed} className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors" style={{ color: theme.primary, borderColor: `${theme.primary}50`, borderWidth: '1px' }}>
+              {playbackRate}x
+            </button>
+            <button
+              onClick={() => setIncognitoMode(!incognitoMode)}
+              className="transition-colors mr-2 hover:text-white"
+              style={{ color: incognitoMode ? '#ff0055' : 'rgba(255,255,255,0.3)' }}
+              title="Incognito Mode"
             >
-              <div className="bg-midnight border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/5 to-electric-purple/5 pointer-events-none" />
-                <h3 className="text-xl font-black mb-6 flex items-center gap-3 relative z-10">
-                  <Globe className="w-6 h-6 text-neon-cyan" />
-                  NETWORK_STREAM
-                </h3>
-                <form onSubmit={handleStreamSubmit} className="flex flex-col gap-4 relative z-10">
-                  <input
-                    type="url"
-                    placeholder="Paste stream URL here..."
-                    value={streamUrl}
-                    onChange={(e) => setStreamUrl(e.target.value)}
-                    className="bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-sm font-mono text-white placeholder:text-white/20 focus:outline-none focus:border-neon-cyan/50 transition-colors w-full"
-                    autoFocus
-                  />
+              <Ghost className="w-4 h-4" />
+            </button>
+            <button onClick={() => setShowDebug(!showDebug)} className="transition-colors" style={{ color: showDebug ? theme.secondary : 'rgba(255,255,255,0.3)' }} title="Stats">
+              <Info className="w-4 h-4" />
+            </button>
+            {window.ipcRenderer && (
+              <button onClick={handleOpenFile} className="text-white/50 hover:text-neon-cyan transition-colors" title="Open File">
+                <FolderOpen className="w-4 h-4" />
+              </button>
+            )}
+            <button onClick={() => setShowPlaylist(!showPlaylist)} className={`transition-colors ${showPlaylist ? 'text-neon-cyan' : 'text-white/30 hover:text-white/70'}`} title="Playlist">
+              <List className="w-4 h-4" />
+            </button>
+            <button onClick={toggleFullscreen} className="text-white/50 hover:text-electric-purple transition-colors" title="Fullscreen">
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.footer>
+  )
+}
+        </AnimatePresence >
 
-                  {/* Demo Stream Buttons - Big Buck Bunny */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setStreamUrl('https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8')}
-                      className="px-3 py-2 bg-white/5 hover:bg-neon-cyan/10 border border-white/10 rounded-lg text-[10px] font-mono text-white/60 hover:text-neon-cyan transition-all"
-                    >
-                      HLS Demo
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setStreamUrl('https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd')}
-                      className="px-3 py-2 bg-white/5 hover:bg-electric-purple/10 border border-white/10 rounded-lg text-[10px] font-mono text-white/60 hover:text-electric-purple transition-all"
-                    >
-                      DASH Demo
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setStreamUrl('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')}
-                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-mono text-white/60 hover:text-white transition-all"
-                    >
-                      MP4 Demo
-                    </button>
-                  </div>
+  {/* Stream Input Modal */ }
+  <AnimatePresence>
+{
+  showStreamInput && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div className="bg-midnight border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/5 to-electric-purple/5 pointer-events-none" />
+        <h3 className="text-xl font-black mb-6 flex items-center gap-3 relative z-10">
+          <Globe className="w-6 h-6 text-neon-cyan" />
+          NETWORK_STREAM
+        </h3>
+        <form onSubmit={handleStreamSubmit} className="flex flex-col gap-4 relative z-10">
+          <input
+            type="url"
+            placeholder="Paste stream URL here..."
+            value={streamUrl}
+            onChange={(e) => setStreamUrl(e.target.value)}
+            className="bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-sm font-mono text-white placeholder:text-white/20 focus:outline-none focus:border-neon-cyan/50 transition-colors w-full"
+            autoFocus
+          />
 
-                  <div className="flex justify-end gap-3 mt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowStreamInput(false)}
-                      className="px-4 py-2 rounded-lg text-xs font-mono hover:bg-white/5 transition-colors"
-                    >
-                      CANCEL
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!streamUrl}
-                      className="px-6 py-2 bg-neon-cyan/10 border border-neon-cyan/50 text-neon-cyan rounded-lg text-xs font-bold hover:bg-neon-cyan/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                    >
-                      CONNECT
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          {/* Demo Stream Buttons - Big Buck Bunny */}
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => setStreamUrl('https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8')}
+              className="px-3 py-2 bg-white/5 hover:bg-neon-cyan/10 border border-white/10 rounded-lg text-[10px] font-mono text-white/60 hover:text-neon-cyan transition-all"
+            >
+              HLS Demo
+            </button>
+            <button
+              type="button"
+              onClick={() => setStreamUrl('https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd')}
+              className="px-3 py-2 bg-white/5 hover:bg-electric-purple/10 border border-white/10 rounded-lg text-[10px] font-mono text-white/60 hover:text-electric-purple transition-all"
+            >
+              DASH Demo
+            </button>
+            <button
+              type="button"
+              onClick={() => setStreamUrl('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')}
+              className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-mono text-white/60 hover:text-white transition-all"
+            >
+              MP4 Demo
+            </button>
+          </div>
 
-        {/* Metadata Editor Modal */}
-        <AnimatePresence>
-          {editingMetadata && (
-            <MetadataEditor
-              filePath={editingMetadata}
-              onClose={() => setEditingMetadata(null)}
-            />
-          )}
-        </AnimatePresence>
+          <div className="flex justify-end gap-3 mt-2">
+            <button
+              type="button"
+              onClick={() => setShowStreamInput(false)}
+              className="px-4 py-2 rounded-lg text-xs font-mono hover:bg-white/5 transition-colors"
+            >
+              CANCEL
+            </button>
+            <button
+              type="submit"
+              disabled={!streamUrl}
+              className="px-6 py-2 bg-neon-cyan/10 border border-neon-cyan/50 text-neon-cyan rounded-lg text-xs font-bold hover:bg-neon-cyan/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              CONNECT
+            </button>
+          </div>
+        </form>
+      </div>
+    </motion.div>
+  )
+}
+        </AnimatePresence >
+
+  {/* Metadata Editor Modal */ }
+  <AnimatePresence>
+{
+  editingMetadata && (
+    <MetadataEditor
+      filePath={editingMetadata}
+      onClose={() => setEditingMetadata(null)}
+    />
+  )
+}
+        </AnimatePresence >
       </main >
     </div >
   )
