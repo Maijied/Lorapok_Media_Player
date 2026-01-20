@@ -1110,7 +1110,7 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
             )}
         </div>
     )
-}
+})
 
 const AudioVisualizer = ({ analyser }: { analyser: AnalyserNode | null }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
