@@ -1,0 +1,22 @@
+<svg width="240" height="60" viewBox="0 0 240 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="p" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#d04eff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#bc13fe;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
+      <feFlood flood-color="#bc13fe" result="color" />
+      <feComposite in="color" in2="blur" operator="in" result="glow" />
+      <feMerge>
+        <feMergeNode in="glow" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="5" y="5" width="230" height="50" rx="25" fill="url(#p)" filter="url(#glow)" />
+  <g transform="translate(30, 18) scale(0.6)" fill="white">
+     <path d="M22 17.5l-10 10-10-10H10V3h4v14.5h8zM24 33H0v4h24v-4z"/>
+  </g>
+  <text x="75" y="37" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="18" fill="white">DOWNLOAD v1.2.0</text>
+</svg>

@@ -1,57 +1,85 @@
 <div align="center">
 
-  <img src="assets/logo.png" alt="Lorapok Player Logo" width="200" height="200" />
+  <img src="assets/logo.png" alt="Lorapok Player Logo" width="180" height="180" />
 
   # LORAPOK PLAYER
   ### SUPERCOMPUTING MEDIA ENGINE
 
-  <p align="center">
-    <a href="https://maijied.github.io/Lorapok_Media_Player/">
-      <img src="assets/btn-demo.png" height="50" alt="Live Demo" />
-    </a>
-    <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest">
-      <img src="assets/btn-download.png" height="50" alt="Download" />
-    </a>
-  </p>
+  [![Version](https://img.shields.io/badge/version-1.2.0-00F3FF?style=flat-square&labelColor=050510)](https://github.com/Maijied/Lorapok_Media_Player)
+  [![License](https://img.shields.io/badge/license-MIT-BC13FE?style=flat-square&labelColor=050510)](LICENSE)
+  [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-white?style=flat-square&labelColor=050510)](https://github.com/Maijied/Lorapok_Media_Player)
 
   <p align="center">
     The next-generation media player blending <b>biological aesthetics</b> with <b>supercomputing performance</b>.
     <br />
-    Built for the modern web and desktop.
+    Engineered for ultra-low latency playback and high-fidelity sensory experiences.
   </p>
+
+  <div align="center">
+    <a href="https://maijied.github.io/Lorapok_Media_Player/">
+      <img src="assets/btn-demo.svg" width="200" alt="Try Live Demo" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest">
+      <img src="assets/btn-download.svg" width="200" alt="Download Latest" />
+    </a>
+  </div>
 
   <br />
 
-  <img src="assets/showcase-video.png" alt="Lorapok Video Playback" width="800" style="border-radius: 10px; box-shadow: 0 0 50px rgba(0, 243, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);" />
-  
-  <br/><br/>
+  <img src="assets/showcase-video.png" alt="Lorapok Main Interface" width="100%" style="border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1);" />
 
-  <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-     <img src="assets/showcase-empty.png" alt="Main Interface" width="260" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
-     <img src="assets/showcase-audio.png" alt="Audio Intelligence" width="260" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
-     <img src="assets/showcase-neural.png" alt="Neural Decoding" width="260" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+  <br />
+
+  <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+     <img src="assets/showcase-empty.png" alt="Main Interface" width="31%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+     <img src="assets/showcase-audio.png" alt="Audio Intelligence" width="31%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+     <img src="assets/showcase-neural.png" alt="Neural Decoding" width="31%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
   </div>
 
 </div>
 
 ---
 
-## 🧬 CORE FEATURES
+## 🧬 ENGINE CAPABILITIES
 
-- **Neural Decoding**: Advanced playback engine supporting all major formats (MKV, AVI, WMV) via FFmpeg-powered server-side transcoding.
-- **Robust Duration**: Intelligent metadata probing (FFprobe) ensures accurate progress bar and total length for all streaming and buffered videos.
-- **Seamless Track Switching**: Runtime Audio and Subtitle track selection for HLS streams—switch instantly without re-buffering.
-- **Organic UI**: A "living" interface that reacts to media content with dynamic ambient lighting and micro-animations.
-- **Universal Drop**: Drag-and-drop any media file or network URL to instantly initialize playback with automatic path normalization.
-- **Smart Resume**: Automatically remembers and resumes playback position for every media file.
-- **Screenshots**: High-resolution frame capture via the `S` shortcut (saved to `Pictures/Lorapok`).
-- **Theme Presets**: Switch between **Midnight Core**, **Cyber Bloom**, and **Quantum Pulse** aesthetics.
-- **Aspect Ratio Control**: VLC-style aspect ratio cycling (16:9, 4:3, 5:4, 21:9, 1:1, etc.) using the `A` shortcut.
-- **Cross-Platform**: Optimized builds for Windows, macOS, and Linux.
+| Feature | Description | Status |
+| :--- | :--- | :--- |
+| **Neural Decoding V2** | High-performance FFmpeg-powered pipeline for MKV, AVI, WMV, and FLV. | 🟢 Ready |
+| **Universal Stream** | Native HLS (.m3u8) and DASH (.mpd) support with zero-buffer track switching. | 🟢 Ready |
+| **Robust Probing** | Intelligent metadata discovery (FFprobe) for 100% accurate duration/seeking. | 🟢 Ready |
+| **Organic UI** | Dynamic ambient lighting engine that reacts to video colors in real-time. | 🟢 Ready |
+| **Smart Resume** | Atomic position tracking to resume playback exactly where you left off. | 🟢 Ready |
+| **Hardware Accel** | GPU-accelerated rasterization for buttery smooth 4K/8K playback. | 🟢 Ready |
 
-## 📦 COMPONENT LIBRARY
+---
 
-Lorapok Player is also available as a standalone React component for web developers.
+## 🖥 SYSTEM REQUIREMENTS
+
+### Desktop Application
+| Component | Minimum Requirement | Recommended |
+| :--- | :--- | :--- |
+| **OS (Windows)** | Windows 10 (Build 19041+) | Windows 11 |
+| **OS (macOS)** | macOS 12.0 (Monterey) | macOS 14.0 (Sonoma) |
+| **OS (Linux)** | Ubuntu 22.04+, Debian 11+ | Latest Fedora / Arch |
+| **Processor** | Dual Core 2.0GHz | Quad Core 3.0GHz+ |
+| **Memory** | 4 GB RAM | 8 GB RAM+ |
+| **Graphics** | DirectX 11 / OpenGL 4.1 | NVIDIA GTX 1050 / Apple M1+ |
+
+### Development Environment
+- **Node.js**: v20.x or higher (LTS recommended)
+- **NPM**: v10.x or higher
+- **Git**: Latest version for source control
+
+---
+
+## 📦 INSTALLATION & USAGE
+
+### 1. Download Pre-built (Recommended)
+Simply grab the latest installer for your OS from the [Releases Page](https://github.com/Maijied/Lorapok_Media_Player/releases/latest).
+
+### 2. NPM Package for Developers
+Integrate the Lorapok Player core into your own React applications.
 
 ```bash
 npm install lorapok-player
@@ -61,45 +89,56 @@ npm install lorapok-player
 import { LorapokPlayer } from 'lorapok-player';
 import 'lorapok-player/style.css';
 
-function App() {
-  return (
-    <LorapokPlayer
-      src="https://example.com/video.mp4"
-      className="w-full aspect-video rounded-xl"
-    />
-  );
-}
+const App = () => (
+  <LorapokPlayer 
+    src="https://example.com/stream.m3u8" 
+    className="rounded-2xl"
+  />
+);
 ```
 
-## 🚀 DEVELOPMENT
-
-### Desktop App (Electron)
-
+### 3. Build from Source
 ```bash
-# Install dependencies
+# Clone the repository
+git clone https://github.com/Maijied/Lorapok_Media_Player.git
+cd Lorapok_Media_Player
+
+# Install all dependencies
 npm install
 
-# Start development server
+# Start development mode
 npm run dev:electron
 
-# Build for production
-npm run build:electron
+# Build production binaries
+npm run build
 ```
 
-### Website
+---
 
-```bash
-cd packages/website
-npm install
-npm run dev
-```
+## 🎹 KEYBOARD SHORTCUTS
 
-## 🏗 ARCHITECTURE
+| Key | Action |
+| :---: | :--- |
+| `Space` / `K` | Play / Pause |
+| `Left` / `Right` | Seek Backward / Forward (10s) |
+| `Up` / `Down` | Volume Up / Down |
+| `F` | Toggle Fullscreen |
+| `M` | Mute / Unmute |
+| `S` | Take Screenshot (Saved to Pictures/Lorapok) |
+| `A` | Cycle Aspect Ratio (16:9, 4:3, etc.) |
+| `N` / `P` | Next / Previous Track |
 
-- **Frontend**: React, TypeScript, Tailwind CSS, Framer Motion
-- **Runtime**: Electron (Main + Renderer Process Isolation)
-- **Media Engine**: Fluent-FFmpeg + Custom Protocol Handler (`media://`)
+---
+
+## 🏗 TECH STACK
+- **Core**: React 18, TypeScript, Tailwind CSS
+- **Runtime**: Electron 30
+- **Animations**: Framer Motion
+- **Media Engine**: HLS.js, Dash.js, Fluent-FFmpeg
+- **Icons**: Lucide React
+
+---
 
 ## 📜 LICENSE
 
-[MIT](LICENSE) © 2026 Lorapok Team
+[MIT](LICENSE) © 2026 Lorapok Team. The core media engine and biological aesthetics are optimized for high-performance open computing.

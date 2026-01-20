@@ -34,6 +34,16 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Update Themed Button Version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          sed "s/{{VERSION}}/$VERSION/g" assets/btn-download.svg.template > assets/btn-download.svg
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add assets/btn-download.svg
+          git commit -m "build: update download button version to v$VERSION [skip ci]" || echo "No changes to commit"
+          git push origin main || echo "No changes to push"
+
       - name: Build Electron App
         run: npm run build
         env:
