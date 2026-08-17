@@ -5,6 +5,10 @@
   "description": "A cross-platform media player with Organic Intelligence aesthetic.",
   "author": "Lorapok Labs <contact@lorapok.tech>",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Maijied/Lorapok_Media_Player.git"
+  },
   "workspaces": [
     "packages/*"
   ],

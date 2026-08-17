@@ -5,14 +5,14 @@ const config: CapacitorConfig = {
   appName: 'Lorapok Player',
   webDir: 'dist',
   bundledWebRuntime: false,
-  backgroundColor: '#050510',
+  backgroundColor: '#00000000',
   server: {
     androidScheme: 'https'
   },
   plugins: {
     SplashScreen: {
       launchAutoHide: false,
-      backgroundColor: '#050510',
+      backgroundColor: '#00000000',
       showSpinner: false,
       androidSplashResourceName: 'splash',
       splashFullScreen: true,
@@ -20,7 +20,7 @@ const config: CapacitorConfig = {
     }
   },
   android: {
-    backgroundColor: '#050510',
+    backgroundColor: '#00000000',
     allowMixedContent: true,
     webContentsDebuggingEnabled: false
   }
