@@ -2,7 +2,25 @@
     "name": "lorapok-player",
     "version": "1.4.1",
     "description": "High-performance React media engine with Organic Intelligence aesthetics. Supports HLS, DASH, and Hardware Acceleration.",
-    "author": "Lorapok Team <team@lorapok.com>",
+    "author": {
+        "name": "Mohammad Maizied Hasan Majumder",
+        "email": "mdshuvo40@gmail.com",
+        "url": "https://github.com/Maijied"
+    },
+    "contributors": [
+        {
+            "name": "Lorapok Labs",
+            "email": "lorapokdev@gmail.com",
+            "url": "https://lorapok.tech"
+        }
+    ],
+    "company": {
+        "name": "Lorapok Labs",
+        "email": "lorapokdev@gmail.com",
+        "supportEmail": "cursor-contact@lorapok.tech",
+        "website": "https://lorapok.tech",
+        "adminUrl": "https://cursor-dev.lorapok.tech"
+    },
     "license": "MIT",
     "homepage": "https://maijied.github.io/Lorapok_Media_Player",
     "repository": {

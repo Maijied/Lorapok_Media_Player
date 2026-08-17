@@ -2,7 +2,25 @@
     "name": "lorapok-website",
     "private": true,
     "version": "1.4.1",
-    "author": "Lorapok Labs",
+    "author": {
+        "name": "Mohammad Maizied Hasan Majumder",
+        "email": "mdshuvo40@gmail.com",
+        "url": "https://github.com/Maijied"
+    },
+    "contributors": [
+        {
+            "name": "Lorapok Labs",
+            "email": "lorapokdev@gmail.com",
+            "url": "https://lorapok.tech"
+        }
+    ],
+    "company": {
+        "name": "Lorapok Labs",
+        "email": "lorapokdev@gmail.com",
+        "supportEmail": "cursor-contact@lorapok.tech",
+        "website": "https://lorapok.tech",
+        "adminUrl": "https://cursor-dev.lorapok.tech"
+    },
     "type": "module",
     "scripts": {
         "dev": "vite",

@@ -3,7 +3,25 @@
   "private": true,
   "version": "1.4.1",
   "description": "A cross-platform media player with Organic Intelligence aesthetic.",
-  "author": "Lorapok Labs <contact@lorapok.tech>",
+  "author": {
+    "name": "Mohammad Maizied Hasan Majumder",
+    "email": "mdshuvo40@gmail.com",
+    "url": "https://github.com/Maijied"
+  },
+  "contributors": [
+    {
+      "name": "Lorapok Labs",
+      "email": "lorapokdev@gmail.com",
+      "url": "https://lorapok.tech"
+    }
+  ],
+  "company": {
+    "name": "Lorapok Labs",
+    "email": "lorapokdev@gmail.com",
+    "supportEmail": "cursor-contact@lorapok.tech",
+    "website": "https://lorapok.tech",
+    "adminUrl": "https://cursor-dev.lorapok.tech"
+  },
   "type": "module",
   "repository": {
     "type": "git",
