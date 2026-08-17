@@ -1,4 +1,4 @@
-name: Lorapok CI/CD
+name: Lorapok Enterprise CI/CD
 
 on:
   push:
@@ -16,8 +16,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  quality-gate:
+    name: Security & Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+          cache-dependency-path: lorapok-player/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: lorapok-player
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: lorapok-player
+        run: npm run typecheck
+        
   build-desktop:
     name: Build Desktop (${{ matrix.os }})
+    needs: quality-gate
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -70,6 +93,7 @@ jobs:
 
   build-android:
     name: Build Android (Signed Release)
+    needs: quality-gate
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
