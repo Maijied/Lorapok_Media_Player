@@ -18,6 +18,6 @@ ffmpeg -f lavfi -i "smptebars=size=854x480:rate=30:duration=15" -f lavfi -i "sin
 
 echo "Generating DASH (Fractal)..."
 mkdir -p "$DEMO_DIR/dash"
-ffmpeg -f lavfi -i "mandelbrot=size=854x480:rate=30:duration=15" -f lavfi -i "sine=frequency=220:duration=15" -c:v libx264 -preset ultrafast -crf 28 -c:a aac -b:a 128k -pix_fmt yuv420p -f dash -y "$DEMO_DIR/dash/fractal_dash.mpd"
+ffmpeg -f lavfi -i "mandelbrot=size=854x480:rate=30" -f lavfi -i "sine=frequency=220:duration=15" -t 15 -c:v libx264 -preset ultrafast -crf 28 -c:a aac -b:a 128k -pix_fmt yuv420p -f dash -y "$DEMO_DIR/dash/fractal_dash.mpd"
 
 echo "Done generating demo videos!"
