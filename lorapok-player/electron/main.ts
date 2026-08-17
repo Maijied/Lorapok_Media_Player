@@ -337,6 +337,7 @@ ipcMain.handle('open-file', async () => {
     filters: [
       { name: 'Movies & TV', extensions: ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov', 'flv', 'wmv', 'm4v', 'mpg', 'mpeg', 'm2ts', 'mts', 'ts', '3gp', '3g2', 'vob', 'mxf', 'rm', 'rmvb', 'asf', 'divx', 'ogm', 'ogv'] },
       { name: 'Audio', extensions: ['mp3', 'wav', 'aac', 'flac', 'm4a', 'opus', 'wma', 'ape', 'wv', 'mka', 'm4p', 'alac', 'oga'] },
+      { name: 'Images & Animations', extensions: ['gif', 'webp', 'png', 'jpg', 'jpeg'] },
       { name: 'All Files', extensions: ['*'] }
     ]
   })

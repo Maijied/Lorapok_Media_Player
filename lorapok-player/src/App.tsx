@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react'
-import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe, Ghost, Edit, Settings, Sliders, Menu, Film, FileVideo, Music, Image as ImageIcon, Monitor, Mic, Radio, Scissors, AudioLines } from 'lucide-react'
+import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe, Ghost, Edit, Settings, Sliders, Menu, Film, FileVideo, Music, Image as ImageIcon, Monitor, Mic, Radio, Scissors, AudioLines, Download } from 'lucide-react'
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -175,6 +175,16 @@ function App() {
   const [showAspectNotification, setShowAspectNotification] = useState(false)
   const [showStreamInput, setShowStreamInput] = useState(false)
   const [showAudioLibrary, setShowAudioLibrary] = useState(false)
+
+  // Android Update Notification State
+  const [showAndroidNotice, setShowAndroidNotice] = useState(() => {
+    return !localStorage.getItem('lorapok_android_notified');
+  });
+
+  const dismissAndroidNotice = () => {
+    localStorage.setItem('lorapok_android_notified', 'true');
+    setShowAndroidNotice(false);
+  };
 
   // Sync state to Capacitor Mobile Media Session
   useEffect(() => {
@@ -1338,6 +1348,52 @@ function App() {
       onDragLeave={() => setIsDragging(false)}
       className="h-screen w-screen flex flex-col bg-midnight text-white selection:bg-neon-cyan selection:text-midnight overflow-hidden font-inter relative"
     >
+      {/* Android Update Notification Modal */}
+      <AnimatePresence>
+        {showAndroidNotice && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="absolute inset-0 z-[200] flex items-center justify-center bg-midnight/80 backdrop-blur-sm p-4"
+          >
+            <div className="bg-[#0a0a14]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/10 to-electric-purple/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <button 
+                onClick={dismissAndroidNotice}
+                className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors z-10"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              
+              <div className="flex flex-col items-center text-center gap-6 relative z-10">
+                <div className="w-20 h-20 rounded-full bg-neon-cyan/20 flex items-center justify-center border border-neon-cyan/50 shadow-[0_0_30px_rgba(0,243,255,0.3)]">
+                  <Monitor className="w-10 h-10 text-neon-cyan" />
+                </div>
+                
+                <div>
+                  <h3 className="text-2xl font-black uppercase tracking-tight text-white mb-2">Android Version is Here!</h3>
+                  <p className="text-white/70 text-sm leading-relaxed">
+                    Lorapok Player is now officially available for Android devices. Take your organic media experience everywhere.
+                  </p>
+                </div>
+
+                <a 
+                  href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-4 bg-neon-cyan text-midnight font-black uppercase tracking-widest rounded-xl hover:bg-white hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,243,255,0.2)]"
+                  onClick={dismissAndroidNotice}
+                >
+                  <Download className="w-5 h-5" />
+                  Download APK
+                </a>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Full Window Drop Zone Overlay */}
       <AnimatePresence>
         {isDragging && (
@@ -1662,6 +1718,8 @@ function App() {
               <div className="text-center space-y-1">
                 <h2 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">LORAPOK</h2>
                 <p className="text-[#00f3ff]/40 font-mono text-[10px] tracking-[0.2em] uppercase">Supercomputing Media Engine</p>
+                <p className="text-white/30 font-mono text-[10px] tracking-widest mt-2">A product of Lorapok Labs</p>
+                <p className="text-white/30 font-mono text-[10px] tracking-widest">url: lorapok.tech</p>
               </div>
 
               <div className="flex flex-col items-center gap-4 mt-4">
@@ -1686,6 +1744,10 @@ function App() {
                 </div>
                 <p className="text-white/20 font-mono text-[9px]">OR_DRAG_DATA_HERE</p>
               </div>
+              
+              <div className="absolute bottom-6 right-8 text-white/20 font-black tracking-widest uppercase text-sm select-none pointer-events-none">
+                LorapokToon
+              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -1701,6 +1763,35 @@ function App() {
 
               {(() => {
                 const isAudio = filePath && ['mp3', 'wav', 'aac', 'flac', 'm4a', 'opus', 'wma', 'ogg', 'oga', 'm4p', 'alac', 'ape', 'wv', 'mka'].includes(filePath.split('.').pop()?.toLowerCase() || '');
+                const isImage = filePath && ['gif', 'webp', 'png', 'jpg', 'jpeg'].includes(filePath.split('.').pop()?.toLowerCase() || '');
+
+                if (isImage) {
+                  return (
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <img
+                        src={(() => {
+                          if (filePath?.match(/^https?:\/\//)) return filePath;
+                          if (filePath?.startsWith('media://')) return filePath;
+                          return `media://${filePath}`;
+                        })()}
+                        className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
+                        style={{
+                          boxShadow: `0 0 80px -20px ${ambientColor}`,
+                          aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
+                          objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
+                        }}
+                        onLoad={() => {
+                          setIsPlaying(true);
+                          setIsBuffering(false);
+                        }}
+                        onError={() => setCodecError("Failed to load image format.")}
+                        onDoubleClick={toggleFullscreen}
+                        alt={filePath?.split(/[/\\]/).pop()}
+                        crossOrigin={filePath?.match(/^https?:\/\//) ? "anonymous" : undefined}
+                      />
+                    </div>
+                  );
+                }
 
                 if (isAudio) {
                   return (

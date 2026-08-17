@@ -12,14 +12,14 @@
     {
       "name": "Lorapok Labs",
       "email": "lorapokdev@gmail.com",
-      "url": "https://lorapok.tech"
+      "url": "https://media.lorapok.tech"
     }
   ],
   "company": {
     "name": "Lorapok Labs",
     "email": "lorapokdev@gmail.com",
-    "supportEmail": "cursor-contact@lorapok.tech",
-    "website": "https://lorapok.tech",
+    "supportEmail": "cursor-contact@media.lorapok.tech",
+    "website": "https://media.lorapok.tech",
     "adminUrl": "https://cursor-dev.lorapok.tech"
   },
   "type": "module",
