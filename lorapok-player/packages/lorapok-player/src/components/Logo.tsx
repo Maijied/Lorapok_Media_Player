@@ -70,3 +70,4 @@ const Logo = ({ className = "w-12 h-12" }: { className?: string }) => (
     </g>
   </svg>
 );
+export { Logo };
