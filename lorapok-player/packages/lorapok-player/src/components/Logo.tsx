@@ -1,89 +1,72 @@
+// Brand Logo Component (Embedded to prevent path issues)
+const Logo = ({ className = "w-12 h-12" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#00F3FF">
+          <animate attributeName="stop-color" values="#00F3FF;#BC13FE;#00F3FF" dur="8s" repeatCount="indefinite" />
+        </stop>
+        <stop offset="100%" stopColor="#BC13FE">
+          <animate attributeName="stop-color" values="#BC13FE;#00F3FF;#BC13FE" dur="8s" repeatCount="indefinite" />
+        </stop>
+      </linearGradient>
+      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="12" result="blur" />
+        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+      </filter>
+    </defs>
 
+    {/* Tech Ring Background */}
+    <g>
+      <circle cx="256" cy="256" r="230" stroke="url(#brandGradient)" strokeWidth="2" strokeDasharray="15 10" opacity="0.1">
+        <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="60s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="256" cy="256" r="245" stroke="url(#brandGradient)" strokeWidth="6" opacity="0.3">
+        <animateTransform attributeName="transform" type="rotate" from="360 256 256" to="0 256 256" dur="45s" repeatCount="indefinite" />
+      </circle>
+    </g>
 
-// Brand Logo Component
-export const Logo = ({ className = "w-12 h-12" }: { className?: string }) => (
-    <svg className={className} viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-            <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#00F3FF">
-                    <animate attributeName="stop-color" values="#00F3FF;#BC13FE;#00F3FF" dur="8s" repeatCount="indefinite" />
-                </stop>
-                <stop offset="100%" stopColor="#BC13FE">
-                    <animate attributeName="stop-color" values="#BC13FE;#00F3FF;#BC13FE" dur="8s" repeatCount="indefinite" />
-                </stop>
-            </linearGradient>
-            
-            <filter id="glassBlur" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="15" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-            
-            <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="10" stdDeviation="15" floodOpacity="0.3" />
-            </filter>
+    {/* Segmented Larva - Bio-Digital Identity */}
+    <g transform="translate(45, 45) scale(0.82)">
+      <g>
+        <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="120s" repeatCount="indefinite" />
+        {[...Array(9)].map((_, i) => {
+          const offsetAngle = 0.8;
+          const angle = (i * 0.45) + offsetAngle;
+          const dist = 175;
+          const x = 256 + Math.cos(angle) * dist;
+          const y = 256 + Math.sin(angle) * dist;
+          const radius = 65 - (i * 5);
+          return (
+            <circle
+              key={i}
+              cx={x}
+              cy={y}
+              r={radius}
+              fill="url(#brandGradient)"
+              fillOpacity={1.0 - (i * 0.08)}
+              filter={i === 0 ? "url(#glow)" : ""}
+            >
+              <animate attributeName="r" values={`${radius};${radius + 3};${radius}`} dur={`${2 + i * 0.5}s`} repeatCount="indefinite" />
+            </circle>
+          );
+        })}
 
-            <radialGradient id="glowGradiant" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#00F3FF" stopOpacity="0.5" />
-                <stop offset="100%" stopColor="#00F3FF" stopOpacity="0" />
-            </radialGradient>
-        </defs>
-
-        {/* Background Base (Clean squircle hint) */}
-        <rect x="64" y="64" width="384" height="384" rx="80" fill="#050510" fillOpacity="0" />
-
-        {/* The "Infinity Larva" Abstract Shape */}
-        <path d="M180 160 C 140 160, 120 200, 120 256 C 120 312, 140 352, 180 352 L 320 352 C 380 352, 400 300, 340 260 L 220 180 C 200 165, 180 160, 180 160 Z" 
-              fill="url(#brandGradient)" 
-              fillOpacity="0.15" 
-              stroke="url(#brandGradient)" 
-              strokeWidth="12" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              filter="url(#softShadow)">
-            <animate attributeName="d" 
-                values="
-                    M180 160 C 140 160, 120 200, 120 256 C 120 312, 140 352, 180 352 L 320 352 C 380 352, 400 300, 340 260 L 220 180 C 200 165, 180 160, 180 160 Z;
-                    M180 170 C 150 170, 130 210, 130 256 C 130 302, 150 342, 180 342 L 310 342 C 370 342, 390 290, 330 250 L 210 190 C 200 175, 180 170, 180 170 Z;
-                    M180 160 C 140 160, 120 200, 120 256 C 120 312, 140 352, 180 352 L 320 352 C 380 352, 400 300, 340 260 L 220 180 C 200 165, 180 160, 180 160 Z" 
-                dur="6s" 
-                repeatCount="indefinite" />
-        </path>
-
-        {/* Glass Highlight Overlap */}
-        <path d="M340 260 L 220 180 C 210 175, 200 175, 190 180 C 170 190, 170 230, 170 256 C 170 282, 170 322, 190 332" 
-              stroke="white" 
-              strokeWidth="2" 
-              strokeOpacity="0.4" 
-              filter="url(#glassBlur)">
-            <animate attributeName="d" 
-                values="
-                    M340 260 L 220 180 C 210 175, 200 175, 190 180 C 170 190, 170 230, 170 256 C 170 282, 170 322, 190 332;
-                    M330 250 L 210 190 C 200 185, 190 185, 180 190 C 160 200, 160 240, 160 256 C 160 272, 160 312, 180 322;
-                    M340 260 L 220 180 C 210 175, 200 175, 190 180 C 170 190, 170 230, 170 256 C 170 282, 170 322, 190 332" 
-                dur="6s" 
-                repeatCount="indefinite" />
-        </path>
-
-        {/* The "Eye" - A single high-tech dot (The 'Intelligence' factor) */}
-        <circle cx="180" cy="220" r="10" fill="white">
-            <animate attributeName="opacity" values="1;0.3;1" dur="3s" repeatCount="indefinite" />
-            <animate attributeName="r" values="10;8;10" dur="3s" repeatCount="indefinite" />
-            <animate attributeName="cy" values="220;225;220" dur="6s" repeatCount="indefinite" />
+        {/* Eye Feature */}
+        <circle cx={256 + Math.cos(0.8) * 175 + 10} cy={256 + Math.sin(0.8) * 175 - 10} r="14" fill="#00F3FF">
+          <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite" />
         </circle>
 
-        {/* Floating Glow Element */}
-        <circle cx="340" cy="260" r="40" fill="url(#glowGradiant)" filter="url(#glassBlur)">
-            <animate attributeName="cx" values="340;330;340" dur="6s" repeatCount="indefinite" />
-            <animate attributeName="cy" values="260;250;260" dur="6s" repeatCount="indefinite" />
-            <animate attributeName="r" values="40;45;40" dur="4s" repeatCount="indefinite" />
-        </circle>
-
-        {/* Subtle pulse ring */}
-        <circle cx="340" cy="260" r="45" fill="none" stroke="#BC13FE" strokeWidth="1" opacity="0">
-            <animate attributeName="r" values="40; 80" dur="3s" repeatCount="indefinite" />
-            <animate attributeName="opacity" values="0.5; 0" dur="3s" repeatCount="indefinite" />
-            <animate attributeName="cx" values="340;330;340" dur="6s" repeatCount="indefinite" />
-            <animate attributeName="cy" values="260;250;260" dur="6s" repeatCount="indefinite" />
-        </circle>
-    </svg>
+        {/* Code Snippet Branding */}
+        <path
+          d="M260 240 L245 255 L260 270 M300 240 L315 255 L300 270"
+          stroke="white"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeOpacity="0.7"
+          transform={`translate(${Math.cos(0.8) * 140}, ${Math.sin(0.8) * 140}) rotate(30)`}
+        />
+      </g>
+    </g>
+  </svg>
 );
