@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="assets/logo.png" alt="Lorapok Player Logo" width="180" height="180" />
+  <img src="Media/Logos/main_logo.png" alt="Lorapok Player Logo" width="180" height="180" />
 
   <h1 align="center" style="border-bottom: none;">LORAPOK PLAYER</h1>
   <p align="center" style="font-weight: bold; color: #00F3FF; letter-spacing: 2px;">SUPERCOMPUTING MEDIA ENGINE BY LORAPOK LABS</p>
@@ -11,36 +11,80 @@
     <a href="https://snapcraft.io/lorapokmediaplayer"><img src="https://snapcraft.io/lorapokmediaplayer/trending.svg?name=0" alt="Trending" height="28" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-050510?style=for-the-badge&labelColor=050510&logoColor=050510" alt="License" /></a>
     <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/PLATFORM-ALL_OS_(+ANDROID)-FFFFFF?style=for-the-badge&labelColor=050510" alt="Platform" /></a>
+    <a href="https://github.com/Maijied/Lorapok_Media_Player/actions/workflows/lorapok-enterprise.yml"><img src="https://img.shields.io/github/actions/workflow/status/Maijied/Lorapok_Media_Player/lorapok-enterprise.yml?style=for-the-badge&labelColor=050510" alt="Build Status" /></a>
   </p>
 
   <p align="center" style="max-width: 600px; margin: 20px auto; line-height: 1.6; opacity: 0.8;">
     The next-generation media player blending <b>biological aesthetics</b> with <b>supercomputing performance</b>.
-    Engineered for ultra-low latency playback and high-fidelity sensory experiences.
+    Engineered for ultra-low latency playback and high-fidelity sensory experiences across Desktop and Android.
   </p>
 
   <div align="center" style="margin: 30px 0;">
     <a href="https://maijied.github.io/Lorapok_Media_Player/">
-      <img src="assets/btn-demo.svg" width="260" alt="Try Live Demo" />
+      <img src="lorapok-player/assets/btn-demo.svg" width="260" alt="Try Live Demo" />
     </a>
     &nbsp;&nbsp;
     <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest">
-      <img src="assets/btn-download.svg" width="260" alt="Download Latest" />
+      <img src="lorapok-player/assets/btn-download.svg" width="260" alt="Download Latest" />
     </a>
   </div>
 
   <br />
 
-  <img src="assets/showcase-video.png" alt="Lorapok Main Interface" width="100%" style="border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1);" />
+  <img src="Media/Marketing/marketing_hero.png" alt="Lorapok Main Interface" width="100%" style="border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1);" />
 
   <br />
 
   <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
-     <img src="assets/showcase-empty.png" alt="Main Interface" width="31%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
-     <img src="assets/showcase-audio.png" alt="Audio Intelligence" width="31%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
-     <img src="assets/showcase-neural.png" alt="Neural Decoding" width="31%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+     <img src="Media/Marketing/marketing_feature.png" alt="Main Interface" width="48%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+     <img src="Media/Marketing/marketing_app.png" alt="Audio Intelligence" width="48%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
   </div>
 
 </div>
+
+---
+
+## 🏗 SYSTEM ARCHITECTURE
+
+Lorapok Player features a unified multi-target architecture that spans Web, Desktop (Electron), and Mobile (Capacitor) with a single React core.
+
+```mermaid
+graph TD
+    %% Styling
+    classDef ui fill:#0a0a1a,stroke:#BC13FE,stroke-width:2px,color:#fff;
+    classDef engine fill:#0a0a1a,stroke:#00F3FF,stroke-width:2px,color:#fff;
+    classDef platform fill:#050510,stroke:#555,stroke-width:1px,color:#ccc;
+    
+    subgraph UI ["Organic React UI (Tailwind & Framer Motion)"]
+        Components["Player Components"]
+        Hooks["Device & Sync Hooks"]
+        Themes["Biological Aesthetics System"]
+    end
+    
+    subgraph Engine ["Media Processing Engine"]
+        HLS["HLS.js / DASH.js"]
+        FFmpeg["Fluent-FFmpeg Pipelines"]
+        Probe["Metadata Probing"]
+    end
+    
+    subgraph Platforms ["Deployment Targets"]
+        Web["Web / GitHub Pages"]
+        Desktop["Electron (Win, Mac, Linux)"]
+        Mobile["Capacitor (Android)"]
+    end
+
+    Components --> Hooks
+    Components --> Themes
+    UI --> Engine
+    
+    Engine --> Web
+    Engine --> Desktop
+    Engine --> Mobile
+    
+    class UI ui;
+    class Engine engine;
+    class Platforms platform;
+```
 
 ---
 
@@ -144,9 +188,14 @@ npm run build
 
 ---
 
+## 🤝 COMMUNITY & CONDUCT
+We welcome contributors! Please see our [Code of Conduct](CODE_OF_CONDUCT.md) to understand the expectations for participating in our community. By contributing, you agree to abide by its terms.
+
+---
+
 ## 🏗 TECH STACK
 - **Core**: React 18, TypeScript, Tailwind CSS
-- **Runtime**: Electron 30
+- **Runtime**: Electron 30, Capacitor (Android)
 - **Animations**: Framer Motion
 - **Media Engine**: HLS.js, Dash.js, Fluent-FFmpeg
 - **Icons**: Lucide React
