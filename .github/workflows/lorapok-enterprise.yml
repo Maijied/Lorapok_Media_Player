@@ -26,7 +26,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: 'npm'
           cache-dependency-path: lorapok-player/package-lock.json
 
@@ -52,7 +52,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "22"
           cache: 'npm'
           cache-dependency-path: lorapok-player/package-lock.json
 
@@ -66,10 +66,10 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           sed "s/{{VERSION}}/$VERSION/g" assets/btn-download.svg.template > assets/btn-download.svg
-          sed -i "s/VERSION-[0-9.]*-BC13FE/VERSION-$VERSION-BC13FE/g" README.md
+          sed -i "s/VERSION-[0-9.]*-BC13FE/VERSION-$VERSION-BC13FE/g" ../README.md
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add assets/btn-download.svg README.md
+          git add assets/btn-download.svg ../README.md
           git commit -m "build: update version to v$VERSION in assets and documentation [skip ci]" || echo "No changes to commit"
           git push origin main || echo "No changes to push"
 
@@ -108,7 +108,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "22"
           cache: 'npm'
           cache-dependency-path: lorapok-player/package-lock.json
 
@@ -247,7 +247,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: 'npm'
           cache-dependency-path: lorapok-player/packages/website/package-lock.json
 
@@ -286,7 +286,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           registry-url: "https://registry.npmjs.org/"
 
       - name: Install Dependencies
