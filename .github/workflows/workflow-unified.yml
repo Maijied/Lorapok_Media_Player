@@ -253,11 +253,15 @@ jobs:
         with:
           node-version: "22"
           cache: 'npm'
-          cache-dependency-path: lorapok-player/packages/website/package-lock.json
+          cache-dependency-path: lorapok-player/package-lock.json
 
       - name: Install Dependencies
-        working-directory: lorapok-player/packages/website
+        working-directory: lorapok-player
         run: npm ci
+
+      - name: Build Library
+        working-directory: lorapok-player/packages/lorapok-player
+        run: npm run build
 
       - name: Generate Demos & Build Website
         working-directory: lorapok-player/packages/website
@@ -298,13 +302,11 @@ jobs:
         run: npm ci
 
       - name: Build Library
-        working-directory: ./lorapok-player
+        working-directory: ./lorapok-player/packages/lorapok-player
         run: npm run build
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to NPM
-        working-directory: ./lorapok-player
+        working-directory: ./lorapok-player/packages/lorapok-player
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
