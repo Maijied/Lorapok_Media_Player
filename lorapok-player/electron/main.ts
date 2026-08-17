@@ -190,7 +190,7 @@ if (!gotTheLock) {
           '.mp4', '.webm', '.ogg', '.mp3', '.mkv', '.avi', '.mov', '.flv',
           '.wmv', '.m4v', '.mpg', '.mpeg', '.m2ts', '.mts', '.ts', '.3gp', '.3g2',
           '.vob', '.mxf', '.rm', '.rmvb', '.asf', '.divx', '.ogm', '.ogv',
-          '.wav', '.aac', '.flac', '.m4a', '.opus', '.wma', '.ape', '.wv', '.mka'
+          '.wav', '.aac', '.flac', '.m4a', '.opus', '.wma', '.ape', '.wv', '.mka', '.gif'
         ];
         return mediaExtensions.includes(ext);
       });
@@ -315,7 +315,7 @@ ipcMain.handle('renderer-ready', () => {
       '.mp4', '.webm', '.ogg', '.mp3', '.mkv', '.avi', '.mov', '.flv',
       '.wmv', '.m4v', '.mpg', '.mpeg', '.m2ts', '.mts', '.ts', '.3gp', '.3g2',
       '.vob', '.mxf', '.rm', '.rmvb', '.asf', '.divx', '.ogm', '.ogv',
-      '.wav', '.aac', '.flac', '.m4a', '.opus', '.wma', '.ape', '.wv', '.mka'
+      '.wav', '.aac', '.flac', '.m4a', '.opus', '.wma', '.ape', '.wv', '.mka', '.gif'
     ];
     return mediaExtensions.includes(ext);
   });

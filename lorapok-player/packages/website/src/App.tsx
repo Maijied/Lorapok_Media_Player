@@ -394,8 +394,10 @@ function App() {
 
             <footer className="py-12 text-center text-white/40 font-mono text-sm border-t border-white/5 relative z-10 bg-[#030305]">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-3 opacity-50">
+                    <div className="flex flex-col md:flex-row items-center gap-3 opacity-50">
                         <Logo className="w-6 h-6 grayscale" />
+                        <span>A product of Lorapok Labs</span>
+                        <a href="https://lorapok.tech" className="hover:text-neon-cyan transition-colors" target="_blank" rel="noopener noreferrer">lorapok.tech</a>
                         <span>&copy; 2026 Lorapok Labs</span>
                     </div>
                     <div className="flex gap-6">
@@ -405,6 +407,11 @@ function App() {
                     </div>
                 </div>
             </footer>
+
+            {/* LorapokToon Watermark */}
+            <div className="fixed bottom-4 right-4 z-[100] text-white/20 font-black tracking-widest pointer-events-none uppercase text-xs">
+                LorapokToon
+            </div>
         </div>
     )
 }

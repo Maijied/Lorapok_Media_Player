@@ -477,7 +477,7 @@ function App() {
       const handleMediaUpdate = (_event: any, { filename }: { filename: string }) => {
         if (!filename) return
         const ext = filename.split('.').pop()?.toLowerCase() || ''
-        const mediaExtensions = ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov', 'flv', 'wmv', 'mp3', 'wav', 'aac', 'flac']
+        const mediaExtensions = ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov', 'flv', 'wmv', 'mp3', 'wav', 'aac', 'flac', 'gif']
         if (mediaExtensions.includes(ext)) {
           window.ipcRenderer?.invoke('log-to-file', `[Hive] New media discovered: ${filename} `)
           // We could auto-add to playlist here or notify user
@@ -1745,9 +1745,6 @@ function App() {
                 <p className="text-white/20 font-mono text-[9px]">OR_DRAG_DATA_HERE</p>
               </div>
               
-              <div className="absolute bottom-6 right-8 text-white/20 font-black tracking-widest uppercase text-sm select-none pointer-events-none">
-                LorapokToon
-              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -1854,40 +1851,51 @@ function App() {
 
                 return (
                   <div className="relative w-full h-full flex items-center justify-center">
-                    <video
-                      ref={videoRef}
-                      src={(() => {
-                        const isStream = filePath?.match(/^https?:\/\//);
-                        const isAdaptive = filePath?.includes('.m3u8') || filePath?.includes('.mpd');
+                      {filePath?.match(/\.(gif|webp|png|jpe?g)$/i) ? (
+                        <img
+                          src={(() => {
+                            if (filePath?.match(/^https?:\/\//)) return filePath;
+                            if (filePath?.startsWith('media://')) return filePath;
+                            return `media://${filePath}`;
+                          })()}
+                          className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
+                          style={{
+                            boxShadow: `0 0 80px -20px ${ambientColor}`,
+                            aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
+                            objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
+                          }}
+                        />
+                      ) : (
+                        <video
+                          ref={videoRef}
+                          src={(() => {
+                            const isStream = filePath?.match(/^https?:\/\//);
+                            const isAdaptive = filePath?.includes('.m3u8') || filePath?.includes('.mpd');
 
-                        if (isStream) {
-                          // If adaptive, let HLS.js/Dash.js handle it (src = undefined usually works best for HLS.js attached media)
-                          if (isAdaptive && (Hls.isSupported() || filePath?.includes('.mpd'))) return undefined;
-                          // Otherwise (MP4, etc), return the direct URL
-                          return filePath;
-                        }
-                        // Protocol check
-                        if (filePath?.startsWith('media://')) return filePath;
-                        // Local file -> media protocol
-                        return `media://${filePath}`;
-                      })()}
-                      className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
-                      style={{
-                        boxShadow: `0 0 80px -20px ${ambientColor}`,
-                        aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
-                        objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
-                      }}
-                      onTimeUpdate={handleTimeUpdate}
-                      onLoadedMetadata={handleLoadedMetadata}
-                      onEnded={() => { playlist.length > 1 ? playNext() : setIsPlaying(false) }}
-                      onWaiting={() => setIsBuffering(true)}
-                      onPlaying={() => setIsBuffering(false)}
-                      onError={handleVideoError}
-                      onDoubleClick={toggleFullscreen}
-                      autoPlay
-                      // IMPORTANT: Only anonymous if stream, to prevent canvas tainting
-                      crossOrigin={filePath?.match(/^https?:\/\//) ? "anonymous" : undefined}
-                    />
+                            if (isStream) {
+                              if (isAdaptive && (Hls.isSupported() || filePath?.includes('.mpd'))) return undefined;
+                              return filePath;
+                            }
+                            if (filePath?.startsWith('media://')) return filePath;
+                            return `media://${filePath}`;
+                          })()}
+                          className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
+                          style={{
+                            boxShadow: `0 0 80px -20px ${ambientColor}`,
+                            aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
+                            objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
+                          }}
+                          onTimeUpdate={handleTimeUpdate}
+                          onLoadedMetadata={handleLoadedMetadata}
+                          onEnded={() => { playlist.length > 1 ? playNext() : setIsPlaying(false) }}
+                          onWaiting={() => setIsBuffering(true)}
+                          onPlaying={() => setIsBuffering(false)}
+                          onError={handleVideoError}
+                          onDoubleClick={toggleFullscreen}
+                          crossOrigin={filePath?.match(/^https?:\/\//) ? "anonymous" : undefined}
+                          autoPlay
+                        />
+                      )}
 
                     {/* Buffering Overlay */}
                     {isBuffering && !codecError && (
@@ -2301,7 +2309,12 @@ function App() {
               />
             )
           }
-        </AnimatePresence >
+        </AnimatePresence>
+
+        {/* Global LorapokToon Watermark */}
+        <div className="absolute bottom-6 right-8 text-white/20 font-black tracking-widest uppercase text-sm select-none pointer-events-none z-50">
+          LorapokToon
+        </div>
       </main >
     </div >
   )
