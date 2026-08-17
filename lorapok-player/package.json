@@ -1,7 +1,7 @@
 {
   "name": "lorapokmediaplayer",
   "private": true,
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "A cross-platform media player with Organic Intelligence aesthetic.",
   "author": "Lorapok Labs <contact@lorapok.tech>",
   "type": "module",
