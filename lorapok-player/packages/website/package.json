@@ -6,6 +6,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "prebuild": "bash scripts/generate_demos.sh",
         "build": "tsc && vite build",
         "preview": "vite preview"
     },

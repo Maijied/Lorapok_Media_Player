@@ -5,7 +5,7 @@ import type { LorapokPlayerRef } from 'lorapok-player'
 import { Download, Zap, Cpu, Globe, Keyboard, Info, CheckCircle } from 'lucide-react'
 
 function App() {
-    const [demoUrl, setDemoUrl] = useState("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+    const [demoUrl, setDemoUrl] = useState("/demos/neon_waves.mp4")
     const [customUrl, setCustomUrl] = useState("")
     const playerRef = useRef<LorapokPlayerRef>(null)
 
@@ -106,14 +106,9 @@ function App() {
                         {/* Sample Streams Gallery */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             {[
-                                { label: 'MP4 • Big Buck Bunny', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', type: 'MP4' },
-                                { label: 'MP4 • Sintel', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', type: 'MP4' },
-                                { label: 'WebM • Tears of Steel', url: 'https://media.xiph.org/tearsofsteel/tearsofsteel_720p.webm', type: 'WEBM' },
-                                { label: 'HLS • Mux Test', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'HLS' },
-                                { label: 'HLS • Apple Demo', url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8', type: 'HLS' },
-                                { label: 'HLS • Sintel', url: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8', type: 'HLS' },
-                                { label: 'DASH • BBB 30fps', url: 'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd', type: 'DASH' },
-                                { label: 'DASH • Sintel', url: 'https://bitdash-a.akamaihd.net/content/sintel/sintel.mpd', type: 'DASH' },
+                                { label: 'MP4 • Neon Waves', url: '/demos/neon_waves.mp4', type: 'MP4' },
+                                { label: 'HLS • Cyber Grid', url: '/demos/hls/cyber_grid.m3u8', type: 'HLS' },
+                                { label: 'DASH • Fractal', url: '/demos/dash/fractal_dash.mpd', type: 'DASH' },
                             ].map((stream, idx) => (
                                 <button
                                     key={idx}

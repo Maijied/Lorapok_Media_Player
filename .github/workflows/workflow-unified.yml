@@ -1,0 +1,309 @@
+name: Lorapok CI/CD
+
+on:
+  push:
+    branches: ["main"]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ci-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-desktop:
+    name: Build Desktop (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: lorapok-player/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: lorapok-player
+        run: npm ci
+
+      - name: Update Themed Button Version (Linux Only)
+        if: runner.os == 'Linux'
+        working-directory: lorapok-player
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          sed "s/{{VERSION}}/$VERSION/g" assets/btn-download.svg.template > assets/btn-download.svg
+          sed -i "s/VERSION-[0-9.]*-BC13FE/VERSION-$VERSION-BC13FE/g" README.md
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add assets/btn-download.svg README.md
+          git commit -m "build: update version to v$VERSION in assets and documentation [skip ci]" || echo "No changes to commit"
+          git push origin main || echo "No changes to push"
+
+      - name: Build Electron App
+        working-directory: lorapok-player
+        run: npm run build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Store Binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: Binaries-${{ matrix.os }}
+          path: |
+            lorapok-player/release/**/*.exe
+            lorapok-player/release/**/*.dmg
+            lorapok-player/release/**/*.AppImage
+            lorapok-player/release/**/*.deb
+            lorapok-player/release/**/*.snap
+            lorapok-player/release/**/*.zip
+
+  build-android:
+    name: Build Android (Signed Release)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: lorapok-player/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: lorapok-player
+        run: npm ci
+
+      - name: Build Web Assets
+        working-directory: lorapok-player
+        run: npm run build:only
+
+      - name: Install Capacitor & Sync
+        working-directory: lorapok-player
+        run: |
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap sync android
+
+      - name: Decode Keystore
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -di > lorapok-player/android/app/lorapok-release.jks
+          echo "ANDROID_KEYSTORE_FILE=$(pwd)/lorapok-player/android/app/lorapok-release.jks" >> $GITHUB_ENV
+
+      - name: Set Signing Env
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          echo "ANDROID_KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "ANDROID_KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "ANDROID_KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=$ANDROID_KEYSTORE_FILE -Pandroid.injected.signing.store.password=$ANDROID_KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$ANDROID_KEY_ALIAS -Pandroid.injected.signing.key.password=$ANDROID_KEY_PASSWORD
+        working-directory: ./lorapok-player/android
+
+      - name: Build Release AAB (Google Play)
+        run: ./gradlew bundleRelease -Pandroid.injected.signing.store.file=$ANDROID_KEYSTORE_FILE -Pandroid.injected.signing.store.password=$ANDROID_KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$ANDROID_KEY_ALIAS -Pandroid.injected.signing.key.password=$ANDROID_KEY_PASSWORD
+        working-directory: ./lorapok-player/android
+
+      - name: Rename Artifacts
+        working-directory: lorapok-player
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n1)
+          if [ -n "$APK" ]; then
+            cp "$APK" "android/app/build/outputs/LorapokPlayer-v${VERSION}-release.apk"
+          fi
+          AAB=$(find android/app/build/outputs/bundle/release -name "*.aab" | head -n1)
+          if [ -n "$AAB" ]; then
+            cp "$AAB" "android/app/build/outputs/LorapokPlayer-v${VERSION}-release.aab"
+          fi
+
+      - name: Store APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lorapok-Android
+          path: |
+            lorapok-player/android/app/build/outputs/LorapokPlayer-*.apk
+            lorapok-player/android/app/build/outputs/LorapokPlayer-*.aab
+
+      - name: Fallback Debug Build
+        if: failure()
+        run: |
+          cd lorapok-player/android && ./gradlew assembleDebug
+          VERSION=$(node -p "require('../package.json').version")
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/LorapokPlayer-v${VERSION}-debug.apk
+
+      - name: Store Debug APK (Fallback)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lorapok-Android
+          path: lorapok-player/android/app/build/outputs/LorapokPlayer-*-debug.apk
+
+  release-rolling:
+    name: Update Rolling Release
+    needs: [build-desktop, build-android]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: List artifacts
+        run: find artifacts -type f | sort
+
+      - name: Create/Update Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
+          name: ${{ github.ref_type == 'tag' && format('Lorapok Player {0}', github.ref_name) || 'Lorapok Player (Latest Build)' }}
+          body: |
+            ## Lorapok Player by Lorapok Labs
+            
+            ${{ github.ref_type == 'tag' && format('Official stable release {0}.', github.ref_name) || '🚀 Rolling release — latest successful build from main.' }}
+            
+            ### Downloads
+            | Platform | File |
+            |----------|------|
+            | 🪟 Windows | `LorapokMediaPlayer-Windows-Setup.exe` |
+            | 🍎 macOS | `LorapokMediaPlayer-Mac-Installer.dmg` |
+            | 🐧 Linux | `LorapokMediaPlayer-Linux.AppImage` / `.deb` |
+            | 🤖 Android | `LorapokPlayer-*-release.apk` |
+            
+            Website: https://lorapok.tech
+          files: |
+            artifacts/**/*.exe
+            artifacts/**/*.dmg
+            artifacts/**/*.AppImage
+            artifacts/**/*.deb
+            artifacts/**/*.snap
+            artifacts/**/*.zip
+            artifacts/**/*.apk
+            artifacts/**/*.aab
+          make_latest: ${{ github.ref_type == 'tag' && 'true' || 'false' }}
+          prerelease: ${{ github.ref_type != 'tag' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-site:
+    name: Build & Deploy Website
+    needs: release-rolling
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+          cache-dependency-path: lorapok-player/packages/website/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: lorapok-player/packages/website
+        run: npm ci
+
+      - name: Generate Demos & Build Website
+        working-directory: lorapok-player/packages/website
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './lorapok-player/packages/website/dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  publish-package:
+    name: Publish to NPM
+    needs: build-desktop
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install Dependencies
+        working-directory: ./lorapok-player
+        run: npm ci
+
+      - name: Build Library
+        working-directory: ./lorapok-player
+        run: npm run build
+
+      - name: Publish to NPM
+        working-directory: ./lorapok-player
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-snap:
+    name: Publish to Snap Store
+    needs: build-desktop
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Snap Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Binaries-ubuntu-latest
+          path: release
+
+      - name: Resolve Snap Package
+        id: snap_resolver
+        run: |
+          SNAP_PATH=$(find release -name "*.snap" -type f | head -n 1)
+          echo "path=$SNAP_PATH" >> $GITHUB_OUTPUT
+
+      - name: Publish to Snap Store
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        with:
+          snap: ${{ steps.snap_resolver.outputs.path }}
+          release: stable
