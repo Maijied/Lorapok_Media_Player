@@ -1,0 +1,316 @@
+name: Lorapok CI/CD
+
+on:
+  push:
+    branches: ["main"]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ci-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-desktop:
+    name: Build Desktop (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Update Themed Button Version (Linux Only)
+        if: runner.os == 'Linux'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          sed "s/{{VERSION}}/$VERSION/g" assets/btn-download.svg.template > assets/btn-download.svg
+          sed -i "s/VERSION-[0-9.]*-BC13FE/VERSION-$VERSION-BC13FE/g" README.md
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add assets/btn-download.svg README.md
+          git commit -m "build: update version to v$VERSION in assets and documentation [skip ci]" || echo "No changes to commit"
+          git push origin main || echo "No changes to push"
+
+      - name: Build Electron App
+        run: npm run build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Store Binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: Binaries-${{ matrix.os }}
+          path: |
+            release/**/*.exe
+            release/**/*.dmg
+            release/**/*.AppImage
+            release/**/*.deb
+            release/**/*.snap
+            release/**/*.zip
+
+  build-android:
+    name: Build Android (Signed Release)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Web Assets
+        run: npm run build:only
+
+      - name: Install Capacitor & Sync
+        run: |
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap sync android
+
+      - name: Decode Keystore
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > ./android/app/lorapok-release.jks
+          echo "ANDROID_KEYSTORE_FILE=$(pwd)/android/app/lorapok-release.jks" >> $GITHUB_ENV
+
+      - name: Set Signing Env
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "ANDROID_KEYSTORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "ANDROID_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "ANDROID_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+        working-directory: ./android
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ env.ANDROID_KEYSTORE_FILE }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ env.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ env.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ env.ANDROID_KEY_PASSWORD }}
+
+      - name: Build Release AAB (Google Play)
+        run: ./gradlew bundleRelease
+        working-directory: ./android
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ env.ANDROID_KEYSTORE_FILE }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ env.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ env.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ env.ANDROID_KEY_PASSWORD }}
+
+      - name: Rename Artifacts
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          # Find and rename APK
+          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n1)
+          if [ -n "$APK" ]; then
+            cp "$APK" "android/app/build/outputs/LorapokPlayer-v${VERSION}-release.apk"
+          fi
+          # Find and rename AAB
+          AAB=$(find android/app/build/outputs/bundle/release -name "*.aab" | head -n1)
+          if [ -n "$AAB" ]; then
+            cp "$AAB" "android/app/build/outputs/LorapokPlayer-v${VERSION}-release.aab"
+          fi
+
+      - name: Store APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lorapok-Android
+          path: |
+            android/app/build/outputs/LorapokPlayer-*.apk
+            android/app/build/outputs/LorapokPlayer-*.aab
+
+      - name: Fallback Debug Build
+        if: failure()
+        run: |
+          cd android && ./gradlew assembleDebug
+          VERSION=$(node -p "require('../package.json').version")
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/LorapokPlayer-v${VERSION}-debug.apk
+
+      - name: Store Debug APK (Fallback)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lorapok-Android
+          path: android/app/build/outputs/LorapokPlayer-*-debug.apk
+
+  release-rolling:
+    name: Update Rolling Release
+    needs: [build-desktop, build-android]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (for version)
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: List artifacts
+        run: find artifacts -type f | sort
+
+      - name: Create/Update Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
+          name: ${{ github.ref_type == 'tag' && format('Lorapok Player {0}', github.ref_name) || 'Lorapok Player (Latest Build)' }}
+          body: |
+            ## Lorapok Player by Lorapok Labs
+            
+            ${{ github.ref_type == 'tag' && format('Official stable release {0}.', github.ref_name) || '🚀 Rolling release — latest successful build from main.' }}
+            
+            ### Downloads
+            | Platform | File |
+            |----------|------|
+            | 🪟 Windows | `LorapokMediaPlayer-Windows-Setup.exe` |
+            | 🍎 macOS | `LorapokMediaPlayer-Mac-Installer.dmg` |
+            | 🐧 Linux | `LorapokMediaPlayer-Linux.AppImage` / `.deb` |
+            | 🤖 Android | `LorapokPlayer-*-release.apk` |
+            
+            Website: https://lorapok.tech
+          files: |
+            artifacts/**/*.exe
+            artifacts/**/*.dmg
+            artifacts/**/*.AppImage
+            artifacts/**/*.deb
+            artifacts/**/*.snap
+            artifacts/**/*.zip
+            artifacts/**/*.apk
+            artifacts/**/*.aab
+          make_latest: ${{ github.ref_type == 'tag' && 'true' || 'false' }}
+          prerelease: ${{ github.ref_type != 'tag' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-site:
+    name: Build & Deploy Website (lorapok.tech)
+    needs: release-rolling
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Player lib
+        working-directory: ./packages/lorapok-player
+        run: |
+          npm install
+          npm run build
+
+      - name: Build Website
+        working-directory: ./packages/website
+        run: |
+          npm install
+          npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './packages/website/dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  publish-package:
+    name: Publish to NPM
+    needs: build-desktop
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Library
+        working-directory: ./packages/lorapok-player
+        run: |
+          npm install
+          npm run build
+
+      - name: Publish to NPM
+        working-directory: ./packages/lorapok-player
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-snap:
+    name: Publish to Snap Store
+    needs: build-desktop
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Snap Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Binaries-ubuntu-latest
+          path: release
+
+      - name: Resolve Snap Package
+        id: snap_resolver
+        run: |
+          SNAP_PATH=$(find release -name "*.snap" -type f | head -n 1)
+          echo "path=$SNAP_PATH" >> $GITHUB_OUTPUT
+
+      - name: Publish to Snap Store
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        with:
+          snap: ${{ steps.snap_resolver.outputs.path }}
+          release: stable
