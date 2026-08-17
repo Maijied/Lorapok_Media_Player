@@ -126,22 +126,22 @@ function test_features() {
     
     declare -A stream_urls=(
         # Progressive Video
-        ["MP4 • Big Buck Bunny"]="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-        ["MP4 • Sintel"]="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
-        ["WebM • Tears of Steel"]="https://media.xiph.org/tearsofsteel/tearsofsteel_720p.webm"
+        ["MP4 • Oceans"]="https://vjs.zencdn.net/v/oceans.mp4"
+        ["MP4 • Flower"]="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+        ["WebM • Flower"]="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm"
         
         # HLS (M3U8) Streams
         ["HLS • Apple Official"]="https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8"
         ["HLS • Apple Advanced"]="https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8"
         ["HLS • Mux Test"]="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
         ["HLS • Mux ToS"]="https://test-streams.mux.dev/tos_ismc/main.m3u8"
-        ["HLS • Sintel"]="https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8"
+        ["HLS • JWPlayer BipBop"]="https://playertest.longtailvideo.com/adaptive/bipbop/gear4/prog_index.m3u8"
         ["HLS • Akamai Live"]="https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"
         
         # MPEG-DASH (MPD) Streams
         ["DASH • BBB 30fps"]="https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"
-        ["DASH • Sintel"]="https://bitdash-a.akamaihd.net/content/sintel/sintel.mpd"
-        ["DASH • Tears of Steel"]="https://www.bok.net/dash/tears_of_steel/cleartext/stream.mpd"
+        ["DASH • Qualcomm MultiRes"]="https://dash.akamaized.net/dash264/TestCases/2c/qualcomm/1/MultiRes.mpd"
+        ["DASH • Tears of Steel Cleartext"]="https://www.bok.net/dash/tears_of_steel/cleartext/stream.mpd"
         ["DASH • Qualcomm MultiRate"]="http://dash.akamaized.net/dash264/TestCases/1a/qualcomm/1/MultiRate.mpd"
     )
 
