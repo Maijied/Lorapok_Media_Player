@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LorapokPlayer, Logo } from 'lorapok-player'
 import type { LorapokPlayerRef } from 'lorapok-player'
@@ -16,6 +16,21 @@ function App() {
     const [customUrl, setCustomUrl] = useState("")
     const [activeFaq, setActiveFaq] = useState<number | null>(null)
     const playerRef = useRef<LorapokPlayerRef>(null)
+
+    const [latestVersion, setLatestVersion] = useState("v1.4.0");
+    const [releaseAssets, setReleaseAssets] = useState<any[]>([]);
+
+    useEffect(() => {
+        fetch('https://api.github.com/repos/Maijied/Lorapok_Media_Player/releases/latest')
+            .then(res => res.json())
+            .then(data => {
+                if (data.tag_name) {
+                    setLatestVersion(data.tag_name);
+                    setReleaseAssets(data.assets || []);
+                }
+            })
+            .catch(err => console.error("Failed to fetch latest release:", err));
+    }, []);
 
     // Android Update Notification State
     const [showAndroidNotice, setShowAndroidNotice] = useState(() => {
@@ -116,12 +131,18 @@ function App() {
             <main className="relative z-10 max-w-7xl mx-auto px-6 py-20 flex flex-col gap-32">
 
                 {/* Hero Section */}
-                <section className="flex flex-col items-center text-center gap-8 pt-10 min-h-[70vh] justify-center">
+                <section className="flex flex-col items-center text-center gap-8 pt-10 min-h-[70vh] justify-center relative">
+                    {/* Background Hero Image */}
+                    <div className="absolute inset-0 z-0 flex items-center justify-center opacity-30 pointer-events-none overflow-hidden mix-blend-screen">
+                        <img src="/images/hero.png" className="w-full h-full object-cover blur-sm scale-110" alt="Lorapok Hero Background" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-[#030305] via-transparent to-[#030305]" />
+                    </div>
+
                     <motion.div
                         initial={{ opacity: 0, scale: 0.8, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         transition={{ duration: 1, ease: "easeOut" }}
-                        className="relative"
+                        className="relative z-10"
                     >
                         <div className="absolute inset-0 bg-neon-cyan/30 blur-3xl animate-pulse" />
                         <Logo className="w-48 h-48 relative z-10 drop-shadow-[0_0_50px_rgba(0,243,255,0.5)]" />
@@ -131,12 +152,12 @@ function App() {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="space-y-6 max-w-5xl px-4"
+                        className="space-y-6 max-w-5xl px-4 relative z-10"
                     >
                         <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-black tracking-[-0.04em] text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/40 leading-[0.9] uppercase">
                             Supercomputing<br />Media Engine
                         </h1>
-                        <p className="text-xl md:text-2xl text-neon-cyan font-mono tracking-wide">
+                        <p className="text-xl md:text-2xl text-neon-cyan font-mono tracking-wide drop-shadow-[0_0_10px_rgba(0,243,255,0.5)]">
                             Biological Aesthetics meets Ultra-Performance Playback
                         </p>
                     </motion.div>
@@ -145,7 +166,7 @@ function App() {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.4 }}
-                        className="flex flex-wrap gap-4 mt-8"
+                        className="flex flex-wrap gap-4 mt-8 relative z-10"
                     >
                         <a href="#demo" className="px-10 py-5 bg-neon-cyan text-midnight font-black rounded-full transition-all flex items-center gap-2 shadow-[0_0_30px_rgba(0,243,255,0.4)] hover:bg-white hover:scale-105 active:scale-95">
                             <Zap className="w-5 h-5 fill-current" />
@@ -235,9 +256,13 @@ function App() {
                     whileInView="visible"
                     viewport={{ once: true, margin: "-100px" }}
                     id="features" 
-                    className="scroll-mt-32"
+                    className="scroll-mt-32 relative"
                 >
-                    <div className="text-center mb-16 space-y-4">
+                    <div className="absolute -right-32 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none mix-blend-screen z-0 hidden lg:block">
+                        <img src="/images/promo.png" className="max-w-[500px] blur-[1px]" alt="Lorapok Promo" />
+                    </div>
+
+                    <div className="text-center mb-16 space-y-4 relative z-10">
                         <h2 className="text-4xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">Engine Capabilities</h2>
                         <p className="text-white/50 font-mono">Next-generation features for uncompromising performance.</p>
                     </div>
@@ -363,30 +388,40 @@ function App() {
                         </div>
                         <h2 className="text-4xl font-black uppercase tracking-tight">Download the App</h2>
                         <div className="flex gap-2 items-center">
-                            <span className="px-4 py-1.5 bg-white/10 rounded-full text-xs font-mono text-cyan-400 border border-white/10 uppercase tracking-widest">Stable Release v1.4.0</span>
+                            <span className="px-4 py-1.5 bg-white/10 rounded-full text-xs font-mono text-cyan-400 border border-white/10 uppercase tracking-widest flex items-center gap-2">
+                                <Zap className="w-3 h-3 fill-current" /> Stable Release {latestVersion}
+                            </span>
                         </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
                         {[
-                            { os: 'Windows', ext: '.exe', file: 'Windows-Setup.exe' },
-                            { os: 'macOS', ext: '.dmg', file: 'Mac-Installer.dmg' },
-                            { os: 'Linux', ext: '.AppImage', file: 'Linux.AppImage' },
-                            { os: 'Android', ext: '.apk', file: 'release.apk' }
-                        ].map((build) => (
-                            <a
-                                key={build.os}
-                                href={`https://github.com/Maijied/Lorapok_Media_Player/releases/download/latest/LorapokMediaPlayer-${build.file}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-6 bg-black/40 border border-white/10 rounded-2xl hover:bg-neon-cyan/10 hover:border-neon-cyan/50 transition-all group flex flex-col items-center text-center gap-4"
-                            >
-                                <h3 className="text-xl font-bold">{build.os}</h3>
-                                <div className="text-xs font-mono text-white/50 group-hover:text-neon-cyan transition-colors">
-                                    Get {build.ext} &rarr;
-                                </div>
-                            </a>
-                        ))}
+                            { os: 'Windows', ext: '.exe', keyword: '.exe' },
+                            { os: 'macOS', ext: '.dmg', keyword: '.dmg' },
+                            { os: 'Linux', ext: '.AppImage', keyword: '.AppImage' },
+                            { os: 'Android', ext: '.apk', keyword: '.apk' }
+                        ].map((build) => {
+                            const matchedAsset = releaseAssets.find(a => a.name.endsWith(build.keyword));
+                            const downloadUrl = matchedAsset 
+                                ? matchedAsset.browser_download_url 
+                                : `https://github.com/Maijied/Lorapok_Media_Player/releases/latest`;
+                            
+                            return (
+                                <a
+                                    key={build.os}
+                                    href={downloadUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-6 bg-black/40 border border-white/10 rounded-2xl hover:bg-neon-cyan/10 hover:border-neon-cyan/50 transition-all group flex flex-col items-center text-center gap-4 relative overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <h3 className="text-xl font-bold relative z-10">{build.os}</h3>
+                                    <div className="text-xs font-mono text-white/50 group-hover:text-neon-cyan transition-colors flex items-center gap-2 relative z-10">
+                                        <Download className="w-3 h-3" /> Get {build.ext}
+                                    </div>
+                                </a>
+                            );
+                        })}
                     </div>
                 </motion.section>
 
@@ -409,8 +444,11 @@ function App() {
             </footer>
 
             {/* LorapokToon Watermark */}
-            <div className="fixed bottom-4 right-4 z-[100] text-white/20 font-black tracking-widest pointer-events-none uppercase text-xs">
-                LorapokToon
+            <div className="fixed bottom-4 right-4 z-[100] select-none pointer-events-none flex items-center gap-2 mix-blend-screen opacity-50">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-neon-cyan to-electric-purple blur-[2px] opacity-80" />
+                <span className="text-white/60 font-black tracking-[0.2em] uppercase text-xs drop-shadow-[0_0_10px_rgba(0,243,255,0.5)]">
+                    LorapokToon
+                </span>
             </div>
         </div>
     )

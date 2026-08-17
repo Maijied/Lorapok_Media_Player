@@ -1717,9 +1717,13 @@ function App() {
 
               <div className="text-center space-y-1">
                 <h2 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">LORAPOK</h2>
-                <p className="text-[#00f3ff]/40 font-mono text-[10px] tracking-[0.2em] uppercase">Supercomputing Media Engine</p>
-                <p className="text-white/30 font-mono text-[10px] tracking-widest mt-2">A product of Lorapok Labs</p>
-                <p className="text-white/30 font-mono text-[10px] tracking-widest">url: lorapok.tech</p>
+                <p className="text-[#00f3ff]/60 font-mono text-[10px] tracking-[0.3em] uppercase drop-shadow-[0_0_10px_rgba(0,243,255,0.3)]">Supercomputing Media Engine</p>
+                
+                <div className="mt-4 flex flex-col items-center gap-1 border-t border-white/10 pt-4 w-48">
+                  <p className="text-white/40 font-mono text-[9px] tracking-[0.2em] uppercase">A product of</p>
+                  <p className="text-white/80 font-black text-xs tracking-widest uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">Lorapok Labs</p>
+                  <a href="https://lorapok.tech" target="_blank" rel="noreferrer" className="text-neon-cyan/50 hover:text-neon-cyan font-mono text-[9px] tracking-widest transition-colors mt-1 pointer-events-auto drop-shadow-[0_0_5px_rgba(0,243,255,0.3)]">lorapok.tech</a>
+                </div>
               </div>
 
               <div className="flex flex-col items-center gap-4 mt-4">
@@ -2312,8 +2316,11 @@ function App() {
         </AnimatePresence>
 
         {/* Global LorapokToon Watermark */}
-        <div className="absolute bottom-6 right-8 text-white/20 font-black tracking-widest uppercase text-sm select-none pointer-events-none z-50">
-          LorapokToon
+        <div className="absolute bottom-6 right-8 select-none pointer-events-none z-50 flex items-center gap-2 mix-blend-screen opacity-50">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-neon-cyan to-neon-magenta blur-[2px] opacity-80" />
+          <span className="text-white/60 font-black tracking-[0.2em] uppercase text-xs drop-shadow-[0_0_10px_rgba(0,243,255,0.5)]">
+            LorapokToon
+          </span>
         </div>
       </main >
     </div >

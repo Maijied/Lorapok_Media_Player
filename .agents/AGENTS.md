@@ -21,3 +21,11 @@ Always use the provided `manage_lorapok.sh` script in the project root for build
 ## Guidelines
 - When making UI changes, adhere to the "biological aesthetics" and "organic UI" design language specified in the README, leveraging Tailwind CSS and Framer Motion.
 - When working on the player core, start from `lorapok-player/` and ensure compatibility with Electron.
+
+## Lorapok Virtual Office Guidelines
+<RULE[lorapok-process-rule]>
+1. **Chain of Command**: Follow the `lorapok-workflow-orchestrator` flow strictly. Never skip the Project Architect when assigning tasks to the Specialized Developer, and never skip SQA before merging.
+2. **High-Tech Standards**: All code produced by `lorapok-specialized-developer` must adhere to SOLID principles, use modern syntax (e.g., React hooks, TypeScript strictly typed), and ensure zero-regression.
+3. **Bug Triage**: `lorapok-sqa-lead` is the only entity allowed to declare a feature complete. If bugs are found, they must be formatted in the structured Bug Report format and assigned back to the Project Architect.
+4. **CI/CD Integration**: SEO optimizations (`lorapok-seo-analyst`) must happen seamlessly during the CI/CD phase without breaking build pipelines. Use `manage_lorapok.sh build` to verify builds.
+</RULE[lorapok-process-rule]>

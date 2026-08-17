@@ -152,6 +152,12 @@ function getMediaMimeType(filePath: string): string {
     '.mka': 'audio/x-matroska',
     '.wv': 'audio/x-wavpack',
     '.ape': 'audio/x-ape',
+    // Images
+    '.gif': 'image/gif',
+    '.webp': 'image/webp',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg'
   };
   return mimeMap[ext] || 'application/octet-stream';
 }
@@ -724,7 +730,7 @@ app.whenReady().then(async () => {
           }
         }
         // Native Chromium support check (Local files only, unless forced)
-        let nativeSupport = !forceTranscode && !isRemote && ['.mp4', '.webm', '.ogg', '.mp3', '.wav', '.aac', '.flac', '.m4a', '.opus'].includes(ext)
+        let nativeSupport = !forceTranscode && !isRemote && ['.mp4', '.webm', '.ogg', '.mp3', '.wav', '.aac', '.flac', '.m4a', '.opus', '.gif', '.webp', '.png', '.jpg', '.jpeg'].includes(ext)
 
         // 🧠 DEEP PROBE: Verify Codec Safety (Fix for HEVC/AC3 hiding in MP4s)
         if (nativeSupport && ['.mp4', '.mov', '.mkv'].includes(ext)) {

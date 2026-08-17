@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "subagentStop": [
+      {
+        "command": ".cursor/hooks/lorapok-task-flow-hook.sh",
+        "matcher": "lorapok-(specialized-developer|sqa-lead|project-architect)",
+        "failClosed": false
+      }
+    ]
+  }
+}
