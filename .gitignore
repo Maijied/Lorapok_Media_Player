@@ -46,5 +46,7 @@ lorapok-player/android/local.properties
 
 # Test Media & Logs
 test_media/
+Media/*.zip
+*.zip
 *.log
 build_execution.log
