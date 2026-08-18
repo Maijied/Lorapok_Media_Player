@@ -3,7 +3,85 @@
 @tailwind utilities;
 
 @layer base {
-    body {
-        @apply bg-midnight text-white font-inter overflow-x-hidden;
+    :root {
+        --color-neon-cyan: #00f3ff;
+        --color-electric-purple: #bc13fe;
+        --color-midnight: #050510;
+        --color-surface-card: rgba(15, 18, 30, 0.75);
     }
+
+    html {
+        scroll-behavior: smooth;
+        color-scheme: dark;
+    }
+
+    body {
+        @apply bg-[#050510] text-slate-100 font-inter overflow-x-hidden antialiased selection:bg-cyan-500/30 selection:text-cyan-200;
+        background-image: 
+            radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 243, 255, 0.08), transparent 70%),
+            radial-gradient(circle at 10% 30%, rgba(188, 19, 254, 0.04), transparent 50%),
+            radial-gradient(circle at 90% 70%, rgba(0, 243, 255, 0.04), transparent 50%);
+        min-height: 100vh;
+    }
+
+    /* Custom Modern Cyberpunk Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #060714;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 9999px;
+        border: 2px solid #060714;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #00f3ff;
+    }
+}
+
+/* Modern Web Guidance: Deferred Rendering for Heavy Below-The-Fold Sections */
+.deferred-render {
+    content-visibility: auto;
+    contain-intrinsic-size: auto none auto 650px;
+}
+
+/* Glassmorphism Surface Utilities */
+.glass-panel {
+    background: rgba(13, 17, 28, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.glass-panel-hover {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+    background: rgba(18, 24, 38, 0.85);
+    border-color: rgba(0, 243, 255, 0.3);
+    box-shadow: 0 12px 32px -8px rgba(0, 243, 255, 0.12);
+}
+
+.glow-cyan {
+    box-shadow: 0 0 30px -5px rgba(0, 243, 255, 0.25);
+}
+
+.glow-purple {
+    box-shadow: 0 0 30px -5px rgba(188, 19, 254, 0.25);
+}
+
+/* Fluid Typography Utilities */
+.fluid-title {
+    font-size: clamp(2.25rem, 5vw + 1rem, 4.5rem);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+}
+
+.fluid-heading {
+    font-size: clamp(1.75rem, 3vw + 0.75rem, 3rem);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
 }

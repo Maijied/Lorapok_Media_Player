@@ -488,7 +488,7 @@ export function App() {
                 </section>
 
                 {/* Interactive Media Testing Laboratory */}
-                <section id="lab" className="scroll-mt-28 flex flex-col gap-8">
+                <section id="medialab" className="deferred-render scroll-mt-28 flex flex-col gap-8">
                     <div className="text-center space-y-3">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan text-xs font-mono uppercase tracking-widest">
                             <Radio className="w-4 h-4" /> Live Interactive Laboratory
@@ -577,7 +577,7 @@ export function App() {
                 </section>
 
                 {/* Direct Downloads Hub: Both Portable & Installable */}
-                <section id="downloads" className="scroll-mt-28 flex flex-col gap-10">
+                <section id="downloads" className="deferred-render scroll-mt-28 flex flex-col gap-10">
                     <div className="text-center space-y-3">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan text-xs font-mono uppercase tracking-widest">
                             <Download className="w-4 h-4" /> Portable & Installable Binaries
@@ -800,7 +800,7 @@ export function App() {
                 </section>
 
                 {/* Browser Extensions for All Browsers (Firefox AMO, Chrome, Edge) */}
-                <section id="extensions" className="scroll-mt-28 bg-gradient-to-br from-[#bc13fe]/10 via-white/5 to-transparent border border-white/15 rounded-3xl p-8 lg:p-12 backdrop-blur-2xl space-y-8">
+                <section id="extensions" className="deferred-render scroll-mt-28 bg-gradient-to-br from-[#bc13fe]/10 via-white/5 to-transparent border border-white/15 rounded-3xl p-8 lg:p-12 backdrop-blur-2xl space-y-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="space-y-3 max-w-2xl">
                             <div className="inline-flex items-center gap-2 text-electric-purple font-mono text-xs uppercase tracking-widest">
@@ -929,7 +929,7 @@ export function App() {
                 </section>
 
                 {/* Developer SDK & NPM Section */}
-                <section id="developer" className="scroll-mt-28 bg-white/5 border border-white/10 rounded-3xl p-8 lg:p-12 backdrop-blur-xl flex flex-col lg:flex-row gap-10">
+                <section id="developer" className="deferred-render scroll-mt-28 bg-white/5 border border-white/10 rounded-3xl p-8 lg:p-12 backdrop-blur-xl flex flex-col lg:flex-row gap-10">
                     <div className="lg:w-1/2 space-y-6 flex flex-col justify-center">
                         <div className="flex items-center gap-2 text-electric-purple font-mono text-xs uppercase tracking-widest">
                             <Code2 className="w-4 h-4" /> Standalone React NPM Library
@@ -980,7 +980,7 @@ export function App() {
                 </section>
 
                 {/* Engine Capabilities */}
-                <section id="features" className="scroll-mt-28 space-y-12">
+                <section id="features" className="deferred-render scroll-mt-28 space-y-12">
                     <div className="text-center space-y-3">
                         <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">
                             Engine Capabilities
@@ -1011,7 +1011,7 @@ export function App() {
                 </section>
 
                 {/* FAQ Section */}
-                <section id="faq" className="scroll-mt-28 max-w-3xl mx-auto w-full space-y-8">
+                <section id="faq" className="deferred-render scroll-mt-28 max-w-3xl mx-auto w-full space-y-8">
                     <div className="text-center space-y-2">
                         <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">
                             Frequently Asked Questions
