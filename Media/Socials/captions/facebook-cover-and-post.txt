@@ -1,0 +1,29 @@
+PLATFORM: Facebook Page Cover + Post
+SIZE: 1200x630
+ASSET: facebook/cover-ecosystem-1200x630.png
+
+---
+
+COVER: Lorapok Media Player INSTAR v2.0 | Lorapok Labs — Products That Feel Alive
+
+---
+
+POST:
+
+Big news from Lorapok Labs: Lorapok Media Player INSTAR v2.0 is here.
+
+A biological metamorphosis release — neural video decoding, lossless FFT audio visualizers, and a full cross-platform ecosystem.
+
+Download free (non-commercial): media.lorapok.tech
+
+Learn more: lorapok.tech
+
+---
+
+POST (cartoon family TV):
+
+Movie night upgraded. Android TV + Lorapok Instar = smooth streams, zero buffering frustration.
+
+Try INSTAR v2.0: media.lorapok.tech
+
+#LorapokLabs #Instar #MediaPlayer #AndroidTV

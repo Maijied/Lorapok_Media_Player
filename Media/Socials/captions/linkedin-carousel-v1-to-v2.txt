@@ -1,0 +1,38 @@
+PLATFORM: LinkedIn Carousel (5 slides)
+SIZE: 1200x627 each
+ASSETS: linkedin/carousel-01 through carousel-05-1200x627.png
+ANIMATED: animated/linkedin-carousel-v1-to-v2_animated.gif
+
+---
+
+POST TEXT (main):
+
+From v1.0 to INSTAR v2.0 — the Lorapok Media Player metamorphosis story.
+
+We didn't just ship a version bump. We mapped software evolution to biological instars — the growth phases of Black Soldier Fly larvae between molts.
+
+Swipe through the journey:
+1. v1.0 — where we started
+2. Planning & thinking — ecosystem design
+3. Instar growth phases — biological versioning metaphor
+4. Full ecosystem — 12+ distribution targets
+5. INSTAR v2.0 — live today
+
+Lorapok Media Player INSTAR v2.0 is an official product of Lorapok Labs.
+
+Download: https://media.lorapok.tech
+Ecosystem: https://lorapok.tech
+
+#LorapokLabs #Instar #MediaPlayer #OpenSource #BiologicalUI #ProductLaunch #DeveloperTools
+
+---
+
+SLIDE 1 CAPTION: v1.0 — The Beginning. A media player with potential, waiting for its next molt.
+
+SLIDE 2 CAPTION: Thinking & Planning. Wireframes, instar metaphors, ecosystem architecture.
+
+SLIDE 3 CAPTION: Biological Metamorphosis. Six instar phases = six stages of product growth.
+
+SLIDE 4 CAPTION: Full Ecosystem. Windows · Linux · macOS · Android · Web · Extensions · NPM · Python · PHP · VS Code.
+
+SLIDE 5 CAPTION: INSTAR v2.0 is live. Download now at media.lorapok.tech

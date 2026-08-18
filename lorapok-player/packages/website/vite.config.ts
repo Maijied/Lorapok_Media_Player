@@ -12,5 +12,36 @@ export default defineConfig({
             'react': path.resolve(__dirname, '../../node_modules/react'),
             'react-dom': path.resolve(__dirname, '../../node_modules/react-dom')
         }
+    },
+    build: {
+        target: 'esnext',
+        minify: 'esbuild',
+        cssCodeSplit: true,
+        chunkSizeWarningLimit: 600,
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                        if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+                            return 'vendor-react'
+                        }
+                        if (id.includes('framer-motion') || id.includes('motion-dom') || id.includes('motion-utils')) {
+                            return 'vendor-motion'
+                        }
+                        if (id.includes('lucide-react')) {
+                            return 'vendor-icons'
+                        }
+                        if (id.includes('hls.js') || id.includes('dashjs')) {
+                            return 'vendor-media'
+                        }
+                        if (id.includes('canvas-confetti')) {
+                            return 'vendor-confetti'
+                        }
+                        return 'vendor-deps'
+                    }
+                }
+            }
+        }
     }
 })
+

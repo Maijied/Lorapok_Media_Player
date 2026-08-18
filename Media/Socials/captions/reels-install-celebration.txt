@@ -1,0 +1,28 @@
+PLATFORM: Instagram Reels / TikTok
+SIZE: 1080x1920
+ASSETS: reels-install-celebration-1080x1920.png, animated/cartoons-performance_animated.gif
+
+---
+
+ON-SCREEN TEXT (Reels):
+
+INSTAR v2.0 dropped
+snap install lorapokmediaplayer
+npm install lorapok-player
+media.lorapok.tech
+
+---
+
+CAPTION:
+
+Installing Lorapok Media Player INSTAR v2.0 in 10 seconds.
+
+Lorapok Labs official release — Linux Snap, NPM, Python pip, PHP Composer, VS Code, browser extensions, all in one ecosystem.
+
+Link in bio: media.lorapok.tech
+
+#Instar #LorapokLabs #MediaPlayer #DevTools #Linux #NPM
+
+---
+
+AUDIO SUGGESTION: upbeat tech / synthwave instrumental

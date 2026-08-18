@@ -1,0 +1,45 @@
+# Lorapok Media Player INSTAR v2.0 — Social Asset Index
+
+Official product of Lorapok Labs (lorapok.tech)
+
+## Folder structure
+
+| Folder | Contents |
+|--------|----------|
+| `instagram/` | 1080x1080 posts, 1080x1350 portrait, 1080x1920 stories/reels |
+| `linkedin/` | 1200x627 carousel slides + cover |
+| `twitter/` | 1600x900 header + posts |
+| `facebook/` | 1200x630 cover |
+| `cartoons/` | Cartoon human + Instar performance illustrations |
+| `storyboard/` | v1 → planning → instar → ecosystem → launch (5 frames) |
+| `animated/` | GIF/WebP loops + LinkedIn carousel animation |
+| `captions/` | Ready-to-paste post text per platform |
+| `references/` | Example carousel style from Lorapok/media player/Example |
+
+## Key animated assets
+
+- `animated/linkedin-carousel-v1-to-v2_animated.gif` — full storyboard carousel
+- `animated/hero-branding_animated.webp` — hero breathe loop
+- `animated/logo-mark_animated.webp` — larva logo loop
+- `animated/cartoons-performance_animated.gif` — cartoon 3-slide loop
+
+## Storyboard sequence (v1 → v2)
+
+1. `storyboard-01-v1-legacy` — Version 1.0 beginning
+2. `storyboard-02-planning` — Thinking & planning Instar
+3. `storyboard-03-instar-growth` — Biological instar phases
+4. `storyboard-04-ecosystem` — Full distribution ecosystem
+5. `storyboard-05-launch-celebration` — INSTAR v2.0 live celebration
+
+## Platform size reference
+
+| Platform | Size | Folder file suffix |
+|----------|------|-------------------|
+| Instagram Post | 1080×1080 | `-1080x1080.png` |
+| Instagram Portrait | 1080×1350 | `-1080x1350.png` |
+| Story / Reels | 1080×1920 | `-1080x1920.png` |
+| LinkedIn | 1200×627 | `-1200x627.png` |
+| Twitter/X | 1600×900 | `-1600x900.png` |
+| Facebook | 1200×630 | `-1200x630.png` |
+
+Download: https://media.lorapok.tech

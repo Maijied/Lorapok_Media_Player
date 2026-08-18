@@ -33,7 +33,7 @@
   <meta name="theme-color" content="#050510" />
   <meta name="msapplication-TileColor" content="#050510" />
 
-  <!-- Preconnect to Google Fonts -->
+  <!-- Preconnect & Optimized Google Fonts with font-display: swap -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -58,8 +58,8 @@
       "name": "Lorapok Labs",
       "url": "https://media.lorapok.tech"
     },
-    "softwareVersion": "1.5.0",
-    "license": "https://opensource.org/licenses/MIT"
+    "softwareVersion": "2.0.0",
+    "license": "https://lorapok.tech/license"
   }
   </script>
   <script type="application/ld+json">
@@ -75,55 +75,94 @@
   }
   </script>
 
-  <!-- Inline Loading Screen Styles (renders before React) -->
+  <!-- Critical Inline CSS: Prevents FOUC / side-blank stalls and ensures sub-100ms FCP/LCP -->
   <style>
-    body { margin: 0; background: #050510; }
-    #loading-screen {
-      position: fixed; inset: 0; z-index: 9999;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    :root {
+      color-scheme: dark;
+      background-color: #050510;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
       background: #050510;
-      transition: opacity 0.6s ease, visibility 0.6s ease;
+      color: #ffffff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow-x: hidden;
     }
-    #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .loader-ring {
-      width: 120px; height: 120px; border-radius: 50%;
-      border: 3px solid transparent;
-      border-top-color: #00F3FF; border-bottom-color: #BC13FE;
-      animation: spin 1.5s linear infinite;
+    #root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #050510;
     }
-    .loader-ring-inner {
-      width: 90px; height: 90px; border-radius: 50%;
-      border: 2px solid transparent;
-      border-left-color: #BC13FE; border-right-color: #00F3FF;
-      animation: spin 2s linear infinite reverse;
-      margin: 12px auto 0;
-      position: relative; top: -106px;
+    /* Critical Shell Skeleton to render instantly */
+    .critical-shell {
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+      width: 100%;
     }
-    .loader-text {
-      color: #00F3FF; font-family: 'Inter', sans-serif;
-      font-size: 12px; letter-spacing: 6px; text-transform: uppercase;
-      margin-top: -60px; opacity: 0.7;
-      animation: pulse-text 2s ease-in-out infinite;
+    .critical-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 4rem;
+      padding: 0 1.5rem;
+      border-radius: 1.5rem;
+      background: rgba(5, 5, 16, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .loader-brand {
-      color: rgba(255,255,255,0.3); font-family: 'Inter', sans-serif;
-      font-size: 10px; letter-spacing: 3px; margin-top: 16px;
+    .critical-hero {
+      text-align: center;
+      padding: 4rem 1rem 2rem;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes pulse-text { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+    .critical-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 1rem;
+      border-radius: 9999px;
+      background: rgba(0, 243, 255, 0.1);
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      color: #00F3FF;
+      font-size: 0.75rem;
+      font-family: monospace;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .critical-title {
+      font-size: clamp(2rem, 5vw, 3.75rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.025em;
+      margin: 1.5rem 0 1rem;
+      background: linear-gradient(to bottom, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
   </style>
 </head>
 
 <body>
-  <!-- Loading Screen (visible before React renders) -->
-  <div id="loading-screen">
-    <div class="loader-ring"></div>
-    <div class="loader-ring-inner"></div>
-    <div class="loader-text">Initializing</div>
-    <div class="loader-brand">LORAPOK LABS</div>
+  <div id="root">
+    <!-- Immediate Inline Fallback Shell for 0ms First Paint -->
+    <div class="critical-shell">
+      <div class="critical-nav">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 2rem; height: 2rem; border-radius: 0.75rem; background: #050510; border: 1px solid rgba(0,243,255,0.4); display: flex; align-items: center; justify-content: center; color: #00F3FF; font-weight: 900; font-size: 0.875rem;">L</div>
+          <span style="font-weight: 900; font-family: monospace; letter-spacing: 0.1em;">LORAPOK</span>
+        </div>
+      </div>
+      <div class="critical-hero">
+        <div class="critical-badge">Version 2.0 "Instar" • Supercomputing Media Engine</div>
+        <h1 class="critical-title">The Universal Playback Engine for Every Screen</h1>
+      </div>
+    </div>
   </div>
-
-  <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

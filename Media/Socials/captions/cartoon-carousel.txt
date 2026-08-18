@@ -1,0 +1,23 @@
+PLATFORM: Cartoon series (Instagram carousel)
+ASSETS: cartoons/*.png, animated/cartoons-performance_animated.gif
+
+---
+
+CAROUSEL POST TEXT:
+
+3 ways humans are enjoying Lorapok Media Player INSTAR v2.0
+
+Slide 1 — Gamer: 8K 60FPS GPU power, zero lag
+Slide 2 — Audiophile: 32-band neural audio visualizer
+Slide 3 — Family: Android TV leanback, smooth streams
+
+Official product of Lorapok Labs.
+media.lorapok.tech
+
+#LorapokLabs #Instar #8K #NeuralAudio #AndroidTV
+
+---
+
+SLIDE 1: cartoon-gamer-8k
+SLIDE 2: cartoon-audio-enjoying
+SLIDE 3: cartoon-family-android-tv

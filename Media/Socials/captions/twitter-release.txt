@@ -1,0 +1,37 @@
+PLATFORM: Twitter / X
+SIZE: 1600x900 header + 1600x900 post
+ASSETS: twitter/header-instar-1600x900.png, post-release-1600x900.png
+
+---
+
+HEADER: Lorapok Media Player INSTAR v2.0 | Lorapok Labs
+
+---
+
+TWEET (release):
+
+INSTAR v2.0 is live.
+
+Lorapok Media Player — biological supercomputing media engine by Lorapok Labs.
+
+8K GPU · Neural audio visualizer · HLS/DASH · Android TV · Snap · VS Code · NPM · Python · PHP · Firefox/Chrome/Edge extensions
+
+media.lorapok.tech
+
+---
+
+TWEET (cartoon / performance):
+
+8K at 60fps. Zero drama.
+
+Cartoon humans approve. Larva mascot approves.
+
+INSTAR v2.0 → media.lorapok.tech
+
+#LorapokLabs #Instar
+
+---
+
+THREAD HOOK:
+
+We named our v2.0 "Instar" after BSF larva growth phases. Here's why that metaphor maps perfectly to software versioning. [carousel link]

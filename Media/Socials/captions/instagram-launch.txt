@@ -1,0 +1,32 @@
+PLATFORM: Instagram (Post + Story)
+SIZE: 1080x1080 / 1080x1920
+ASSETS: instagram/post-hero-branding-1080x1080.png, story-cartoon-enjoying-1080x1920.png
+
+---
+
+CAPTION (Post):
+
+A new instar begins. Lorapok Media Player INSTAR v2.0 is live.
+
+Official product of Lorapok Labs — biological supercomputing meets sensory computing UI.
+
+8K GPU playback · 32-band neural audio · HLS/DASH streams · Android TV · VS Code · NPM · Python · PHP · Browser extensions.
+
+Download: media.lorapok.tech
+Lorapok Labs: lorapok.tech
+
+#LorapokLabs #Instar #MediaPlayer #OpenSource #BiologicalUI #SensoryComputing #8K #DeveloperTools #AndroidTV
+
+---
+
+STORY TEXT (overlay suggestion):
+
+SWIPE UP
+INSTAR v2.0
+media.lorapok.tech
+
+---
+
+HASHTAGS (max 5 for story):
+
+#LorapokLabs #Instar #MediaPlayer #8K #Lorapok

@@ -1,0 +1,17 @@
+PLATFORM: Instagram Post (Cartoon)
+SIZE: 1080x1080
+ASSET: post-cartoon-performance-1080x1080.png
+
+---
+
+CAPTION:
+
+Your media player just molted.
+
+Meet INSTAR v2.0 — Lorapok Media Player's biggest metamorphosis yet. Smoother 8K, sharper audio, and a UI that actually feels alive.
+
+A product of Lorapok Labs.
+
+Try it: media.lorapok.tech
+
+#LorapokLabs #Instar #MediaPlayer #8K #CartoonTech #BetterPerformance

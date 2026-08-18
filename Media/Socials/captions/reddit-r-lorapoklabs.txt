@@ -1,0 +1,30 @@
+PLATFORM: Reddit r/LorapokLabs
+ASSETS: linkedin/post-ecosystem-1200x627.png or instagram/post-hero-branding-1080x1080.png
+
+---
+
+TITLE:
+
+[Release] Lorapok Media Player INSTAR v2.0 — Biological Metamorphosis Release (Lorapok Labs)
+
+---
+
+BODY:
+
+Version "Instar" (v2.0) marks a major metamorphosis in the Lorapok ecosystem. Inspired by the distinct biological growth phases of Hermetia illucens (Black Soldier Fly) larvae between molts.
+
+What's new in INSTAR v2.0:
+- 8K / 4K 60FPS GPU-accelerated video
+- Adaptive HLS & MPEG-DASH neural stream engine
+- 32-band real-time FFT audio visualizer
+- Android TV Leanback + mobile touch gestures
+- Full ecosystem: Windows, Linux, macOS, Android, Web, Snap, VS Code, NPM, Yarn, Python pip, PHP Composer, Firefox/Chrome/Edge extensions
+
+Official product of Lorapok Labs.
+- Web: https://media.lorapok.tech
+- Releases: https://github.com/Maijied/Lorapok_Media_Player/releases/tag/v2.0.0
+- Lorapok Labs: https://lorapok.tech
+
+License: Lorapok Labs Non-Commercial (LL-NC-1.0) — personal & non-commercial use.
+
+Feedback welcome — this collective builds in the open.

@@ -1,7 +1,7 @@
 {
   "version": "2.0.0",
   "releaseName": "Lorapok 2.0.0 Neural Release",
-  "updatedAt": "2026-08-18T16:37:36.339Z",
+  "updatedAt": "2026-08-18T16:58:00.176Z",
   "platforms": {
     "windows": {
       "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer-Windows-Setup.exe",
@@ -72,39 +72,39 @@
       }
     },
     "android": {
-      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-universal-release.apk",
-      "size": "2.8 MB",
+      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-universal-release-unsigned.apk",
+      "size": "18.8 MB",
       "universal": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-universal-release.apk",
-        "size": "2.8 MB",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-universal-release-unsigned.apk",
+        "size": "18.8 MB",
         "label": "Universal APK",
         "badge": "INSTALLABLE",
         "desc": "Compatible with all Android phones, tablets & TV"
       },
       "arm64": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-arm64-v8a-release.apk",
-        "size": "2.8 MB",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-arm64-v8a-release-unsigned.apk",
+        "size": "3.2 MB",
         "label": "ARM64-v8a APK",
         "badge": "INSTALLABLE",
         "desc": "Native 64-bit performance for modern Android flagships"
       },
       "armv7": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-armeabi-v7a-release.apk",
-        "size": "2.8 MB",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-armeabi-v7a-release-unsigned.apk",
+        "size": "3.2 MB",
         "label": "ARMv7 APK",
         "badge": "INSTALLABLE",
         "desc": "For legacy Android devices & TV sticks"
       },
       "x86_64": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-x86_64-release.apk",
-        "size": "2.8 MB",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-x86_64-release-unsigned.apk",
+        "size": "3.2 MB",
         "label": "x86_64 APK",
         "badge": "INSTALLABLE",
         "desc": "For Android emulators and ChromeOS"
       },
       "aab": {
         "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-release.aab",
-        "size": "3.3 MB",
+        "size": "3.7 MB",
         "label": "Google Play Bundle (.aab)",
         "badge": "STORE BUNDLE",
         "desc": "Signed Android App Bundle for Store deployment"

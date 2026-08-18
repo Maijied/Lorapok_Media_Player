@@ -1278,6 +1278,89 @@ export function App() {
                     </div>
                 </section>
 
+                {/* Visual Showcase & Biological Metamorphosis Gallery */}
+                <section className="deferred-render scroll-mt-28 space-y-12">
+                    <div className="text-center space-y-3">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-neon-cyan/15 to-electric-purple/15 border border-neon-cyan/30 text-neon-cyan text-xs font-mono uppercase tracking-widest">
+                            <Sparkles className="w-3.5 h-3.5 text-neon-cyan animate-pulse" /> Biological Metamorphosis & Visual Architecture
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">
+                            Sensory Computing Showcase
+                        </h2>
+                        <p className="text-white/50 font-mono text-sm max-w-xl mx-auto">
+                            Explore the sensory computing interface, biological audio stages, and unified cross-platform architecture.
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Card 1: Core Engine */}
+                        <div className="group rounded-3xl overflow-hidden border border-white/10 bg-white/5 hover:border-neon-cyan/40 transition-all backdrop-blur-xl flex flex-col justify-between">
+                            <div className="aspect-[16/10] overflow-hidden bg-black/50 relative">
+                                <img
+                                    src="/images/lorapok-instar-hero-branding.png"
+                                    alt="Lorapok Instar Core Engine"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-transparent to-transparent opacity-80" />
+                                <span className="absolute top-4 left-4 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-neon-cyan/30 text-neon-cyan">
+                                    CORE PLAYBACK ENGINE
+                                </span>
+                            </div>
+                            <div className="p-6 space-y-2">
+                                <h3 className="text-lg font-bold text-white group-hover:text-neon-cyan transition-colors">Ultra-Low Latency 8K Video</h3>
+                                <p className="text-xs font-mono text-white/60 leading-relaxed">
+                                    Adaptive multi-bitrate HLS/DASH streaming with hardware-accelerated color rendering and zero-latency stream switching.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Card 2: Neural Audio */}
+                        <div className="group rounded-3xl overflow-hidden border border-white/10 bg-white/5 hover:border-purple-400/40 transition-all backdrop-blur-xl flex flex-col justify-between">
+                            <div className="aspect-[16/10] overflow-hidden bg-black/50 relative">
+                                <img
+                                    src="/images/lorapok-instar-audio-branding.png"
+                                    alt="Lorapok Neural Lossless Audio"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-transparent to-transparent opacity-80" />
+                                <span className="absolute top-4 left-4 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-purple-500/30 text-purple-300">
+                                    24-BIT LOSSLESS DSP
+                                </span>
+                            </div>
+                            <div className="p-6 space-y-2">
+                                <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors">Neural Audio Stage & EQ</h3>
+                                <p className="text-xs font-mono text-white/60 leading-relaxed">
+                                    Dynamic audio normalizer, night mode compression, voice enhancement, and real-time multi-band spectrum visualizers.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Card 3: Unified Ecosystem */}
+                        <div className="group rounded-3xl overflow-hidden border border-white/10 bg-white/5 hover:border-teal-400/40 transition-all backdrop-blur-xl flex flex-col justify-between">
+                            <div className="aspect-[16/10] overflow-hidden bg-black/50 relative">
+                                <img
+                                    src="/images/lorapok-instar-ecosystem-branding.png"
+                                    alt="Lorapok Cross-Platform Ecosystem"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-transparent to-transparent opacity-80" />
+                                <span className="absolute top-4 left-4 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-teal-500/30 text-teal-300">
+                                    CROSS-PLATFORM
+                                </span>
+                            </div>
+                            <div className="p-6 space-y-2">
+                                <h3 className="text-lg font-bold text-white group-hover:text-teal-300 transition-colors">Unified Developer Ecosystem</h3>
+                                <p className="text-xs font-mono text-white/60 leading-relaxed">
+                                    Seamlessly available on Desktop (Windows, macOS, Linux), Mobile (Android), IDEs (VS Code), and SDKs (NPM, PIP, PHP).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* FAQ Section */}
                 <section id="faq" className="deferred-render scroll-mt-28 max-w-3xl mx-auto w-full space-y-8">
                     <div className="text-center space-y-2">
