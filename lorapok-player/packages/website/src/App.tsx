@@ -575,19 +575,28 @@ export function App() {
                     {/* Hero CTA Hub */}
                     <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                         <a
-                            href="#medialab"
-                            className="px-8 py-4 rounded-2xl bg-white text-midnight font-mono font-black text-sm uppercase tracking-wider hover:bg-neon-cyan transition-all shadow-[0_0_30px_rgba(0,243,255,0.4)] flex items-center gap-3"
+                            href={(manifest.platforms[detectedOS]?.default || manifest.platforms.windows.default)}
+                            download
+                            className="px-8 py-4 rounded-2xl bg-neon-cyan text-midnight font-mono font-black text-sm uppercase tracking-wider hover:bg-white transition-all shadow-[0_0_30px_rgba(0,243,255,0.45)] flex items-center gap-3 group"
                         >
-                            <Play className="w-4 h-4 fill-current" />
+                            <Download className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            <span>Download for {detectedOS === 'macos' ? 'macOS' : (detectedOS.charAt(0).toUpperCase() + detectedOS.slice(1))}</span>
+                        </a>
+
+                        <a
+                            href="#medialab"
+                            className="px-8 py-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 font-mono font-bold text-sm uppercase tracking-wider text-white transition-all flex items-center gap-3"
+                        >
+                            <Play className="w-4 h-4 text-neon-cyan fill-neon-cyan" />
                             <span>Launch Live Media Lab</span>
                         </a>
 
                         <a
                             href="#downloads"
-                            className="px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/15 border border-white/10 font-mono font-bold text-sm uppercase tracking-wider text-white transition-all flex items-center gap-3"
+                            className="px-6 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 font-mono text-sm uppercase tracking-wider text-white/70 hover:text-white transition-all flex items-center gap-2"
                         >
-                            <Download className="w-4 h-4 text-neon-cyan" />
-                            <span>Get App & Packages</span>
+                            <span>All Binaries</span>
+                            <ChevronDown className="w-4 h-4" />
                         </a>
                     </div>
                 </section>
@@ -863,8 +872,7 @@ export function App() {
                             <div className="space-y-2">
                                 <a
                                     href={((manifest.platforms.windows.installer as DownloadItem)?.url || manifest.platforms.windows.default)}
-                                    target="_blank"
-                                    rel="noreferrer"
+                                    download
                                     className="w-full py-3 px-4 rounded-xl bg-blue-500 hover:bg-white text-midnight font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-between shadow-[0_0_20px_rgba(59,130,246,0.3)]"
                                 >
                                     <div className="flex items-center gap-2">
@@ -876,8 +884,7 @@ export function App() {
 
                                 <a
                                     href={((manifest.platforms.windows.portable as DownloadItem)?.url || manifest.platforms.windows.default)}
-                                    target="_blank"
-                                    rel="noreferrer"
+                                    download
                                     className="w-full py-3 px-4 rounded-xl bg-white/5 hover:bg-white/15 font-mono text-xs uppercase tracking-wider transition-all flex items-center justify-between border border-white/10 text-white/80"
                                 >
                                     <div className="flex items-center gap-2">
@@ -908,7 +915,7 @@ export function App() {
 
                             <div className="space-y-2">
                                 <a
-                                    href={(manifest.platforms.linux.portable as DownloadItem)?.url || "/downloads/lorapok-player-1.5.0-x86_64.AppImage"}
+                                    href={(manifest.platforms.linux.portable as DownloadItem)?.url || manifest.platforms.linux.default}
                                     download
                                     className="w-full py-3 px-4 rounded-xl bg-neon-cyan hover:bg-white text-midnight font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-between shadow-[0_0_20px_rgba(0,243,255,0.3)]"
                                 >
@@ -920,7 +927,7 @@ export function App() {
                                 </a>
 
                                 <a
-                                    href={(manifest.platforms.linux.deb as DownloadItem)?.url || "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Linux.deb"}
+                                    href={(manifest.platforms.linux.deb as DownloadItem)?.url || manifest.platforms.linux.default}
                                     download
                                     className="w-full py-3 px-4 rounded-xl bg-white/5 hover:bg-white/15 font-mono text-xs uppercase tracking-wider transition-all flex items-center justify-between border border-white/10 text-white/80"
                                 >
@@ -965,8 +972,7 @@ export function App() {
                             <div className="space-y-2">
                                 <a
                                     href={((manifest.platforms.macos.dmgArm as DownloadItem)?.url || manifest.platforms.macos.default)}
-                                    target="_blank"
-                                    rel="noreferrer"
+                                    download
                                     className="w-full py-3 px-4 rounded-xl bg-electric-purple hover:bg-white hover:text-midnight font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-between shadow-[0_0_20px_rgba(188,19,254,0.3)]"
                                 >
                                     <div className="flex items-center gap-2">
@@ -978,8 +984,7 @@ export function App() {
 
                                 <a
                                     href={((manifest.platforms.macos.dmgIntel as DownloadItem)?.url || manifest.platforms.macos.default)}
-                                    target="_blank"
-                                    rel="noreferrer"
+                                    download
                                     className="w-full py-3 px-4 rounded-xl bg-white/5 hover:bg-white/15 font-mono text-xs uppercase tracking-wider transition-all flex items-center justify-between border border-white/10 text-white/80"
                                 >
                                     <div className="flex items-center gap-2">
