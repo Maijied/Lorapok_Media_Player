@@ -8,6 +8,7 @@ export default defineConfig({
         react(),
         dts({
             include: ['src/lib', 'src/components'],
+            exclude: ['src/**/__tests__/**', '**/*.test.*'],
             insertTypesEntry: true,
         }),
     ],

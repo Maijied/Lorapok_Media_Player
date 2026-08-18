@@ -37,7 +37,7 @@ jobs:
       - name: Typecheck
         working-directory: lorapok-player
         run: npm run typecheck
-        
+
   build-desktop:
     name: Build Desktop (${{ matrix.os }})
     needs: quality-gate
@@ -59,19 +59,6 @@ jobs:
       - name: Install Dependencies
         working-directory: lorapok-player
         run: npm ci
-
-      - name: Update Themed Button Version (Linux Only)
-        if: runner.os == 'Linux'
-        working-directory: lorapok-player
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          sed "s/{{VERSION}}/$VERSION/g" assets/btn-download.svg.template > assets/btn-download.svg
-          sed -i "s/VERSION-[0-9.]*-BC13FE/VERSION-$VERSION-BC13FE/g" ../README.md
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add assets/btn-download.svg ../README.md
-          git commit -m "build: update version to v$VERSION in assets and documentation [skip ci]" || echo "No changes to commit"
-          git push origin main || echo "No changes to push"
 
       - name: Build Electron App
         working-directory: lorapok-player
@@ -100,9 +87,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Java JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
 
       - name: Install Node.js
@@ -116,14 +103,10 @@ jobs:
         working-directory: lorapok-player
         run: npm ci
 
-      - name: Build Web Assets
-        working-directory: lorapok-player
-        run: npm run build:only
-
-      - name: Install Capacitor & Sync
+      - name: Build Web Assets & Sync Capacitor
         working-directory: lorapok-player
         run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm run build:only
           npx cap sync android
 
       - name: Decode Keystore
@@ -147,48 +130,33 @@ jobs:
         working-directory: lorapok-player/android
         run: chmod +x ./gradlew
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=$ANDROID_KEYSTORE_FILE -Pandroid.injected.signing.store.password=$ANDROID_KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$ANDROID_KEY_ALIAS -Pandroid.injected.signing.key.password=$ANDROID_KEY_PASSWORD
-        working-directory: ./lorapok-player/android
+      - name: Build Release APK & AAB
+        working-directory: lorapok-player/android
+        run: ./gradlew assembleRelease bundleRelease
 
-      - name: Build Release AAB (Google Play)
-        run: ./gradlew bundleRelease -Pandroid.injected.signing.store.file=$ANDROID_KEYSTORE_FILE -Pandroid.injected.signing.store.password=$ANDROID_KEYSTORE_PASSWORD -Pandroid.injected.signing.key.alias=$ANDROID_KEY_ALIAS -Pandroid.injected.signing.key.password=$ANDROID_KEY_PASSWORD
-        working-directory: ./lorapok-player/android
-
-      - name: Rename Artifacts
+      - name: Package Android Artifacts
         working-directory: lorapok-player
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n1)
-          if [ -n "$APK" ]; then
-            cp "$APK" "android/app/build/outputs/LorapokPlayer-v${VERSION}-release.apk"
-          fi
+          mkdir -p release/builds/android
+          for apk in android/app/build/outputs/apk/release/*.apk; do
+            if [ -f "$apk" ]; then
+              base=$(basename "$apk")
+              cp "$apk" "release/builds/android/LorapokPlayer-v${VERSION}-${base}"
+            fi
+          done
           AAB=$(find android/app/build/outputs/bundle/release -name "*.aab" | head -n1)
           if [ -n "$AAB" ]; then
-            cp "$AAB" "android/app/build/outputs/LorapokPlayer-v${VERSION}-release.aab"
+            cp "$AAB" "release/builds/android/LorapokPlayer-v${VERSION}-release.aab"
           fi
 
-      - name: Store APK
+      - name: Store Android Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Lorapok-Android
+          name: Binaries-Android
           path: |
-            lorapok-player/android/app/build/outputs/LorapokPlayer-*.apk
-            lorapok-player/android/app/build/outputs/LorapokPlayer-*.aab
-
-      - name: Fallback Debug Build
-        if: failure()
-        run: |
-          cd lorapok-player/android && ./gradlew assembleDebug
-          VERSION=$(node -p "require('../package.json').version")
-          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/LorapokPlayer-v${VERSION}-debug.apk
-
-      - name: Store Debug APK (Fallback)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Lorapok-Android
-          path: lorapok-player/android/app/build/outputs/LorapokPlayer-*-debug.apk
+            lorapok-player/release/builds/android/*.apk
+            lorapok-player/release/builds/android/*.aab
 
   release-rolling:
     name: Update Rolling Release
@@ -213,17 +181,17 @@ jobs:
           tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
           name: ${{ github.ref_type == 'tag' && format('Lorapok Player {0}', github.ref_name) || 'Lorapok Player (Latest Build)' }}
           body: |
-            ## Lorapok Player by Lorapok Labs
+            ## Lorapok Media Player v1.5.0
             
-            ${{ github.ref_type == 'tag' && format('Official stable release {0}.', github.ref_name) || '🚀 Rolling release — latest successful build from main.' }}
+            ${{ github.ref_type == 'tag' && format('Official stable release {0}.', github.ref_name) || '🚀 Rolling release — latest build from main branch.' }}
             
-            ### Downloads
-            | Platform | File |
-            |----------|------|
+            ### Downloads & Packages
+            | Platform | File Format |
+            |----------|-------------|
             | 🪟 Windows | `LorapokMediaPlayer-Windows-Setup.exe` |
             | 🍎 macOS | `LorapokMediaPlayer-Mac-Installer.dmg` |
             | 🐧 Linux | `LorapokMediaPlayer-Linux.AppImage` / `.deb` |
-            | 🤖 Android | `LorapokPlayer-*-release.apk` |
+            | 🤖 Android | Universal APK / ARM64 APK / Google Play AAB |
             
             Website: https://lorapok.tech
           files: |
@@ -284,9 +252,10 @@ jobs:
 
   publish-package:
     name: Publish to NPM
-    needs: build-desktop
+    needs: quality-gate
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -306,6 +275,7 @@ jobs:
         run: npm run build
 
       - name: Publish to NPM
+        if: env.NODE_AUTH_TOKEN != ''
         working-directory: ./lorapok-player/packages/lorapok-player
         run: npm publish --access public
         env:
@@ -316,6 +286,7 @@ jobs:
     needs: build-desktop
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -333,6 +304,7 @@ jobs:
           echo "path=$SNAP_PATH" >> $GITHUB_OUTPUT
 
       - name: Publish to Snap Store
+        if: env.SNAPCRAFT_STORE_CREDENTIALS != ''
         uses: snapcore/action-publish@v1
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}

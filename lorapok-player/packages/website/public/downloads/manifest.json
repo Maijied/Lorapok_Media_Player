@@ -1,0 +1,87 @@
+{
+  "version": "1.5.0",
+  "releaseName": "Lorapok 1.5.0 Neural Release",
+  "updatedAt": "2026-08-18T11:00:29.651Z",
+  "platforms": {
+    "android": {
+      "default": "/downloads/lorapok-player-1.5.0-universal.apk",
+      "size": "2.8 MB",
+      "universal": {
+        "url": "/downloads/lorapok-player-1.5.0-universal.apk",
+        "size": "2.8 MB",
+        "label": "Universal APK",
+        "desc": "Compatible with all Android phones, tablets & TV"
+      },
+      "arm64": {
+        "url": "/downloads/lorapok-player-1.5.0-arm64-v8a.apk",
+        "size": "2.8 MB",
+        "label": "ARM64-v8a APK",
+        "desc": "Optimized for modern Android flagships"
+      },
+      "armv7": {
+        "url": "/downloads/lorapok-player-1.5.0-armeabi-v7a.apk",
+        "size": "2.8 MB",
+        "label": "ARMv7 APK",
+        "desc": "For legacy Android devices & TV sticks"
+      },
+      "x86_64": {
+        "url": "/downloads/lorapok-player-1.5.0-x86_64.apk",
+        "size": "2.8 MB",
+        "label": "x86_64 APK",
+        "desc": "For Android emulators and ChromeOS"
+      },
+      "aab": {
+        "url": "/downloads/lorapok-player-1.5.0.aab",
+        "size": "3.3 MB",
+        "label": "Google Play Bundle (.aab)",
+        "desc": "Signed Android App Bundle for Store deployment"
+      }
+    },
+    "linux": {
+      "default": "/downloads/lorapok-player-1.5.0-x86_64.AppImage",
+      "size": "253.9 MB",
+      "appimage": {
+        "url": "/downloads/lorapok-player-1.5.0-x86_64.AppImage",
+        "size": "253.9 MB",
+        "label": "Linux AppImage",
+        "desc": "Portable self-contained bundle for all Linux distros"
+      },
+      "deb": {
+        "url": "/downloads/lorapok-player-1.5.0-amd64.deb",
+        "size": "153.9 MB",
+        "label": "Debian / Ubuntu (.deb)",
+        "desc": "Native package installer"
+      }
+    },
+    "windows": {
+      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/latest",
+      "size": "120 MB",
+      "exe": {
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/latest",
+        "size": "120 MB",
+        "label": "Windows 64-bit Installer (.exe)",
+        "desc": "Windows 10 / 11 installer"
+      }
+    },
+    "macos": {
+      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/latest",
+      "size": "130 MB",
+      "dmg": {
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/latest",
+        "size": "130 MB",
+        "label": "macOS Universal DMG",
+        "desc": "Apple Silicon & Intel DMG"
+      }
+    },
+    "extension": {
+      "default": "/downloads/lorapok-extension-1.5.0.zip",
+      "size": "425.7 KB",
+      "zip": {
+        "url": "/downloads/lorapok-extension-1.5.0.zip",
+        "size": "425.7 KB",
+        "label": "Chrome / Chromium Extension",
+        "desc": "Manifest V3 Stream Interceptor"
+      }
+    }
+  }
+}

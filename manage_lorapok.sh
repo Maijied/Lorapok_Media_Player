@@ -48,8 +48,46 @@ function build_app() {
     zip -r "$OUTPUT_DIR/lorapok-extension.zip" * -x "*.DS_Store" > /dev/null
     popd > /dev/null
 
+    echo "📦 Building Standalone NPM Package & Showcase Website..."
+    pushd "$(pwd)/packages/lorapok-player" > /dev/null
+    npm run build 2>/dev/null || true
+    popd > /dev/null
+    pushd "$(pwd)/packages/website" > /dev/null
+    npm run build 2>/dev/null || true
+    popd > /dev/null
+
     echo "✅ Build process complete. Artifacts in $OUTPUT_DIR"
     cd ..
+}
+
+function build_android() {
+    echo "🤖 Starting Android & Android TV Build Process..."
+    cd "$PROJECT_ROOT"
+    
+    mkdir -p "$OUTPUT_DIR/android"
+    
+    echo "📦 Building Web Renderer & Syncing Capacitor Assets..."
+    npm run build:only
+    npx cap sync android
+    
+    cd android
+    echo "🏗️ Building Android Universal APK, Split APKs, and App Bundle (.aab)..."
+    chmod +x gradlew
+    ./gradlew assembleRelease bundleRelease
+    
+    echo "📦 Copying Android Artifacts to Release Directory..."
+    find app/build/outputs/apk/release -name "*.apk" -exec cp {} "$OUTPUT_DIR/android/" \; 2>/dev/null || true
+    find app/build/outputs/bundle/release -name "*.aab" -exec cp {} "$OUTPUT_DIR/android/" \; 2>/dev/null || true
+    
+    echo "🌐 Synchronizing Direct Downloads to Showcase Website..."
+    pushd "$PROJECT_ROOT/packages/website" > /dev/null
+    node scripts/sync_downloads.js 2>/dev/null || true
+    npm run build 2>/dev/null || true
+    popd > /dev/null
+
+    echo "✅ Android build completed! Artifacts located in $OUTPUT_DIR/android"
+    ls -lh "$OUTPUT_DIR/android" 2>/dev/null || true
+    cd ../..
 }
 
 function setup_test_media() {
@@ -176,6 +214,9 @@ case "$1" in
     build)
         build_app
         ;;
+    android)
+        build_android
+        ;;
     test)
         test_features
         ;;
@@ -184,10 +225,11 @@ case "$1" in
         ;;
     all)
         build_app
+        build_android
         test_features
         ;;
     *)
-        echo "Usage: $0 {build|test|setup-media|all}"
+        echo "Usage: $0 {build|android|test|setup-media|all}"
         exit 1
         ;;
 esac

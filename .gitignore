@@ -21,6 +21,16 @@ build/
 lorapok-player/dist/
 lorapok-player/release/
 lorapok-player/packages/website/dist/
+lorapok-player/packages/lorapok-player/dist/
+
+# Website generated large downloads (built in CI/CD)
+lorapok-player/packages/website/public/downloads/*.apk
+lorapok-player/packages/website/public/downloads/*.aab
+lorapok-player/packages/website/public/downloads/*.AppImage
+lorapok-player/packages/website/public/downloads/*.deb
+lorapok-player/packages/website/public/downloads/*.zip
+lorapok-player/packages/website/public/downloads/*.exe
+lorapok-player/packages/website/public/downloads/*.dmg
 
 # OS files
 .DS_Store
@@ -33,5 +43,7 @@ lorapok-player/android/.idea/
 lorapok-player/android/local.properties
 *.iml
 
-# Test Media
+# Test Media & Logs
 test_media/
+*.log
+build_execution.log

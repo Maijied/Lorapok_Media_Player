@@ -19,19 +19,21 @@
 - **Playback Engine:** 
   - [x] Standard HTML5 Video (MP4, WebM, OGG).
   - [x] Neural Decode Core (FFmpeg Transcoding for MKV, AVI, FLV, WMV).
-- **Native OS Integration:**
+- **Native OS & Mobile/TV Integration:**
   - [x] Frameless Window (Custom title bar).
   - [x] Native File Dialog (Open local files).
   - [x] Hardware Acceleration (Optimized for 4K/8K).
+  - [x] Android Mobile (Capacitor 8 + Home Screen Widget + MediaSession).
+  - [x] Android TV (Leanback launcher + D-Pad remote navigation + TV Banner).
+  - [x] Mobile Touch Gestures (Swipe Brightness/Volume, double-tap seek).
+  - [x] Picture-in-Picture (PiP) background playback.
 - **High-Res Optimization:**
   - [x] GPU Rasterization support.
-  - [ ] Dynamic viewport scaling.
+  - [x] Dynamic viewport scaling & aspect ratio presets.
 
-## AI Integration (Lorapok Suite)
-- [ ] Context-aware media suggestions.
-- [ ] AI-powered subtitle generation.
-- [ ] Gesture/Voice control placeholder.
-
-## Distribution
-- **Platforms:** Windows, Ubuntu (Linux), macOS.
-- **Web Plugin:** Integration for web-based playback synchronization.
+## Ecosystem Distribution
+- **Desktop:** Windows (.exe), Linux (.AppImage, .deb, .snap), macOS (.dmg).
+- **Mobile & TV:** Android APK (Universal & ABI Splits), Android App Bundle (.aab), Android TV Leanback.
+- **NPM Package:** `@lorapok/player` (Reusable React component).
+- **Browser Extension:** Chrome / Chromium Web Store extension (`lorapok-extension`).
+- **Showcase Website:** Web live demo & documentation portal on GitHub Pages.

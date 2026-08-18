@@ -122,6 +122,7 @@ function App() {
   const ___INTERNAL_ICONS___ = { Menu, Music, FileVideo, ImageIcon, Monitor, Mic, Radio, Sliders, Settings };
   if (process.env.NODE_ENV === 'development') console.log('Icons Ready:', Object.keys(___INTERNAL_ICONS___).length);
 
+  const isElectron = Boolean(typeof window !== 'undefined' && ((window as any).electron || (window as any).ipcRenderer));
   const [isPlaying, setIsPlaying] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [tracks, setTracks] = useState<Track[]>([])
@@ -175,6 +176,21 @@ function App() {
   const [showAspectNotification, setShowAspectNotification] = useState(false)
   const [showStreamInput, setShowStreamInput] = useState(false)
   const [showAudioLibrary, setShowAudioLibrary] = useState(false)
+
+  // Screen Brightness & Mobile Touch Gesture Feedback
+  const [screenBrightness, setScreenBrightness] = useState(1);
+  const [touchFeedback, setTouchFeedback] = useState<{ type: 'vol' | 'bright' | 'seek'; label: string; value: number } | null>(null);
+  const touchFeedbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number; time: number; initialVol: number; initialBright: number; initialTime: number } | null>(null);
+  const lastTapRef = useRef<{ time: number; x: number; y: number } | null>(null);
+
+  const showGestureFeedback = (type: 'vol' | 'bright' | 'seek', label: string, value: number) => {
+    setTouchFeedback({ type, label, value });
+    if (touchFeedbackTimeoutRef.current) clearTimeout(touchFeedbackTimeoutRef.current);
+    touchFeedbackTimeoutRef.current = setTimeout(() => {
+      setTouchFeedback(null);
+    }, 1500);
+  };
 
   // Android Update Notification State
   const [showAndroidNotice, setShowAndroidNotice] = useState(() => {
@@ -516,13 +532,26 @@ function App() {
 
       switch (e.key.toLowerCase()) {
         case ' ':
+        case 'enter':
+        case 'select':
+        case 'mediaplaypause':
           e.preventDefault()
           togglePlay()
+          break
+        case 'mediaplay':
+          e.preventDefault()
+          if (videoRef.current && videoRef.current.paused) togglePlay()
+          break
+        case 'mediapause':
+          e.preventDefault()
+          if (videoRef.current && !videoRef.current.paused) togglePlay()
           break
         case 'f':
           toggleFullscreen()
           break
         case 'escape':
+        case 'back':
+        case 'goback':
           if (isFullscreen) toggleFullscreen()
           break
         case 'a':
@@ -546,6 +575,7 @@ function App() {
         case '?':
           setShowHelp(prev => !prev)
           break
+        case 'mediafastforward':
         case 'arrowright':
           if (videoRef.current) {
             e.preventDefault()
@@ -557,9 +587,11 @@ function App() {
               const finalTime = Math.min(max, next)
               videoRef.current.currentTime = finalTime
               setCurrentTime(finalTime)
+              showGestureFeedback('seek', `+10s (${Math.floor(finalTime)}s)`, (finalTime / (duration || 1)) * 100)
             }
           }
           break
+        case 'mediarewind':
         case 'arrowleft':
           if (videoRef.current) {
             e.preventDefault()
@@ -569,20 +601,33 @@ function App() {
               const finalTime = Math.max(0, prev)
               videoRef.current.currentTime = finalTime
               setCurrentTime(finalTime)
+              showGestureFeedback('seek', `-10s (${Math.floor(finalTime)}s)`, (finalTime / (duration || 1)) * 100)
             }
           }
           break
         case 'arrowup':
           e.preventDefault()
-          setVolume(prev => Math.min(1, prev + 0.1))
+          setVolume(prev => {
+            const nextVol = Math.min(1, Math.round((prev + 0.05) * 100) / 100)
+            showGestureFeedback('vol', `Volume ${Math.round(nextVol * 100)}%`, nextVol * 100)
+            return nextVol
+          })
           setIsMuted(false)
           break
         case 'arrowdown':
           e.preventDefault()
-          setVolume(prev => Math.max(0, prev - 0.1))
+          setVolume(prev => {
+            const nextVol = Math.max(0, Math.round((prev - 0.05) * 100) / 100)
+            showGestureFeedback('vol', `Volume ${Math.round(nextVol * 100)}%`, nextVol * 100)
+            return nextVol
+          })
           break
         case 'm':
-          setIsMuted(prev => !prev)
+          setIsMuted(prev => {
+            const nextMuted = !prev
+            showGestureFeedback('vol', nextMuted ? 'Muted' : 'Unmuted', nextMuted ? 0 : volume * 100)
+            return nextMuted
+          })
           break
         case '[':
           if (e.shiftKey) {
@@ -602,9 +647,11 @@ function App() {
           setLoopA(null)
           setLoopB(null)
           break
+        case 'medianexttrack':
         case 'n':
           playNext()
           break
+        case 'mediaprevioustrack':
         case 'p':
           playPrevious()
           break
@@ -989,30 +1036,57 @@ function App() {
   }
 
   const handleOpenFile = async () => {
-    if (!window.ipcRenderer) {
-      alert("Local file access is only available in the Desktop App.")
+    if (window.ipcRenderer) {
+      const file = await window.ipcRenderer.invoke('open-file')
+      if (file) {
+        if (!playlist.includes(file)) {
+          setPlaylist([...playlist, file])
+        }
+        setFilePath(file)
+        setIsPlaying(true)
+        setCodecError(null)
+      }
       return
     }
-    const file = await window.ipcRenderer.invoke('open-file')
-    if (file) {
-      if (!playlist.includes(file)) {
-        setPlaylist([...playlist, file])
+
+    // Android / Web Storage Access File Chooser
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'video/*,audio/*,image/*,.mkv,.flv,.wmv,.avi,.m4v,.mov,.ts,.mp4,.webm,.flac,.mp3,.wav,.aac,.ogg'
+    input.onchange = (e: any) => {
+      const file = e.target.files?.[0]
+      if (file) {
+        const url = URL.createObjectURL(file)
+        setFilePath(url)
+        setIsPlaying(true)
+        setCodecError(null)
+        if (!playlist.includes(file.name)) {
+          setPlaylist([...playlist, file.name])
+        }
       }
-      setFilePath(file)
-      setIsPlaying(true)
-      setCodecError(null) // Clear any previous codec errors
     }
+    input.click()
   }
 
   const addToPlaylist = async () => {
-    if (!window.ipcRenderer) {
-      alert("Local file access is only available in the Desktop App.")
+    if (window.ipcRenderer) {
+      const file = await window.ipcRenderer.invoke('open-file')
+      if (file && !playlist.includes(file)) {
+        setPlaylist([...playlist, file])
+      }
       return
     }
-    const file = await window.ipcRenderer.invoke('open-file')
-    if (file && !playlist.includes(file)) {
-      setPlaylist([...playlist, file])
+
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'video/*,audio/*,image/*,.mkv,.flv,.wmv,.avi,.m4v,.mov,.ts,.mp4,.webm,.flac,.mp3,.wav,.aac,.ogg'
+    input.onchange = (e: any) => {
+      const file = e.target.files?.[0]
+      if (file && !playlist.includes(file.name)) {
+        setPlaylist([...playlist, file.name])
+      }
     }
+    input.click()
   }
 
   const removeFromPlaylist = (path: string) => {
@@ -1527,41 +1601,71 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Title Bar / Header */}
-      <header className={`h-10 flex items-center justify-between px-4 border-b border-white/5 bg-midnight/50 backdrop-blur-md select-none drag-region z-[60] transition-opacity duration-500 ${!showControls && isFullscreen ? 'opacity-0 pointer-events-none' : 'opacity-100'} `}>
-        <div className="flex items-center gap-3 no-drag">
-          <Logo className="w-5 h-5" />
-          <span className="font-mono text-xs tracking-tighter font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f3ff] to-[#bc13fe]">
-            LORAPOK_PLAYER
-          </span>
-          {/* Help Toggle - Moved to Left */}
-          <button onClick={() => setShowHelp(true)} className="p-1.5 hover:bg-neon-cyan/10 rounded transition-colors text-xs font-mono text-neon-cyan/70 border border-neon-cyan/20 ml-2">
-            ? HELP
-          </button>
-        </div>
+      {/* Title Bar / Header - Desktop Only */}
+      {isElectron && (
+        <header className={`h-10 flex items-center justify-between px-4 border-b border-white/5 bg-midnight/50 backdrop-blur-md select-none drag-region z-[60] transition-opacity duration-500 ${!showControls && isFullscreen ? 'opacity-0 pointer-events-none' : 'opacity-100'} `}>
+          <div className="flex items-center gap-3 no-drag">
+            <Logo className="w-5 h-5" />
+            <span className="font-mono text-xs tracking-tighter font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00f3ff] to-[#bc13fe]">
+              LORAPOK_PLAYER
+            </span>
+            {/* Help Toggle - Moved to Left */}
+            <button onClick={() => setShowHelp(true)} className="p-1.5 hover:bg-neon-cyan/10 rounded transition-colors text-xs font-mono text-neon-cyan/70 border border-neon-cyan/20 ml-2">
+              ? HELP
+            </button>
+          </div>
 
-        {/* Real-ish Window Controls */}
-        <div className="flex items-center no-drag">
-          <button
-            onClick={() => window.ipcRenderer?.invoke('window-minimize')}
-            className="p-2 hover:bg-white/10 transition-colors"
-          >
-            <Minus className="w-3 h-3" />
-          </button>
-          <button
-            onClick={() => window.ipcRenderer?.invoke('window-maximize')}
-            className="p-2 hover:bg-white/10 transition-colors"
-          >
-            <Square className="w-3 h-3" />
-          </button>
-          <button
-            onClick={() => window.ipcRenderer?.invoke('window-close')}
-            className="p-2 hover:bg-red-500/80 transition-colors"
-          >
-            <X className="w-3 h-3" />
-          </button>
+          {/* Real-ish Window Controls */}
+          <div className="flex items-center no-drag">
+            <button
+              onClick={() => window.ipcRenderer?.invoke('window-minimize')}
+              className="p-2 hover:bg-white/10 transition-colors"
+            >
+              <Minus className="w-3 h-3" />
+            </button>
+            <button
+              onClick={() => window.ipcRenderer?.invoke('window-maximize')}
+              className="p-2 hover:bg-white/10 transition-colors"
+            >
+              <Square className="w-3 h-3" />
+            </button>
+            <button
+              onClick={() => window.ipcRenderer?.invoke('window-close')}
+              className="p-2 hover:bg-red-500/80 transition-colors"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        </header>
+      )}
+
+      {/* Mobile Top App Bar when not playing */}
+      {!isElectron && !filePath && (
+        <div className="w-full px-4 pt-4 pb-2 flex items-center justify-between z-50 select-none">
+          <div className="flex items-center gap-2">
+            <Logo className="w-6 h-6" />
+            <span className="font-mono text-xs font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#00f3ff] to-[#bc13fe]">
+              LORAPOK
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowAudioLibrary(true)}
+              className="p-2 bg-white/5 border border-white/10 rounded-xl text-neon-magenta hover:bg-white/10 transition-colors"
+              title="Audio Library"
+            >
+              <AudioLines className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setShowPlaylist(true)}
+              className="p-2 bg-white/5 border border-white/10 rounded-xl text-neon-cyan hover:bg-white/10 transition-colors"
+              title="Playlist Queue"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-      </header >
+      )}
 
       {/* Main Viewport */}
       <main className="flex-1 relative flex flex-col items-center justify-center overflow-hidden transition-colors duration-1000" style={{ backgroundColor: theme.bg }}>
@@ -1726,27 +1830,56 @@ function App() {
                 </div>
               </div>
 
-              <div className="flex flex-col items-center gap-4 mt-4">
-                <div className="flex gap-4">
+              <div className="flex flex-col items-center gap-4 mt-2">
+                <div className="flex flex-wrap justify-center gap-3">
                   <button
                     onClick={handleOpenFile}
-                    className="group relative px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#00f3ff]/50 rounded-2xl transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
+                    className="group relative px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#00f3ff]/50 rounded-2xl transition-all duration-300 flex items-center gap-3 overflow-hidden shadow-2xl"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#00f3ff]/10 to-[#bc13fe]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                    <FolderOpen className="w-5 h-5 text-[#00f3ff] relative z-10" />
-                    <span className="font-mono text-xs font-bold relative z-10 tracking-widest">INITIALIZE_CORE</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#00f3ff]/10 to-[#bc13fe]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                    <FolderOpen className="w-4 h-4 text-[#00f3ff] relative z-10" />
+                    <span className="font-mono text-xs font-bold relative z-10 tracking-wider">OPEN_STORAGE_MEDIA</span>
                   </button>
 
                   <button
                     onClick={() => setShowStreamInput(true)}
-                    className="group relative px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#bc13fe]/50 rounded-2xl transition-all duration-500 flex items-center gap-3 overflow-hidden shadow-2xl"
+                    className="group relative px-6 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#bc13fe]/50 rounded-2xl transition-all duration-300 flex items-center gap-3 overflow-hidden shadow-2xl"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#bc13fe]/10 to-[#00f3ff]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                    <Globe className="w-5 h-5 text-[#bc13fe] relative z-10" />
-                    <span className="font-mono text-xs font-bold relative z-10 tracking-widest">NETWORK_STREAM</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#bc13fe]/10 to-[#00f3ff]/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                    <Globe className="w-4 h-4 text-[#bc13fe] relative z-10" />
+                    <span className="font-mono text-xs font-bold relative z-10 tracking-wider">NETWORK_STREAM</span>
                   </button>
                 </div>
-                <p className="text-white/20 font-mono text-[9px]">OR_DRAG_DATA_HERE</p>
+
+                {/* Quick Sample Media Presets */}
+                <div className="flex flex-col items-center gap-2 mt-2 max-w-md w-full px-4">
+                  <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                    Quick Test Streams
+                  </span>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {[
+                      { label: 'MP4 1080p', url: 'https://vjs.zencdn.net/v/oceans.mp4' },
+                      { label: 'HLS Live', url: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8' },
+                      { label: 'MPEG-DASH', url: 'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd' },
+                      { label: 'WebM VP9', url: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm' }
+                    ].map((demo, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setFilePath(demo.url);
+                          setIsPlaying(true);
+                          setCodecError(null);
+                        }}
+                        className="px-3 py-1.5 bg-white/5 hover:bg-neon-cyan/20 border border-white/10 hover:border-neon-cyan/50 rounded-xl font-mono text-[10px] text-white/70 hover:text-white transition-all flex items-center gap-1.5"
+                      >
+                        <Play className="w-2.5 h-2.5 fill-current text-neon-cyan" />
+                        <span>{demo.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-white/20 font-mono text-[9px] mt-1">OR_DRAG_MEDIA_HERE</p>
               </div>
               
             </motion.div>
@@ -1854,7 +1987,115 @@ function App() {
                 }
 
                 return (
-                  <div className="relative w-full h-full flex items-center justify-center">
+                  <div 
+                    className="relative w-full h-full flex items-center justify-center overflow-hidden select-none"
+                    onTouchStart={(e) => {
+                      if (e.touches.length !== 1) return;
+                      const touch = e.touches[0];
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = touch.clientX - rect.left;
+                      const y = touch.clientY - rect.top;
+                      const now = Date.now();
+                      
+                      // Check for double tap
+                      if (lastTapRef.current && (now - lastTapRef.current.time) < 300) {
+                        const tapX = x / rect.width;
+                        if (tapX < 0.35) {
+                          // Double tap left: -10s
+                          if (videoRef.current) {
+                            const newTime = Math.max(0, videoRef.current.currentTime - 10);
+                            videoRef.current.currentTime = newTime;
+                            setCurrentTime(newTime);
+                            showGestureFeedback('seek', `-10s (${Math.floor(newTime)}s)`, (newTime / (duration || 1)) * 100);
+                          }
+                        } else if (tapX > 0.65) {
+                          // Double tap right: +10s
+                          if (videoRef.current) {
+                            const max = (duration && isFinite(duration) && duration > 0) ? duration : videoRef.current.currentTime + 1000;
+                            const newTime = Math.min(max, videoRef.current.currentTime + 10);
+                            videoRef.current.currentTime = newTime;
+                            setCurrentTime(newTime);
+                            showGestureFeedback('seek', `+10s (${Math.floor(newTime)}s)`, (newTime / (duration || 1)) * 100);
+                          }
+                        } else {
+                          togglePlay();
+                        }
+                        lastTapRef.current = null;
+                        touchStartRef.current = null;
+                        return;
+                      }
+
+                      lastTapRef.current = { time: now, x, y };
+                      touchStartRef.current = {
+                        x,
+                        y,
+                        time: now,
+                        initialVol: volume,
+                        initialBright: screenBrightness,
+                        initialTime: videoRef.current ? videoRef.current.currentTime : 0
+                      };
+                    }}
+                    onTouchMove={(e) => {
+                      if (!touchStartRef.current || e.touches.length !== 1) return;
+                      const touch = e.touches[0];
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = touch.clientX - rect.left;
+                      const y = touch.clientY - rect.top;
+                      const dx = x - touchStartRef.current.x;
+                      const dy = y - touchStartRef.current.y;
+                      const normalizedStartX = touchStartRef.current.x / rect.width;
+
+                      // Vertical gestures
+                      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 15) {
+                        const deltaFactor = -dy / rect.height;
+                        if (normalizedStartX < 0.4) {
+                          // Left side: Brightness
+                          const newBright = Math.min(1.8, Math.max(0.3, touchStartRef.current.initialBright + deltaFactor * 1.5));
+                          setScreenBrightness(newBright);
+                          showGestureFeedback('bright', `Brightness ${Math.round((newBright / 1.8) * 100)}%`, (newBright / 1.8) * 100);
+                        } else if (normalizedStartX > 0.6) {
+                          // Right side: Volume
+                          const newVol = Math.min(1, Math.max(0, touchStartRef.current.initialVol + deltaFactor));
+                          setVolume(newVol);
+                          setIsMuted(false);
+                          showGestureFeedback('vol', `Volume ${Math.round(newVol * 100)}%`, newVol * 100);
+                        }
+                      } else if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 20) {
+                        // Horizontal gesture: Seek scrubbing
+                        if (videoRef.current && duration > 0) {
+                          const seekDelta = (dx / rect.width) * Math.min(duration, 120);
+                          const targetTime = Math.min(duration, Math.max(0, touchStartRef.current.initialTime + seekDelta));
+                          videoRef.current.currentTime = targetTime;
+                          setCurrentTime(targetTime);
+                          showGestureFeedback('seek', `${seekDelta >= 0 ? '+' : ''}${Math.round(seekDelta)}s (${Math.floor(targetTime)}s)`, (targetTime / duration) * 100);
+                        }
+                      }
+                    }}
+                    onTouchEnd={() => {
+                      touchStartRef.current = null;
+                    }}
+                  >
+                      {/* Mobile Touch / D-Pad Gesture Visual HUD */}
+                      <AnimatePresence>
+                        {touchFeedback && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.8, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                            className="absolute top-10 z-50 px-5 py-2.5 rounded-full bg-midnight/90 backdrop-blur-xl border border-[#00f3ff]/40 shadow-2xl flex items-center gap-3 text-white pointer-events-none"
+                          >
+                            <span className="w-2 h-2 rounded-full bg-[#00f3ff] animate-pulse" />
+                            <span className="font-mono text-xs font-bold tracking-wider">{touchFeedback.label}</span>
+                            <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-[#00f3ff] to-[#bc13fe] transition-all duration-150"
+                                style={{ width: `${Math.min(100, Math.max(0, touchFeedback.value))}%` }}
+                              />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
                       {filePath?.match(/\.(gif|webp|png|jpe?g)$/i) ? (
                         <img
                           src={(() => {
@@ -1866,7 +2107,8 @@ function App() {
                           style={{
                             boxShadow: `0 0 80px -20px ${ambientColor}`,
                             aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
-                            objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
+                            objectFit: aspectRatio === 'original' ? 'contain' : 'fill',
+                            filter: screenBrightness !== 1 ? `brightness(${screenBrightness})` : undefined
                           }}
                         />
                       ) : (
@@ -1887,7 +2129,8 @@ function App() {
                           style={{
                             boxShadow: `0 0 80px -20px ${ambientColor}`,
                             aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
-                            objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
+                            objectFit: aspectRatio === 'original' ? 'contain' : 'fill',
+                            filter: screenBrightness !== 1 ? `brightness(${screenBrightness})` : undefined
                           }}
                           onTimeUpdate={handleTimeUpdate}
                           onLoadedMetadata={handleLoadedMetadata}
@@ -2006,9 +2249,61 @@ function App() {
                               <span>CLIP IT</span>
                             </button>
                           )}
-                          <button onClick={() => { setLoopA(null); setLoopB(null) }} className="hover:text-red-400 transition-colors">
-                            <X className="w-4 h-4" />
-                          </button>
+                    {/* Floating Immersive Top Bar */}
+                    <AnimatePresence>
+                      {showControls && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          className="absolute top-0 left-0 right-0 z-50 p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent flex items-center justify-between pointer-events-auto select-none"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <button
+                              onClick={() => {
+                                setFilePath(null);
+                                setIsPlaying(false);
+                                setCodecError(null);
+                              }}
+                              className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-white"
+                              title="Back to Media Hub"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                            <span className="font-mono text-xs font-bold text-white truncate max-w-xs sm:max-w-sm md:max-w-md">
+                              {filePath?.split(/[/\\]/).pop()}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {/* Aspect Ratio Cycler */}
+                            <button
+                              onClick={cycleAspectRatio}
+                              className="px-2.5 py-1 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg text-[10px] font-mono font-bold text-neon-cyan uppercase transition-colors"
+                              title="Cycle Aspect Ratio"
+                            >
+                              {aspectRatio}
+                            </button>
+
+                            {/* Tracks Selector */}
+                            {tracks.length > 0 && (
+                              <button
+                                onClick={() => setShowTracks(!showTracks)}
+                                className={`px-2 py-1 rounded-lg text-[10px] font-mono font-bold uppercase transition-colors ${showTracks ? 'bg-neon-cyan text-midnight' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                              >
+                                TRK
+                              </button>
+                            )}
+
+                            {/* Incognito */}
+                            <button
+                              onClick={() => setIncognitoMode(!incognitoMode)}
+                              className={`p-1.5 rounded-lg transition-colors ${incognitoMode ? 'text-neon-pink bg-neon-pink/10' : 'text-white/40 hover:text-white'}`}
+                              title="Incognito"
+                            >
+                              <Ghost className="w-4 h-4" />
+                            </button>
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>

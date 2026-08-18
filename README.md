@@ -6,17 +6,17 @@
   <p align="center" style="font-weight: bold; color: #00F3FF; letter-spacing: 2px;">SUPERCOMPUTING MEDIA ENGINE BY LORAPOK LABS</p>
 
   <p align="center">
-    <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/VERSION-1.4.1-BC13FE?style=for-the-badge&labelColor=050510" alt="Version" /></a>
+    <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/VERSION-1.5.0-BC13FE?style=for-the-badge&labelColor=050510" alt="Version" /></a>
     <a href="https://snapcraft.io/lorapokmediaplayer"><img src="https://snapcraft.io/lorapokmediaplayer/badge.svg" alt="Snap Store" height="28" /></a>
     <a href="https://snapcraft.io/lorapokmediaplayer"><img src="https://snapcraft.io/lorapokmediaplayer/trending.svg?name=0" alt="Trending" height="28" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-050510?style=for-the-badge&labelColor=050510&logoColor=050510" alt="License" /></a>
-    <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/PLATFORM-ALL_OS_(+ANDROID)-FFFFFF?style=for-the-badge&labelColor=050510" alt="Platform" /></a>
-    <a href="https://github.com/Maijied/Lorapok_Media_Player/actions/workflows/lorapok-enterprise.yml"><img src="https://img.shields.io/github/actions/workflow/status/Maijied/Lorapok_Media_Player/lorapok-enterprise.yml?style=for-the-badge&labelColor=050510" alt="Build Status" /></a>
+    <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/PLATFORM-ALL_OS_(+ANDROID_+TV)-FFFFFF?style=for-the-badge&labelColor=050510" alt="Platform" /></a>
+    <a href="https://github.com/Maijied/Lorapok_Media_Player/actions/workflows/workflow-unified.yml"><img src="https://img.shields.io/github/actions/workflow/status/Maijied/Lorapok_Media_Player/workflow-unified.yml?style=for-the-badge&labelColor=050510" alt="Build Status" /></a>
   </p>
 
   <p align="center" style="max-width: 600px; margin: 20px auto; line-height: 1.6; opacity: 0.8;">
     The next-generation media player blending <b>biological aesthetics</b> with <b>supercomputing performance</b>.
-    Engineered for ultra-low latency playback and high-fidelity sensory experiences across Desktop and Android.
+    Engineered for ultra-low latency playback and high-fidelity sensory experiences across Desktop, Android, and Android TV.
   </p>
 
   <div align="center" style="margin: 30px 0;">
@@ -46,7 +46,7 @@
 
 ## 🏗 SYSTEM ARCHITECTURE
 
-Lorapok Player features a unified multi-target architecture that spans Web, Desktop (Electron), and Mobile (Capacitor) with a single React core.
+Lorapok Player features a unified multi-target ecosystem spanning Web, Desktop (Electron), Mobile (Android), Android TV (Leanback), Standalone NPM, and Browser Extension.
 
 ```mermaid
 graph TD
@@ -56,7 +56,9 @@ graph TD
     classDef platform fill:#050510,stroke:#555,stroke-width:1px,color:#ccc;
     
     subgraph UI ["Organic React UI (Tailwind & Framer Motion)"]
-        Components["Player Components"]
+        Components["Player Canvas & Controls"]
+        TouchGestures["Mobile Touch Gestures (Vol / Bright / Seek)"]
+        DPad["Android TV D-Pad & Key Handler"]
         Hooks["Device & Sync Hooks"]
         Themes["Biological Aesthetics System"]
     end
@@ -64,15 +66,21 @@ graph TD
     subgraph Engine ["Media Processing Engine"]
         HLS["HLS.js / DASH.js"]
         FFmpeg["Fluent-FFmpeg Pipelines"]
-        Probe["Metadata Probing"]
+        Probe["Intelligent Metadata Probing"]
+        SmartDec["Universal Smart Path Decoder"]
     end
     
     subgraph Platforms ["Deployment Targets"]
-        Web["Web / GitHub Pages"]
-        Desktop["Electron (Win, Mac, Linux)"]
-        Mobile["Capacitor (Android)"]
+        Web["Web / GitHub Pages Showcase"]
+        Desktop["Desktop Electron (Linux, Win, Mac)"]
+        Mobile["Android Mobile (Capacitor + Widgets + PiP)"]
+        TV["Android TV (Leanback + D-Pad Remote)"]
+        NPM["Standalone NPM Library (@lorapok/player)"]
+        Ext["Chrome / Chromium Extension"]
     end
 
+    Components --> TouchGestures
+    Components --> DPad
     Components --> Hooks
     Components --> Themes
     UI --> Engine
@@ -80,6 +88,9 @@ graph TD
     Engine --> Web
     Engine --> Desktop
     Engine --> Mobile
+    Engine --> TV
+    Engine --> NPM
+    Engine --> Ext
     
     class UI ui;
     class Engine engine;
@@ -94,6 +105,9 @@ graph TD
 | :--- | :--- | :--- |
 | **Neural Decoding V2** | High-performance FFmpeg-powered pipeline for MKV, AVI, WMV, and FLV. | 🟢 Ready |
 | **Universal Stream** | Native HLS (.m3u8) and DASH (.mpd) support with zero-buffer track switching. | 🟢 Ready |
+| **Android TV & Leanback** | Native Android TV launcher, D-Pad directional navigation, and TV banner. | 🟢 Ready |
+| **Mobile Touch Gestures** | Vertical swipe for Brightness/Volume, double-tap seek, and tactile HUD. | 🟢 Ready |
+| **Picture-in-Picture** | Native PiP playback on mobile minimize and background audio handling. | 🟢 Ready |
 | **Robust Probing** | Intelligent metadata discovery (FFprobe) for 100% accurate duration/seeking. | 🟢 Ready |
 | **Organic UI** | Dynamic ambient lighting engine that reacts to video colors in real-time. | 🟢 Ready |
 | **Smart Resume** | Atomic position tracking to resume playback exactly where you left off. | 🟢 Ready |
