@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { motion } from 'framer-motion';
 import { Logo } from './Logo';
 
 // Mascot Component (Meta-Grade Minimalist)
@@ -15,17 +14,11 @@ export const Mascot = memo(({ state }: { state: 'idle' | 'playing' | 'buffering'
             <Logo className="w-32 h-32 relative z-10" />
 
             {/* Dynamic Status Rings */}
-            <motion.div
-                animate={{
-                    rotate: state === 'playing' ? 360 : 0,
-                    scale: state === 'buffering' ? [1, 1.1, 1] : 1
-                }}
-                transition={{
-                    rotate: { duration: 10, repeat: Infinity, ease: "linear" },
-                    scale: { duration: 2, repeat: Infinity }
-                }}
-                className={`absolute inset-0 border-2 rounded-full border-t-white/20 border-r-white/5 border-b-white/5 border-l-white/20 ${state === 'error' ? 'border-red-500/40' : ''}`}
+            <div
+                className={`absolute inset-0 border-2 rounded-full border-t-white/20 border-r-white/5 border-b-white/5 border-l-white/20 transition-all duration-700 ${state === 'playing' ? 'animate-spin' : state === 'buffering' ? 'animate-pulse scale-105' : ''} ${state === 'error' ? 'border-red-500/40' : ''}`}
+                style={{ animationDuration: state === 'playing' ? '10s' : undefined }}
             />
         </div>
     )
 });
+

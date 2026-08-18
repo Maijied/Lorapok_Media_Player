@@ -2,9 +2,7 @@ import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHand
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
 import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX, Subtitles, Languages, Scissors, SkipBack, SkipForward, X, HelpCircle, Activity, Music } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Logo } from '../components/Logo'
-import { Mascot } from '../components/Mascot'
 
 export interface LorapokPlayerRef {
     load: (url: string) => void;
@@ -654,25 +652,20 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
             style={{ ...style, backgroundColor: ambientColor.replace('0.3', '0.05') }}
         >
             {/* Full Window Drop Zone Overlay */}
-            <AnimatePresence>
-                {isDragging && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="absolute inset-0 z-[100] bg-midnight/90 backdrop-blur-md flex items-center justify-center border-4 border-neon-cyan/50 rounded-xl m-4 pointer-events-none"
-                    >
-                        <div className="flex flex-col items-center gap-6 animate-pulse">
-                            <div className="w-32 h-32 rounded-full bg-neon-cyan/20 flex items-center justify-center border border-neon-cyan/50 shadow-[0_0_50px_rgba(0,243,255,0.3)]">
-                                <FolderOpen className="w-16 h-16 text-neon-cyan" />
-                            </div>
-                            <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white tracking-tighter">
-                                DROP TO PLAY
-                            </h2>
+            {isDragging && (
+                <div
+                    className="absolute inset-0 z-[100] bg-midnight/90 backdrop-blur-md flex items-center justify-center border-4 border-neon-cyan/50 rounded-xl m-4 pointer-events-none transition-all duration-300"
+                >
+                    <div className="flex flex-col items-center gap-6 animate-pulse">
+                        <div className="w-32 h-32 rounded-full bg-neon-cyan/20 flex items-center justify-center border border-neon-cyan/50 shadow-[0_0_50px_rgba(0,243,255,0.3)]">
+                            <FolderOpen className="w-16 h-16 text-neon-cyan" />
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white tracking-tighter">
+                            DROP TO PLAY
+                        </h2>
+                    </div>
+                </div>
+            )}
 
             <main className="flex-1 relative flex flex-col items-center justify-center overflow-hidden transition-colors duration-1000">
                 <canvas ref={canvasRef} width="10" height="10" className="hidden" />
@@ -696,45 +689,35 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
                     </div>
                 )}
 
-                <AnimatePresence mode="wait">
-                    {!currentSrc ? (
-                        <motion.div
-                            key="empty"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            className="z-10 flex flex-col items-center gap-6"
-                        >
-                            <div className="relative group">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-[#00f3ff]/20 to-[#bc13fe]/20 blur-3xl rounded-full scale-150 group-hover:scale-175 transition-transform duration-1000" />
-                                <Logo className="w-48 h-48 relative z-10 drop-shadow-[0_0_30px_rgba(0,243,255,0.3)]" />
-                            </div>
-                            <div className="text-center space-y-1">
-                                <h2 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">LORAPOK</h2>
-                                <p className="text-[#00f3ff]/40 font-mono text-[10px] tracking-[0.2em] uppercase">Web Media Engine</p>
-                            </div>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="player"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="w-full h-full flex items-center justify-center relative group z-10"
-                        >
-                            {!isPlaying && (
-                                <div
-                                    className="absolute inset-0 z-50 flex items-center justify-center cursor-pointer bg-black/25 hover:bg-black/15 transition-colors"
-                                    onClick={togglePlay}
-                                >
-                                    <div className="w-24 h-24 rounded-full bg-midnight/85 backdrop-blur-md border border-neon-cyan/50 flex items-center justify-center group/play shadow-[0_0_50px_rgba(0,243,255,0.25)] hover:scale-110 transition-transform duration-300">
-                                        <Play className="w-10 h-10 text-neon-cyan fill-neon-cyan ml-1 group-hover/play:scale-125 transition-transform" />
-                                    </div>
+                {!currentSrc ? (
+                    <div
+                        key="empty"
+                        className="z-10 flex flex-col items-center gap-6 transition-all duration-300"
+                    >
+                        <div className="relative group">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-[#00f3ff]/20 to-[#bc13fe]/20 blur-3xl rounded-full scale-150 group-hover:scale-175 transition-transform duration-1000" />
+                            <Logo className="w-48 h-48 relative z-10 drop-shadow-[0_0_30px_rgba(0,243,255,0.3)]" />
+                        </div>
+                        <div className="text-center space-y-1">
+                            <h2 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">LORAPOK</h2>
+                            <p className="text-[#00f3ff]/40 font-mono text-[10px] tracking-[0.2em] uppercase">Web Media Engine</p>
+                        </div>
+                    </div>
+                ) : (
+                    <div
+                        key="player"
+                        className="w-full h-full flex items-center justify-center relative group z-10 transition-opacity duration-300"
+                    >
+                        {!isPlaying && (
+                            <div
+                                className="absolute inset-0 z-50 flex items-center justify-center cursor-pointer bg-black/25 hover:bg-black/15 transition-colors"
+                                onClick={togglePlay}
+                            >
+                                <div className="w-24 h-24 rounded-full bg-midnight/85 backdrop-blur-md border border-neon-cyan/50 flex items-center justify-center group/play shadow-[0_0_50px_rgba(0,243,255,0.25)] hover:scale-110 transition-transform duration-300">
+                                    <Play className="w-10 h-10 text-neon-cyan fill-neon-cyan ml-1 group-hover/play:scale-125 transition-transform" />
                                 </div>
-                            )}
-
-                            <div className="absolute top-4 right-4 z-40 scale-[0.4] origin-top-right opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Mascot state={(isBuffering && isPlaying) ? 'buffering' : (isPlaying ? 'playing' : (currentTime >= duration && duration > 0 ? 'ended' : 'idle'))} />
                             </div>
+                        )}
 
                             <video
                                 ref={videoRef}
@@ -807,309 +790,270 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
                                 </div>
                             )}
 
-                            {/* Visualizer HUD Overlay for Video */}
-                            {showVisualizerHUD && !isAudioTrack && (
-                                <div className="absolute inset-x-0 bottom-24 z-30 h-28 px-6 pointer-events-none flex items-end justify-center">
-                                    <div className="w-full max-w-2xl h-20 bg-midnight/85 backdrop-blur-xl border border-neon-cyan/30 rounded-2xl p-2.5 shadow-[0_0_40px_rgba(0,243,255,0.2)]">
-                                        <div className="flex items-center justify-between px-2 mb-1">
-                                            <span className="text-[9px] font-mono text-neon-cyan uppercase tracking-widest flex items-center gap-1.5">
-                                                <Activity className="w-3 h-3 animate-pulse" /> Real-Time Spectrum
-                                            </span>
-                                            <span className="text-[9px] font-mono text-white/40">32-Band Neural FFT</span>
-                                        </div>
-                                        <div className="w-full h-12">
-                                            <AudioVisualizer analyser={analyserNodeRef.current} isPlaying={isPlaying} mode="stage" />
-                                        </div>
-                                    </div>
+                        {/* Buffering Overlay */}
+                        {isBuffering && isPlaying && !codecError && (
+                            <div
+                                className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-midnight/80 backdrop-blur-md transition-opacity duration-300"
+                            >
+                                <div className="relative">
+                                    <div
+                                        className="w-20 h-20 border-4 border-neon-cyan/20 border-t-neon-cyan rounded-full animate-spin"
+                                    />
+                                    <Logo className="absolute inset-2 w-12 h-12 m-auto" />
                                 </div>
-                            )}
+                                <p className="mt-6 font-mono text-xs text-neon-cyan/60 tracking-widest">BUFFERING...</p>
+                            </div>
+                        )}
 
-                            {/* Buffering Overlay - Only when actively waiting during playback */}
-                            {isBuffering && isPlaying && !codecError && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-midnight/80 backdrop-blur-md"
-                                >
-                                    <div className="relative">
-                                        <motion.div
-                                            animate={{ rotate: 360 }}
-                                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                            className="w-20 h-20 border-4 border-neon-cyan/20 border-t-neon-cyan rounded-full"
-                                        />
-                                        <Logo className="absolute inset-2 w-12 h-12 m-auto" />
+                        {codecError && (
+                            <div
+                                className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-midnight/90 backdrop-blur-xl transition-opacity duration-300"
+                            >
+                                <div className="text-center space-y-4 max-w-sm px-6">
+                                    <div className="relative w-20 h-20 mx-auto">
+                                        <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full animate-pulse" />
+                                        <Logo className="w-full h-full relative z-10" />
                                     </div>
-                                    <p className="mt-6 font-mono text-xs text-neon-cyan/60 tracking-widest">BUFFERING...</p>
-                                </motion.div>
-                            )}
-
-                            {codecError && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-midnight/90 backdrop-blur-xl"
-                                >
-                                    <div className="text-center space-y-4 max-w-sm px-6">
-                                        <div className="relative w-20 h-20 mx-auto">
-                                            <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full animate-pulse" />
-                                            <Logo className="w-full h-full relative z-10" />
-                                        </div>
-                                        <h3 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">STREAM ERROR</h3>
-                                        <p className="text-white/40 text-xs font-mono">{codecError}</p>
-                                        <button
-                                            onClick={() => { setCurrentSrc(null); setCodecError(null); }}
-                                            className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-white border border-white/10 transition-all mt-4"
-                                        >
-                                            Back to Home
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            )}
-
-                            {/* Hidden sampling canvas */}
-                            <canvas ref={ambientCanvasRef} width="10" height="10" className="hidden" />
-
-                            {/* Aspect Ratio Notification */}
-                            <AnimatePresence>
-                                {showAspectNotification && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] px-8 py-4 bg-black/80 backdrop-blur-xl border border-neon-cyan/30 rounded-2xl shadow-[0_0_50px_rgba(0,243,255,0.2)]"
+                                    <h3 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">STREAM ERROR</h3>
+                                    <p className="text-white/40 text-xs font-mono">{codecError}</p>
+                                    <button
+                                        onClick={() => { setCurrentSrc(null); setCodecError(null); }}
+                                        className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-white border border-white/10 transition-all mt-4"
                                     >
-                                        <div className="flex flex-col items-center gap-2">
-                                            <span className="text-[10px] font-mono text-neon-cyan/50 tracking-[0.3em] uppercase">Aspect Ratio</span>
-                                            <span className="text-3xl font-black text-white tracking-tighter">{aspectRatio === 'original' ? 'ORIGINAL' : aspectRatio}</span>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                                        Back to Home
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Hidden sampling canvas */}
+                        <canvas ref={ambientCanvasRef} width="10" height="10" className="hidden" />
+
+                        {/* Aspect Ratio Notification */}
+                        {showAspectNotification && (
+                            <div
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] px-8 py-4 bg-black/80 backdrop-blur-xl border border-neon-cyan/30 rounded-2xl shadow-[0_0_50px_rgba(0,243,255,0.2)] transition-all duration-300"
+                            >
+                                <div className="flex flex-col items-center gap-2">
+                                    <span className="text-[10px] font-mono text-neon-cyan/50 tracking-[0.3em] uppercase">Aspect Ratio</span>
+                                    <span className="text-3xl font-black text-white tracking-tighter">{aspectRatio === 'original' ? 'ORIGINAL' : aspectRatio}</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </main>
 
             {/* Control Deck */}
-            <AnimatePresence>
-                {showControls && (
-                    <motion.footer
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        className="absolute bottom-0 left-0 right-0 h-24 px-6 pb-6 pt-2 z-50 pointer-events-auto"
-                        onMouseEnter={() => setShowControls(true)}
-                    >
-                        <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90 relative overflow-hidden">
-                            {/* Audio Visualizer (Subtle Background) */}
-                            <div className="absolute inset-x-0 bottom-0 h-12 opacity-20 pointer-events-none">
-                                <AudioVisualizer analyser={analyserNodeRef.current} />
-                            </div>
+            {showControls && (
+                <footer
+                    className="absolute bottom-0 left-0 right-0 h-24 px-6 pb-6 pt-2 z-50 pointer-events-auto transition-all duration-300"
+                    onMouseEnter={() => setShowControls(true)}
+                >
+                    <div className="h-full bg-midnight/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col px-6 justify-center gap-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] transition-all hover:bg-midnight/90 relative overflow-hidden">
+                        {/* Audio Visualizer (Subtle Background) */}
+                        <div className="absolute inset-x-0 bottom-0 h-12 opacity-20 pointer-events-none">
+                            <AudioVisualizer analyser={analyserNodeRef.current} />
+                        </div>
 
-                            {/* Progress Bar */}
+                        {/* Progress Bar */}
+                        <div
+                            className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden z-10"
+                            onClick={handleSeek}
+                        >
                             <div
-                                className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer group relative overflow-hidden z-10"
-                                onClick={handleSeek}
-                            >
-                                <div
-                                    className="absolute top-0 left-0 h-full transition-all"
-                                    style={{
-                                        width: `${(currentTime / Math.max(duration || 0, (videoRef.current?.duration && isFinite(videoRef.current.duration)) ? videoRef.current.duration : 0, currentTime || 1)) * 100}%`,
-                                        backgroundColor: theme.primary,
-                                        boxShadow: `0 0 15px ${theme.primary}`
-                                    }}
-                                />
-                                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                className="absolute top-0 left-0 h-full transition-all"
+                                style={{
+                                    width: `${(currentTime / Math.max(duration || 0, (videoRef.current?.duration && isFinite(videoRef.current.duration)) ? videoRef.current.duration : 0, currentTime || 1)) * 100}%`,
+                                    backgroundColor: theme.primary,
+                                    boxShadow: `0 0 15px ${theme.primary}`
+                                }}
+                            />
+                            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+
+                        {/* Buttons Row */}
+                        <div className="flex items-center justify-between mt-1 z-10">
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => {
+                                            const v = videoRef.current;
+                                            if (v) v.currentTime = Math.max(0, v.currentTime - 10);
+                                        }}
+                                        className="text-white/30 hover:text-white transition-colors"
+                                    >
+                                        <SkipBack className="w-4 h-4" />
+                                    </button>
+                                    <button onClick={togglePlay} className="w-8 h-8 rounded-full text-midnight flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: theme.primary }}>
+                                        {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const v = videoRef.current;
+                                            if (v) v.currentTime = Math.min(duration, v.currentTime + 10);
+                                        }}
+                                        className="text-white/30 hover:text-white transition-colors"
+                                    >
+                                        <SkipForward className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <div className="font-mono text-[10px] text-white/50 ml-2">
+                                    {formatTime(currentTime)} / {((duration && isFinite(duration) && duration > 0) || (videoRef.current?.duration && isFinite(videoRef.current.duration))) ? formatTime(Math.max(duration || 0, videoRef.current?.duration || 0, currentTime)) : '--:--'}
+                                </div>
                             </div>
 
-                            {/* Buttons Row */}
-                            <div className="flex items-center justify-between mt-1 z-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <button
-                                            onClick={() => {
-                                                const v = videoRef.current;
-                                                if (v) v.currentTime = Math.max(0, v.currentTime - 10);
-                                            }}
-                                            className="text-white/30 hover:text-white transition-colors"
-                                        >
-                                            <SkipBack className="w-4 h-4" />
-                                        </button>
-                                        <button onClick={togglePlay} className="w-8 h-8 rounded-full text-midnight flex items-center justify-center transition-all hover:scale-110" style={{ backgroundColor: theme.primary }}>
-                                            {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                const v = videoRef.current;
-                                                if (v) v.currentTime = Math.min(duration, v.currentTime + 10);
-                                            }}
-                                            className="text-white/30 hover:text-white transition-colors"
-                                        >
-                                            <SkipForward className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                    <div className="font-mono text-[10px] text-white/50 ml-2">
-                                        {formatTime(currentTime)} / {((duration && isFinite(duration) && duration > 0) || (videoRef.current?.duration && isFinite(videoRef.current.duration))) ? formatTime(Math.max(duration || 0, videoRef.current?.duration || 0, currentTime)) : '--:--'}
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2 group/volume relative">
+                                    <button onClick={() => setIsMuted(!isMuted)} className="text-white/50 hover:text-white transition-colors">
+                                        {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+                                    </button>
+                                    <div className="w-20 h-1 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar" onClick={(e) => {
+                                        const rect = e.currentTarget.getBoundingClientRect();
+                                        const val = (e.clientX - rect.left) / rect.width;
+                                        setVolume(Math.max(0, Math.min(1, val)));
+                                        setIsMuted(false);
+                                    }}>
+                                        <div className="absolute top-0 left-0 h-full" style={{ width: `${isMuted ? 0 : volume * 100}%`, backgroundColor: theme.primary }} />
+                                        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2 group/volume relative">
-                                        <button onClick={() => setIsMuted(!isMuted)} className="text-white/50 hover:text-white transition-colors">
-                                            {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+                                {/* Audio Track Selector */}
+                                {audioTracks.length > 1 && (
+                                    <div className="relative group/tracks">
+                                        <button className="text-white/30 hover:text-white transition-colors" title="Audio Tracks">
+                                            <Languages className="w-4 h-4" />
                                         </button>
-                                        <div className="w-20 h-1 bg-white/10 rounded-full cursor-pointer relative overflow-hidden group/volbar" onClick={(e) => {
-                                            const rect = e.currentTarget.getBoundingClientRect();
-                                            const val = (e.clientX - rect.left) / rect.width;
-                                            setVolume(Math.max(0, Math.min(1, val)));
-                                            setIsMuted(false);
-                                        }}>
-                                            <div className="absolute top-0 left-0 h-full" style={{ width: `${isMuted ? 0 : volume * 100}%`, backgroundColor: theme.primary }} />
-                                            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/volbar:opacity-100 transition-opacity" />
-                                        </div>
-                                    </div>
-
-                                    {/* Audio Track Selector */}
-                                    {audioTracks.length > 1 && (
-                                        <div className="relative group/tracks">
-                                            <button className="text-white/30 hover:text-white transition-colors" title="Audio Tracks">
-                                                <Languages className="w-4 h-4" />
-                                            </button>
-                                            <div className="absolute bottom-full right-0 mb-4 w-48 bg-midnight/95 backdrop-blur-2xl border border-white/10 rounded-xl overflow-hidden opacity-0 group-hover/tracks:opacity-100 pointer-events-none group-hover/tracks:pointer-events-auto transition-all transform translate-y-2 group-hover/tracks:translate-y-0 shadow-2xl z-50">
-                                                <div className="p-2 border-b border-white/5 bg-white/5">
-                                                    <span className="text-[9px] font-mono text-[#00f3ff] uppercase tracking-widest">Audio Tracks</span>
-                                                </div>
-                                                <div className="max-h-48 overflow-y-auto">
-                                                    {audioTracks.map((track) => (
-                                                        <button
-                                                            key={track.id}
-                                                            onClick={() => {
-                                                                if (hlsRef.current) hlsRef.current.audioTrack = track.id
-                                                            }}
-                                                            className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentAudioTrack === track.id ? 'text-[#00f3ff]' : 'text-white/60'}`}
-                                                        >
-                                                            {track.name || `Track ${track.id}`}
-                                                        </button>
-                                                    ))}
-                                                </div>
+                                        <div className="absolute bottom-full right-0 mb-4 w-48 bg-midnight/95 backdrop-blur-2xl border border-white/10 rounded-xl overflow-hidden opacity-0 group-hover/tracks:opacity-100 pointer-events-none group-hover/tracks:pointer-events-auto transition-all transform translate-y-2 group-hover/tracks:translate-y-0 shadow-2xl z-50">
+                                            <div className="p-2 border-b border-white/5 bg-white/5">
+                                                <span className="text-[9px] font-mono text-[#00f3ff] uppercase tracking-widest">Audio Tracks</span>
                                             </div>
-                                        </div>
-                                    )}
-
-                                    {/* Subtitle Track Selector */}
-                                    {subtitleTracks.length > 0 && (
-                                        <div className="relative group/subs">
-                                            <button className="text-white/30 hover:text-white transition-colors" title="Subtitles">
-                                                <Subtitles className="w-4 h-4" />
-                                            </button>
-                                            <div className="absolute bottom-full right-0 mb-4 w-48 bg-midnight/95 backdrop-blur-2xl border border-white/10 rounded-xl overflow-hidden opacity-0 group-hover/subs:opacity-100 pointer-events-none group-hover/subs:pointer-events-auto transition-all transform translate-y-2 group-hover/subs:translate-y-0 shadow-2xl z-50">
-                                                <div className="p-2 border-b border-white/5 bg-white/5">
-                                                    <span className="text-[9px] font-mono text-[#00f3ff] uppercase tracking-widest">Subtitles</span>
-                                                </div>
-                                                <div className="max-h-48 overflow-y-auto">
+                                            <div className="max-h-48 overflow-y-auto">
+                                                {audioTracks.map((track) => (
                                                     <button
+                                                        key={track.id}
                                                         onClick={() => {
-                                                            if (hlsRef.current) hlsRef.current.subtitleTrack = -1
+                                                            if (hlsRef.current) hlsRef.current.audioTrack = track.id
                                                         }}
-                                                        className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentSubtitleTrack === -1 ? 'text-[#00f3ff]' : 'text-white/60'}`}
+                                                        className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentAudioTrack === track.id ? 'text-[#00f3ff]' : 'text-white/60'}`}
                                                     >
-                                                        DISABLED
+                                                        {track.name || `Track ${track.id}`}
                                                     </button>
-                                                    {subtitleTracks.map((track) => (
-                                                        <button
-                                                            key={track.id}
-                                                            onClick={() => {
-                                                                if (hlsRef.current) hlsRef.current.subtitleTrack = track.id
-                                                            }}
-                                                            className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentSubtitleTrack === track.id ? 'text-[#00f3ff]' : 'text-white/60'}`}
-                                                        >
-                                                            {track.name || `Subtitle ${track.id}`}
-                                                        </button>
-                                                    ))}
-                                                </div>
+                                                ))}
                                             </div>
                                         </div>
-                                    )}
-
-                                    {/* Normalization Mode Selector */}
-                                    <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
-                                        {['none', 'night', 'voice', 'ebu'].map((mode) => (
-                                            <button
-                                                key={mode}
-                                                onClick={() => setAudioNormalization(mode as any)}
-                                                className={`px-1.5 py-0.5 text-[8px] font-mono rounded transition-all`}
-                                                style={{
-                                                    backgroundColor: audioNormalization === mode ? theme.primary : 'transparent',
-                                                    color: audioNormalization === mode ? '#050510' : 'rgba(255,255,255,0.3)'
-                                                }}
-                                            >
-                                                {mode.toUpperCase()}
-                                            </button>
-                                        ))}
                                     </div>
+                                )}
 
-                                    {/* Visualizer Toggle */}
-                                    <button
-                                        onClick={() => setShowVisualizerHUD(!showVisualizerHUD)}
-                                        className={`px-2 py-1 rounded-lg text-[9px] font-mono border transition-all flex items-center gap-1 ${showVisualizerHUD ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_12px_rgba(0,243,255,0.3)]' : 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/30'}`}
-                                        title="Toggle Audio Visualizer HUD"
-                                    >
-                                        <Activity className="w-3 h-3" />
-                                        <span className="hidden sm:inline">FX</span>
-                                    </button>
-
-                                    {/* Theme Switcher */}
-                                    <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
-                                        {Object.keys(themes).map(t => (
-                                            <button
-                                                key={t}
-                                                onClick={() => setCurrentTheme(t as any)}
-                                                className={`w-4 h-4 rounded-full transition-all ${currentTheme === t ? 'scale-110 ring-1 ring-white' : 'opacity-40 hover:opacity-100'}`}
-                                                style={{ backgroundColor: themes[t as keyof typeof themes].primary }}
-                                                title={t}
-                                            />
-                                        ))}
+                                {/* Subtitle Track Selector */}
+                                {subtitleTracks.length > 0 && (
+                                    <div className="relative group/subs">
+                                        <button className="text-white/30 hover:text-white transition-colors" title="Subtitles">
+                                            <Subtitles className="w-4 h-4" />
+                                        </button>
+                                        <div className="absolute bottom-full right-0 mb-4 w-48 bg-midnight/95 backdrop-blur-2xl border border-white/10 rounded-xl overflow-hidden opacity-0 group-hover/subs:opacity-100 pointer-events-none group-hover/subs:pointer-events-auto transition-all transform translate-y-2 group-hover/subs:translate-y-0 shadow-2xl z-50">
+                                            <div className="p-2 border-b border-white/5 bg-white/5">
+                                                <span className="text-[9px] font-mono text-[#00f3ff] uppercase tracking-widest">Subtitles</span>
+                                            </div>
+                                            <div className="max-h-48 overflow-y-auto">
+                                                <button
+                                                    onClick={() => {
+                                                        if (hlsRef.current) hlsRef.current.subtitleTrack = -1
+                                                    }}
+                                                    className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentSubtitleTrack === -1 ? 'text-[#00f3ff]' : 'text-white/60'}`}
+                                                >
+                                                    DISABLED
+                                                </button>
+                                                {subtitleTracks.map((track) => (
+                                                    <button
+                                                        key={track.id}
+                                                        onClick={() => {
+                                                            if (hlsRef.current) hlsRef.current.subtitleTrack = track.id
+                                                        }}
+                                                        className={`w-full text-left px-4 py-2 text-[10px] font-mono transition-colors hover:bg-white/5 ${currentSubtitleTrack === track.id ? 'text-[#00f3ff]' : 'text-white/60'}`}
+                                                    >
+                                                        {track.name || `Subtitle ${track.id}`}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
+                                )}
 
-                                    {/* Playback Speed Button */}
-                                    <button
-                                        onClick={cyclePlaybackSpeed}
-                                        className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors"
-                                        style={{ color: theme.primary, borderColor: `${theme.primary}50`, borderWidth: '1px' }}
-                                    >
-                                        {playbackRate}x
-                                    </button>
-
-                                    <button onClick={() => setShowDebug(!showDebug)} className="transition-colors" style={{ color: showDebug ? theme.secondary : 'rgba(255,255,255,0.3)' }} title="Stats">
-                                        <Info className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={cycleAspectRatio} className="px-2 py-0.5 hover:bg-white/10 rounded transition-colors text-[9px] font-mono border" style={{ color: `${theme.primary}B3`, borderColor: `${theme.primary}33` }}>
-                                        {aspectRatio.toUpperCase()}
-                                    </button>
-                                    <button onClick={() => setShowHelp(true)} className="text-white/30 hover:text-white transition-colors" title="Help (?)">
-                                        <HelpCircle className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={toggleFullscreen} className="text-white/50 hover:text-electric-purple transition-colors" title="Fullscreen">
-                                        {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                                    </button>
+                                {/* Normalization Mode Selector */}
+                                <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
+                                    {['none', 'night', 'voice', 'ebu'].map((mode) => (
+                                        <button
+                                            key={mode}
+                                            onClick={() => setAudioNormalization(mode as any)}
+                                            className={`px-1.5 py-0.5 text-[8px] font-mono rounded transition-all`}
+                                            style={{
+                                                backgroundColor: audioNormalization === mode ? theme.primary : 'transparent',
+                                                color: audioNormalization === mode ? '#050510' : 'rgba(255,255,255,0.3)'
+                                            }}
+                                        >
+                                            {mode.toUpperCase()}
+                                        </button>
+                                    ))}
                                 </div>
+
+                                {/* Visualizer Toggle */}
+                                <button
+                                    onClick={() => setShowVisualizerHUD(!showVisualizerHUD)}
+                                    className={`px-2 py-1 rounded-lg text-[9px] font-mono border transition-all flex items-center gap-1 ${showVisualizerHUD ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_12px_rgba(0,243,255,0.3)]' : 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/30'}`}
+                                    title="Toggle Audio Visualizer HUD"
+                                >
+                                    <Activity className="w-3 h-3" />
+                                    <span className="hidden sm:inline">FX</span>
+                                </button>
+
+                                {/* Theme Switcher */}
+                                <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
+                                    {Object.keys(themes).map(t => (
+                                        <button
+                                            key={t}
+                                            onClick={() => setCurrentTheme(t as any)}
+                                            className={`w-4 h-4 rounded-full transition-all ${currentTheme === t ? 'scale-110 ring-1 ring-white' : 'opacity-40 hover:opacity-100'}`}
+                                            style={{ backgroundColor: themes[t as keyof typeof themes].primary }}
+                                            title={t}
+                                        />
+                                    ))}
+                                </div>
+
+                                {/* Playback Speed Button */}
+                                <button
+                                    onClick={cyclePlaybackSpeed}
+                                    className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded transition-colors"
+                                    style={{ color: theme.primary, borderColor: `${theme.primary}50`, borderWidth: '1px' }}
+                                >
+                                    {playbackRate}x
+                                </button>
+
+                                <button onClick={() => setShowDebug(!showDebug)} className="transition-colors" style={{ color: showDebug ? theme.secondary : 'rgba(255,255,255,0.3)' }} title="Stats">
+                                    <Info className="w-4 h-4" />
+                                </button>
+                                <button onClick={cycleAspectRatio} className="px-2 py-0.5 hover:bg-white/10 rounded transition-colors text-[9px] font-mono border" style={{ color: `${theme.primary}B3`, borderColor: `${theme.primary}33` }}>
+                                    {aspectRatio.toUpperCase()}
+                                </button>
+                                <button onClick={() => setShowHelp(true)} className="text-white/30 hover:text-white transition-colors" title="Help (?)">
+                                    <HelpCircle className="w-4 h-4" />
+                                </button>
+                                <button onClick={toggleFullscreen} className="text-white/50 hover:text-electric-purple transition-colors" title="Fullscreen">
+                                    {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                                </button>
                             </div>
                         </div>
-                    </motion.footer>
-                )}
-            </AnimatePresence>
+                    </div>
+                </footer>
+            )}
 
             {/* Help Modal */}
-            <AnimatePresence>
-                {showHelp && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="absolute inset-0 z-[100] bg-midnight/90 backdrop-blur-xl flex items-center justify-center p-8"
-                        onClick={() => setShowHelp(false)}
-                    >
+            {showHelp && (
+                <div
+                    className="absolute inset-0 z-[100] bg-midnight/90 backdrop-blur-xl flex items-center justify-center p-8 transition-all duration-300"
+                    onClick={() => setShowHelp(false)}
+                >
                         <div className="max-w-2xl w-full bg-black/50 border border-white/10 rounded-2xl p-8" onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
                                 <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">KEYBOARD SHORTCUTS</h2>
@@ -1185,21 +1129,20 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
                                 </div>
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
 
             {/* A-B Loop Overlay / Indicators */}
             {(loopA !== null || loopB !== null) && (
                 <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-1.5 bg-midnight/60 backdrop-blur-md border border-white/10 rounded-full font-mono text-[10px] text-neon-cyan select-none">
                     <div className="flex items-center gap-1">
                         <span className="opacity-50">A:</span>
-                        <span>{loopA !== null ? formatTime(loopA) : '--:--'}</span>
+                        <span>{loopA !== null ? formatTime(loopA as number) : '--:--'}</span>
                     </div>
                     <div className="w-px h-2 bg-white/10 mx-1" />
                     <div className="flex items-center gap-1">
                         <span className="opacity-50">B:</span>
-                        <span>{loopB !== null ? formatTime(loopB) : '--:--'}</span>
+                        <span>{loopB !== null ? formatTime(loopB as number) : '--:--'}</span>
                     </div>
                     {loopA !== null && loopB !== null && (window as any).ipcRenderer && (
                         <button

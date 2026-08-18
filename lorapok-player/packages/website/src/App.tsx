@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { LorapokPlayer, Logo } from 'lorapok-player'
 import type { LorapokPlayerRef } from 'lorapok-player'
 import { 
@@ -1385,18 +1384,13 @@ export function App() {
                                     <span>{item.q}</span>
                                     <ChevronDown className={`w-5 h-5 transition-transform text-neon-cyan ${activeFaq === idx ? 'rotate-180' : ''}`} />
                                 </button>
-                                <AnimatePresence>
-                                    {activeFaq === idx && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            className="px-6 pb-6 text-xs md:text-sm font-mono text-white/60 leading-relaxed border-t border-white/5 pt-4"
-                                        >
-                                            {item.a}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                {activeFaq === idx && (
+                                    <div
+                                        className="px-6 pb-6 text-xs md:text-sm font-mono text-white/60 leading-relaxed border-t border-white/5 pt-4 transition-all duration-300"
+                                    >
+                                        {item.a}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -1405,229 +1399,205 @@ export function App() {
             </main>
 
             {/* Global Search Modal (Cmd/Ctrl + K) */}
-            <AnimatePresence>
-                {showSearchModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setShowSearchModal(false)}
-                        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-start justify-center pt-24 px-4"
+            {showSearchModal && (
+                <div
+                    onClick={() => setShowSearchModal(false)}
+                    className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-start justify-center pt-24 px-4 transition-all duration-300"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-[#0b0e18] border border-white/15 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-4 p-6 transform transition-transform"
                     >
-                        <motion.div
-                            initial={{ scale: 0.95, y: -20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.95, y: -20 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-[#0b0e18] border border-white/15 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-4 p-6"
-                        >
-                            <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                                <Search className="w-5 h-5 text-neon-cyan" />
-                                <input
-                                    type="text"
-                                    autoFocus
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search test media presets, formats, audio or custom streams..."
-                                    className="flex-1 bg-transparent text-white font-mono text-sm focus:outline-none placeholder-white/40"
-                                />
-                                <button onClick={() => setShowSearchModal(false)}>
-                                    <X className="w-5 h-5 text-white/40 hover:text-white" />
-                                </button>
-                            </div>
+                        <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                            <Search className="w-5 h-5 text-neon-cyan" />
+                            <input
+                                type="text"
+                                autoFocus
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search test media presets, formats, audio or custom streams..."
+                                className="flex-1 bg-transparent text-white font-mono text-sm focus:outline-none placeholder-white/40"
+                            />
+                            <button onClick={() => setShowSearchModal(false)}>
+                                <X className="w-5 h-5 text-white/40 hover:text-white" />
+                            </button>
+                        </div>
 
-                            <div className="max-h-96 overflow-y-auto space-y-2 pr-1">
-                                {searchResults.length === 0 ? (
-                                    <div className="py-8 text-center text-xs font-mono text-white/40">
-                                        No media found matching "{searchQuery}"
-                                    </div>
-                                ) : (
-                                    searchResults.map((item, idx) => (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => {
-                                                selectTrack(playlist.indexOf(item))
-                                                setShowSearchModal(false)
-                                                document.getElementById('medialab')?.scrollIntoView({ behavior: 'smooth' })
-                                            }}
-                                            className="w-full text-left p-3 rounded-xl border border-white/5 hover:border-neon-cyan/40 bg-white/5 hover:bg-white/10 transition-all flex items-center justify-between group"
-                                        >
-                                            <div>
-                                                <div className="font-bold text-sm text-white group-hover:text-neon-cyan transition-colors">{item.name}</div>
-                                                <div className="text-[10px] font-mono text-white/50">{item.desc}</div>
-                                            </div>
-                                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-neon-cyan">
-                                                {item.type}
-                                            </span>
-                                        </button>
-                                    ))
-                                )}
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        <div className="max-h-96 overflow-y-auto space-y-2 pr-1">
+                            {searchResults.length === 0 ? (
+                                <div className="py-8 text-center text-xs font-mono text-white/40">
+                                    No media found matching "{searchQuery}"
+                                </div>
+                            ) : (
+                                searchResults.map((item) => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => {
+                                            selectTrack(playlist.indexOf(item))
+                                            setShowSearchModal(false)
+                                            document.getElementById('medialab')?.scrollIntoView({ behavior: 'smooth' })
+                                        }}
+                                        className="w-full text-left p-3 rounded-xl border border-white/5 hover:border-neon-cyan/40 bg-white/5 hover:bg-white/10 transition-all flex items-center justify-between group"
+                                    >
+                                        <div>
+                                            <div className="font-bold text-sm text-white group-hover:text-neon-cyan transition-colors">{item.name}</div>
+                                            <div className="text-[10px] font-mono text-white/50">{item.desc}</div>
+                                        </div>
+                                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-neon-cyan">
+                                            {item.type}
+                                        </span>
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Interactive "How to Use" Guide Modal */}
-            <AnimatePresence>
-                {showHowToUseModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setShowHowToUseModal(false)}
-                        className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4"
+            {showHowToUseModal && (
+                <div
+                    onClick={() => setShowHowToUseModal(false)}
+                    className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 transition-all duration-300"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-[#0b0e18] border border-white/15 rounded-3xl max-w-3xl w-full max-h-[85vh] overflow-y-auto p-8 space-y-8 shadow-2xl"
                     >
-                        <motion.div
-                            initial={{ scale: 0.95 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0.95 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-[#0b0e18] border border-white/15 rounded-3xl max-w-3xl w-full max-h-[85vh] overflow-y-auto p-8 space-y-8 shadow-2xl"
-                        >
-                            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                                <div>
-                                    <h2 className="text-2xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">
-                                        How to Use Lorapok Player
-                                    </h2>
-                                    <p className="text-xs font-mono text-white/50">Complete user guide, shortcuts & ecosystem features</p>
-                                </div>
-                                <button onClick={() => setShowHowToUseModal(false)}>
-                                    <X className="w-6 h-6 text-white/40 hover:text-white" />
-                                </button>
+                        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                            <div>
+                                <h2 className="text-2xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">
+                                    How to Use Lorapok Player
+                                </h2>
+                                <p className="text-xs font-mono text-white/50">Complete user guide, shortcuts & ecosystem features</p>
                             </div>
+                            <button onClick={() => setShowHowToUseModal(false)}>
+                                <X className="w-6 h-6 text-white/40 hover:text-white" />
+                            </button>
+                        </div>
 
-                            {/* Section 1: Keyboard Shortcuts */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-mono font-bold text-neon-cyan uppercase tracking-wider flex items-center gap-2">
-                                    <Laptop className="w-4 h-4" /> 1. Desktop Keyboard Shortcuts
-                                </h3>
-                                <div className="grid sm:grid-cols-2 gap-3 text-xs font-mono">
-                                    {[
-                                        { key: "SPACE", action: "Play / Pause playback" },
-                                        { key: "← / →", action: "Seek backward / forward 10 seconds" },
-                                        { key: "↑ / ↓", action: "Increase / Decrease volume (10%)" },
-                                        { key: "M", action: "Mute / Unmute audio" },
-                                        { key: "F", action: "Toggle Fullscreen mode" },
-                                        { key: "A", action: "Cycle Aspect Ratio (16:9, 4:3, 21:9, Original)" },
-                                        { key: "[ / ]", action: "Set A-B Loop Start & End points" },
-                                        { key: "\\", action: "Clear active A-B Loop" },
-                                        { key: "{ / }", action: "Cycle playback speed (0.5x, 1x, 1.25x, 1.5x, 2x)" },
-                                        { key: "⌘K / Ctrl+K", action: "Open Instant File & Stream Search" },
-                                    ].map((s, i) => (
-                                        <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
-                                            <span className="font-bold text-white bg-black/40 px-2 py-0.5 rounded border border-white/10">{s.key}</span>
-                                            <span className="text-white/60">{s.action}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                        {/* Section 1: Keyboard Shortcuts */}
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-mono font-bold text-neon-cyan uppercase tracking-wider flex items-center gap-2">
+                                <Laptop className="w-4 h-4" /> 1. Desktop Keyboard Shortcuts
+                            </h3>
+                            <div className="grid sm:grid-cols-2 gap-3 text-xs font-mono">
+                                {[
+                                    { key: "SPACE", action: "Play / Pause playback" },
+                                    { key: "← / →", action: "Seek backward / forward 10 seconds" },
+                                    { key: "↑ / ↓", action: "Increase / Decrease volume (10%)" },
+                                    { key: "M", action: "Mute / Unmute audio" },
+                                    { key: "F", action: "Toggle Fullscreen mode" },
+                                    { key: "A", action: "Cycle Aspect Ratio (16:9, 4:3, 21:9, Original)" },
+                                    { key: "[ / ]", action: "Set A-B Loop Start & End points" },
+                                    { key: "\\", action: "Clear active A-B Loop" },
+                                    { key: "{ / }", action: "Cycle playback speed (0.5x, 1x, 1.25x, 1.5x, 2x)" },
+                                    { key: "⌘K / Ctrl+K", action: "Open Instant File & Stream Search" },
+                                ].map((s, i) => (
+                                    <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                        <span className="font-bold text-white bg-black/40 px-2 py-0.5 rounded border border-white/10">{s.key}</span>
+                                        <span className="text-white/60">{s.action}</span>
+                                    </div>
+                                ))}
                             </div>
+                        </div>
 
-                            {/* Section 2: Mobile Gestures */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-mono font-bold text-green-400 uppercase tracking-wider flex items-center gap-2">
-                                    <Smartphone className="w-4 h-4" /> 2. Android Mobile Gestures & Android TV
-                                </h3>
-                                <div className="grid sm:grid-cols-3 gap-3 text-xs font-mono">
-                                    <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
-                                        <div className="font-bold text-green-300">Left Vertical Swipe</div>
-                                        <div className="text-white/50 text-[11px]">Adjust screen brightness (0.2x to 2.0x)</div>
-                                    </div>
-                                    <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
-                                        <div className="font-bold text-green-300">Right Vertical Swipe</div>
-                                        <div className="text-white/50 text-[11px]">Adjust audio volume with 150% boost</div>
-                                    </div>
-                                    <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
-                                        <div className="font-bold text-green-300">Double Tap & Remote</div>
-                                        <div className="text-white/50 text-[11px]">Double tap to seek 10s • Full D-Pad TV remote support</div>
-                                    </div>
+                        {/* Section 2: Mobile Gestures */}
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-mono font-bold text-green-400 uppercase tracking-wider flex items-center gap-2">
+                                <Smartphone className="w-4 h-4" /> 2. Android Mobile Gestures & Android TV
+                            </h3>
+                            <div className="grid sm:grid-cols-3 gap-3 text-xs font-mono">
+                                <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                                    <div className="font-bold text-green-300">Left Vertical Swipe</div>
+                                    <div className="text-white/50 text-[11px]">Adjust screen brightness (0.2x to 2.0x)</div>
+                                </div>
+                                <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                                    <div className="font-bold text-green-300">Right Vertical Swipe</div>
+                                    <div className="text-white/50 text-[11px]">Adjust audio volume with 150% boost</div>
+                                </div>
+                                <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                                    <div className="font-bold text-green-300">Double Tap & Remote</div>
+                                    <div className="text-white/50 text-[11px]">Double tap to seek 10s • Full D-Pad TV remote support</div>
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Section 3: Browser & IDE Extensions */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-mono font-bold text-electric-purple uppercase tracking-wider flex items-center gap-2">
-                                    <Compass className="w-4 h-4" /> 3. Browser Connector & VS Code Extension
-                                </h3>
-                                <p className="text-xs font-mono text-white/60 leading-relaxed">
-                                    Install the Firefox AMO (.xpi), Chrome (.zip), Edge (.zip), or VS Code (.vsix) extensions to sniff media streams on any webpage or preview video files directly in your IDE code editor with 1 click.
-                                </p>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        {/* Section 3: Browser & IDE Extensions */}
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-mono font-bold text-electric-purple uppercase tracking-wider flex items-center gap-2">
+                                <Compass className="w-4 h-4" /> 3. Browser Connector & VS Code Extension
+                            </h3>
+                            <p className="text-xs font-mono text-white/60 leading-relaxed">
+                                Install the Firefox AMO (.xpi), Chrome (.zip), Edge (.zip), or VS Code (.vsix) extensions to sniff media streams on any webpage or preview video files directly in your IDE code editor with 1 click.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Official License Terms Modal */}
-            <AnimatePresence>
-                {showLicenseModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setShowLicenseModal(false)}
-                        className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4"
+            {showLicenseModal && (
+                <div
+                    onClick={() => setShowLicenseModal(false)}
+                    className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4 transition-all duration-300"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-[#0b0e18] border border-white/15 rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-8 space-y-6 shadow-2xl"
                     >
-                        <motion.div
-                            initial={{ scale: 0.95 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0.95 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-[#0b0e18] border border-white/15 rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-8 space-y-6 shadow-2xl"
-                        >
-                            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                                <div>
-                                    <h2 className="text-xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">
-                                        Lorapok Labs Non-Commercial License
-                                    </h2>
-                                    <p className="text-xs font-mono text-white/50">LL-NC-1.0 End-User Terms & Conditions</p>
+                        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                            <div>
+                                <h2 className="text-xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">
+                                    Lorapok Labs Non-Commercial License
+                                </h2>
+                                <p className="text-xs font-mono text-white/50">LL-NC-1.0 End-User Terms & Conditions</p>
+                            </div>
+                            <button onClick={() => setShowLicenseModal(false)}>
+                                <X className="w-6 h-6 text-white/40 hover:text-white" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4 text-xs font-mono text-white/70 leading-relaxed">
+                            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                                <div className="font-bold text-white uppercase tracking-wider text-[11px] text-neon-cyan">
+                                    1. Product Ownership & Origin
                                 </div>
-                                <button onClick={() => setShowLicenseModal(false)}>
-                                    <X className="w-6 h-6 text-white/40 hover:text-white" />
-                                </button>
+                                <p>
+                                    This software is an official product developed by <strong>Lorapok Labs</strong> (<a href="https://lorapok.tech" target="_blank" rel="noopener noreferrer" className="text-neon-cyan underline">https://lorapok.tech</a>). All intellectual property, trademarks, and source architectures remain the property of Lorapok Labs.
+                                </p>
                             </div>
 
-                            <div className="space-y-4 text-xs font-mono text-white/70 leading-relaxed">
-                                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                                    <div className="font-bold text-white uppercase tracking-wider text-[11px] text-neon-cyan">
-                                        1. Product Ownership & Origin
-                                    </div>
-                                    <p>
-                                        This software is an official product developed by <strong>Lorapok Labs</strong> (<a href="https://lorapok.tech" target="_blank" rel="noopener noreferrer" className="text-neon-cyan underline">https://lorapok.tech</a>). All intellectual property, trademarks, and source architectures remain the property of Lorapok Labs.
-                                    </p>
+                            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                                <div className="font-bold text-white uppercase tracking-wider text-[11px] text-green-400">
+                                    2. Permitted End-User Use
                                 </div>
-
-                                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                                    <div className="font-bold text-white uppercase tracking-wider text-[11px] text-green-400">
-                                        2. Permitted End-User Use
-                                    </div>
-                                    <p>
-                                        You are granted a free, non-exclusive, revocable license to install, execute, and operate Lorapok Media Player across personal computers, mobile devices, and media centers solely for personal, private, educational, and non-commercial multimedia playback.
-                                    </p>
-                                </div>
-
-                                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 space-y-2">
-                                    <div className="font-bold text-red-400 uppercase tracking-wider text-[11px]">
-                                        3. Strict Commercial Prohibitions (NOT FOR SALE)
-                                    </div>
-                                    <p className="text-red-200/90">
-                                        You may NOT sell, resell, lease, rent, sublicense, or monetize this Software or any derivative thereof. You may NOT bundle or use this software for commercial broadcasting, paid business applications, or corporate revenue generation without prior express written authorization and commercial licensing from Lorapok Labs.
-                                    </p>
-                                </div>
-
-                                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                                    <div className="font-bold text-white uppercase tracking-wider text-[11px] text-electric-purple">
-                                        4. Commercial Licensing & Inquiries
-                                    </div>
-                                    <p>
-                                        For enterprise deployments, commercial integration, or business inquiries, contact the team at <a href="https://lorapok.tech" target="_blank" rel="noopener noreferrer" className="text-neon-cyan underline">lorapok.tech</a>.
-                                    </p>
-                                </div>
+                                <p>
+                                    You are granted a free, non-exclusive, revocable license to install, execute, and operate Lorapok Media Player across personal computers, mobile devices, and media centers solely for personal, private, educational, and non-commercial multimedia playback.
+                                </p>
                             </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+
+                            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 space-y-2">
+                                <div className="font-bold text-red-400 uppercase tracking-wider text-[11px]">
+                                    3. Strict Commercial Prohibitions (NOT FOR SALE)
+                                </div>
+                                <p className="text-red-200/90">
+                                    You may NOT sell, resell, lease, rent, sublicense, or monetize this Software or any derivative thereof. You may NOT bundle or use this software for commercial broadcasting, paid business applications, or corporate revenue generation without prior express written authorization and commercial licensing from Lorapok Labs.
+                                </p>
+                            </div>
+
+                            <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                                <div className="font-bold text-white uppercase tracking-wider text-[11px] text-electric-purple">
+                                    4. Commercial Licensing & Inquiries
+                                </div>
+                                <p>
+                                    For enterprise deployments, commercial integration, or business inquiries, contact the team at <a href="https://lorapok.tech" target="_blank" rel="noopener noreferrer" className="text-neon-cyan underline">lorapok.tech</a>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Footer */}
             <footer className="border-t border-white/10 bg-[#020204] py-12 mt-20 text-center text-xs font-mono text-white/50 space-y-4">
