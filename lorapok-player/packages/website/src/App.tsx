@@ -46,60 +46,67 @@ const DEFAULT_MANIFEST: Manifest = {
     updatedAt: new Date().toISOString(),
     platforms: {
         windows: {
-            default: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Windows-Setup-1.5.0.exe`,
+            default: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Windows-Setup.exe`,
             size: "78 MB",
             installer: {
-                url: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Windows-Setup-1.5.0.exe`,
+                url: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Windows-Setup.exe`,
                 size: "78 MB",
                 label: "Windows Installer (.exe)",
                 badge: "INSTALLABLE",
                 desc: "Complete installer for Windows 10 & 11 (64-bit)"
             },
             portable: {
-                url: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Windows-Setup-1.5.0.exe`,
-                size: "78 MB",
+                url: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer.exe`,
+                size: "68 MB",
                 label: "Windows Standalone (.exe)",
                 badge: "PORTABLE",
                 desc: "Zero-install standalone binary for USB / portable drives"
             }
         },
         linux: {
-            default: "/downloads/lorapok-player-1.5.0-x86_64.AppImage",
+            default: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Linux.AppImage`,
             size: "108 MB",
             portable: {
-                url: "/downloads/lorapok-player-1.5.0-x86_64.AppImage",
+                url: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Linux.AppImage`,
                 size: "108 MB",
                 label: "Linux AppImage",
                 badge: "PORTABLE",
                 desc: "Self-contained universal executable for all Linux distributions"
             },
             deb: {
-                url: "/downloads/lorapok-player-1.5.0-amd64.deb",
+                url: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Linux.deb`,
                 size: "70 MB",
                 label: "Debian / Ubuntu (.deb)",
                 badge: "INSTALLABLE",
                 desc: "Native APT package installer with desktop integration"
+            },
+            snap: {
+                url: "https://snapcraft.io/lorapokmediaplayer",
+                size: "93 MB",
+                label: "Snap Store (Universal Linux)",
+                badge: "SNAP STORE",
+                desc: "Install directly via snap install lorapokmediaplayer"
             }
         },
         macos: {
-            default: `${GITHUB_RELEASE_BASE}/Lorapok-Media-Player-1.5.0-arm64.dmg`,
+            default: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Mac-Installer.dmg`,
             size: "96 MB",
             dmgArm: {
-                url: `${GITHUB_RELEASE_BASE}/Lorapok-Media-Player-1.5.0-arm64.dmg`,
+                url: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Mac-Installer.dmg`,
                 size: "96 MB",
                 label: "macOS Apple Silicon (.dmg)",
                 badge: "INSTALLABLE",
                 desc: "Optimized for Apple M1, M2, M3, M4 Macs"
             },
             dmgIntel: {
-                url: `${GITHUB_RELEASE_BASE}/Lorapok-Media-Player-1.5.0.dmg`,
+                url: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Mac-Installer.dmg`,
                 size: "96 MB",
                 label: "macOS Intel (.dmg)",
                 badge: "INSTALLABLE",
                 desc: "For Intel-based Mac systems"
             },
             zipPortable: {
-                url: `${GITHUB_RELEASE_BASE}/Lorapok-Media-Player-1.5.0-arm64-mac.zip`,
+                url: `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Mac-Installer.zip`,
                 size: "97 MB",
                 label: "macOS Portable (.zip)",
                 badge: "PORTABLE",
@@ -107,38 +114,38 @@ const DEFAULT_MANIFEST: Manifest = {
             }
         },
         android: {
-            default: "/downloads/lorapok-player-1.5.0-universal.apk",
+            default: `${GITHUB_RELEASE_BASE}/app-universal-release.apk`,
             size: "2.8 MB",
             universal: {
-                url: "/downloads/lorapok-player-1.5.0-universal.apk",
+                url: `${GITHUB_RELEASE_BASE}/app-universal-release.apk`,
                 size: "2.8 MB",
                 label: "Universal APK",
                 badge: "INSTALLABLE",
                 desc: "Compatible with all Android phones, tablets & TV"
             },
             arm64: {
-                url: "/downloads/lorapok-player-1.5.0-arm64-v8a.apk",
+                url: `${GITHUB_RELEASE_BASE}/app-arm64-v8a-release.apk`,
                 size: "2.8 MB",
                 label: "ARM64-v8a APK",
                 badge: "INSTALLABLE",
                 desc: "Native 64-bit performance for modern Android flagships"
             },
             armv7: {
-                url: "/downloads/lorapok-player-1.5.0-armeabi-v7a.apk",
+                url: `${GITHUB_RELEASE_BASE}/app-armeabi-v7a-release.apk`,
                 size: "2.8 MB",
                 label: "ARMv7 APK",
                 badge: "INSTALLABLE",
                 desc: "For legacy Android devices & TV sticks"
             },
             x86_64: {
-                url: "/downloads/lorapok-player-1.5.0-x86_64.apk",
+                url: `${GITHUB_RELEASE_BASE}/app-x86_64-release.apk`,
                 size: "2.8 MB",
                 label: "x86_64 APK",
                 badge: "INSTALLABLE",
                 desc: "For Android emulators and ChromeOS"
             },
             aab: {
-                url: "/downloads/lorapok-player-1.5.0.aab",
+                url: `${GITHUB_RELEASE_BASE}/app-release.aab`,
                 size: "3.3 MB",
                 label: "Google Play Bundle (.aab)",
                 badge: "STORE BUNDLE",
@@ -147,35 +154,35 @@ const DEFAULT_MANIFEST: Manifest = {
         },
         extensions: {
             firefoxXpi: {
-                url: "/downloads/lorapok-extension-firefox-1.5.0.xpi",
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-1.5.0.xpi`,
                 size: "428 KB",
                 label: "Firefox Add-on (.xpi)",
                 badge: "AMO READY",
                 desc: "Mozilla Firefox Add-ons (AMO) installable package"
             },
             firefoxZip: {
-                url: "/downloads/lorapok-extension-firefox-1.5.0.zip",
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-1.5.0.zip`,
                 size: "428 KB",
                 label: "Firefox Source (.zip)",
                 badge: "AMO ARCHIVE",
                 desc: "Firefox Developer Edition / AMO submission archive"
             },
             chromeZip: {
-                url: "/downloads/lorapok-extension-chrome-1.5.0.zip",
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-chrome-1.5.0.zip`,
                 size: "428 KB",
                 label: "Google Chrome (.zip)",
                 badge: "CHROME MV3",
                 desc: "Chrome Web Store / Chromium unpacked extension"
             },
             edgeZip: {
-                url: "/downloads/lorapok-extension-edge-1.5.0.zip",
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-edge-1.5.0.zip`,
                 size: "428 KB",
                 label: "Microsoft Edge (.zip)",
                 badge: "EDGE ADD-ONS",
                 desc: "Microsoft Edge Add-ons Store package"
             },
             vscodeVsix: {
-                url: "/downloads/lorapok-player-vscode-1.5.0.vsix",
+                url: `${GITHUB_RELEASE_BASE}/lorapok-player-vscode-1.5.0.vsix`,
                 size: "21 KB",
                 label: "VS Code Extension (.vsix)",
                 badge: "IDE EXTENSION",
@@ -204,12 +211,20 @@ const INITIAL_MEDIA_PRESETS: PlaylistItem[] = [
         desc: '1080p RGB spectrum color cycle benchmark with AAC audio'
     },
     {
-        id: 'hls',
-        name: 'Cyber Grid Adaptive',
+        id: 'hls-mux',
+        name: 'Big Buck Bunny (Mux HLS)',
+        category: 'Adaptive Stream',
+        type: 'HLS (.m3u8)',
+        url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+        desc: 'Multi-bitrate adaptive live HLS broadcast stream with master playlist indexing'
+    },
+    {
+        id: 'hls-cyber',
+        name: 'Cyber Grid Broadcast',
         category: 'Adaptive Stream',
         type: 'HLS (.m3u8)',
         url: '/demos/hls/cyber_grid.m3u8',
-        desc: 'Multi-segment HLS broadcast stream with live segment indexing'
+        desc: 'Multi-segment local HLS neural broadcast with live segment indexing'
     },
     {
         id: 'dash',
@@ -221,7 +236,7 @@ const INITIAL_MEDIA_PRESETS: PlaylistItem[] = [
     },
     {
         id: 'webm',
-        name: 'Cyber Matrix',
+        name: 'Cyber Matrix VP9',
         category: 'Video',
         type: 'WebM (VP9)',
         url: '/demos/cyber_matrix.webm',
@@ -229,19 +244,19 @@ const INITIAL_MEDIA_PRESETS: PlaylistItem[] = [
     },
     {
         id: 'flac',
-        name: 'Neural 528Hz Tone',
+        name: 'Neural 528Hz Lossless',
         category: 'Lossless Audio',
         type: 'FLAC (24-bit)',
         url: '/demos/audio_lossless.flac',
         desc: 'Audiophile lossless pure sinusoidal tone for audio visualizer testing'
     },
     {
-        id: 'aac',
-        name: 'Synthwave 432Hz Hi-Fi',
+        id: 'mp3',
+        name: 'Synthwave Neon Drive',
         category: 'Audio',
-        type: 'AAC (320kbps)',
-        url: '/demos/audio_synthwave.aac',
-        desc: 'High-bitrate studio master stream with dynamic stereo panning'
+        type: 'MP3 (320kbps)',
+        url: '/demos/audio_synthwave.mp3',
+        desc: 'Dynamic retro synthwave studio master with reactive audio equalizer'
     },
     {
         id: 'wav',
@@ -250,14 +265,6 @@ const INITIAL_MEDIA_PRESETS: PlaylistItem[] = [
         type: 'WAV (PCM)',
         url: '/demos/audio_pulse.wav',
         desc: 'Uncompressed PCM 48kHz audio waveform demo'
-    },
-    {
-        id: 'live-akamai',
-        name: 'Akamai Live CDN',
-        category: 'Live Broadcast',
-        type: 'HLS Live',
-        url: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
-        desc: 'Production Akamai CDN live stream test'
     }
 ]
 
@@ -284,6 +291,7 @@ export function App() {
     const [selectedAndroidVariant, setSelectedAndroidVariant] = useState<'universal' | 'arm64' | 'armv7' | 'x86_64' | 'aab'>('universal')
     const [showSearchModal, setShowSearchModal] = useState(false)
     const [showHowToUseModal, setShowHowToUseModal] = useState(false)
+    const [showLicenseModal, setShowLicenseModal] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [isShuffle, setIsShuffle] = useState(false)
@@ -828,7 +836,7 @@ export function App() {
                                 </a>
 
                                 <a
-                                    href={(manifest.platforms.linux.deb as DownloadItem)?.url || "/downloads/lorapok-player-1.5.0-amd64.deb"}
+                                    href={(manifest.platforms.linux.deb as DownloadItem)?.url || "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Linux.deb"}
                                     download
                                     className="w-full py-3 px-4 rounded-xl bg-white/5 hover:bg-white/15 font-mono text-xs uppercase tracking-wider transition-all flex items-center justify-between border border-white/10 text-white/80"
                                 >
@@ -837,6 +845,18 @@ export function App() {
                                         <span>Debian / Ubuntu (.deb)</span>
                                     </div>
                                     <span className="text-[10px] opacity-60">70 MB</span>
+                                </a>
+
+                                <a
+                                    href="https://snapcraft.io/lorapokmediaplayer"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full py-2.5 px-3 rounded-xl bg-black/60 hover:bg-black/90 font-mono text-xs uppercase tracking-wider transition-all flex items-center justify-between border border-white/15 text-white hover:border-neon-cyan/50 group"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <img alt="Get Lorapok Media Player from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" className="h-6 group-hover:scale-105 transition-transform" />
+                                    </div>
+                                    <span className="text-[10px] font-mono text-neon-cyan/90 font-bold">SNAP STORE</span>
                                 </a>
                             </div>
                         </div>
@@ -1454,20 +1474,105 @@ export function App() {
                 )}
             </AnimatePresence>
 
+            {/* Official License Terms Modal */}
+            <AnimatePresence>
+                {showLicenseModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowLicenseModal(false)}
+                        className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-[#0b0e18] border border-white/15 rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-8 space-y-6 shadow-2xl"
+                        >
+                            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                                <div>
+                                    <h2 className="text-xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">
+                                        Lorapok Labs Non-Commercial License
+                                    </h2>
+                                    <p className="text-xs font-mono text-white/50">LL-NC-1.0 End-User Terms & Conditions</p>
+                                </div>
+                                <button onClick={() => setShowLicenseModal(false)}>
+                                    <X className="w-6 h-6 text-white/40 hover:text-white" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4 text-xs font-mono text-white/70 leading-relaxed">
+                                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                                    <div className="font-bold text-white uppercase tracking-wider text-[11px] text-neon-cyan">
+                                        1. Product Ownership & Origin
+                                    </div>
+                                    <p>
+                                        This software is an official product developed by <strong>Lorapok Labs</strong> (<a href="https://lorapok.tech" target="_blank" rel="noopener noreferrer" className="text-neon-cyan underline">https://lorapok.tech</a>). All intellectual property, trademarks, and source architectures remain the property of Lorapok Labs.
+                                    </p>
+                                </div>
+
+                                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                                    <div className="font-bold text-white uppercase tracking-wider text-[11px] text-green-400">
+                                        2. Permitted End-User Use
+                                    </div>
+                                    <p>
+                                        You are granted a free, non-exclusive, revocable license to install, execute, and operate Lorapok Media Player across personal computers, mobile devices, and media centers solely for personal, private, educational, and non-commercial multimedia playback.
+                                    </p>
+                                </div>
+
+                                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 space-y-2">
+                                    <div className="font-bold text-red-400 uppercase tracking-wider text-[11px]">
+                                        3. Strict Commercial Prohibitions (NOT FOR SALE)
+                                    </div>
+                                    <p className="text-red-200/90">
+                                        You may NOT sell, resell, lease, rent, sublicense, or monetize this Software or any derivative thereof. You may NOT bundle or use this software for commercial broadcasting, paid business applications, or corporate revenue generation without prior express written authorization and commercial licensing from Lorapok Labs.
+                                    </p>
+                                </div>
+
+                                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                                    <div className="font-bold text-white uppercase tracking-wider text-[11px] text-electric-purple">
+                                        4. Commercial Licensing & Inquiries
+                                    </div>
+                                    <p>
+                                        For enterprise deployments, commercial integration, or business inquiries, contact the team at <a href="https://lorapok.tech" target="_blank" rel="noopener noreferrer" className="text-neon-cyan underline">lorapok.tech</a>.
+                                    </p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Footer */}
             <footer className="border-t border-white/10 bg-[#020204] py-12 mt-20 text-center text-xs font-mono text-white/50 space-y-4">
                 <div className="flex items-center justify-center gap-3">
                     <Logo className="w-6 h-6" />
                     <span className="font-bold text-white tracking-widest uppercase">Lorapok Labs</span>
                 </div>
-                <div className="flex justify-center gap-6 text-xs text-white/60">
+                <div className="flex flex-wrap justify-center gap-6 text-xs text-white/60">
                     <a href="https://media.lorapok.tech" className="hover:text-neon-cyan">media.lorapok.tech</a>
+                    <span>•</span>
+                    <a href="https://lorapok.tech" target="_blank" rel="noopener noreferrer" className="hover:text-neon-cyan">lorapok.tech</a>
+                    <span>•</span>
+                    <a href="https://snapcraft.io/lorapokmediaplayer" target="_blank" rel="noopener noreferrer" className="hover:text-neon-cyan">Snap Store</a>
                     <span>•</span>
                     <a href="https://github.com/Maijied/Lorapok_Media_Player" className="hover:text-neon-cyan">GitHub Repository</a>
                     <span>•</span>
                     <a href="https://github.com/Maijied/Lorapok_Media_Player/releases" className="hover:text-neon-cyan">Release Assets</a>
                 </div>
-                <p>© {new Date().getFullYear()} Lorapok Labs. Released under MIT License.</p>
+                <div className="space-y-1">
+                    <p className="text-white/40">
+                        A product of <a href="https://lorapok.tech" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-neon-cyan font-bold">Lorapok Labs</a>.
+                    </p>
+                    <p className="text-white/30 text-[11px]">
+                        Licensed under Lorapok Labs Non-Commercial License (LL-NC-1.0). Personal & Non-Commercial Use Only.
+                        <button onClick={() => setShowLicenseModal(true)} className="ml-2 text-neon-cyan hover:underline">
+                            View Terms
+                        </button>
+                    </p>
+                </div>
             </footer>
         </div>
     )

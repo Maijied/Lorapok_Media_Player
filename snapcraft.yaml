@@ -1,0 +1,70 @@
+name: lorapokmediaplayer
+base: core22
+version: '1.5.0'
+summary: Next-Gen Sensory Neural Supercomputing Media Player
+description: |
+  Lorapok Media Player is an ultra-high performance, hardware-accelerated media engine 
+  and sensory player developed by Lorapok Labs (https://lorapok.tech).
+  
+  Key Features:
+  - 4K/8K 60FPS Video & Lossless Studio Audio playback (.mp4, .webm, .mkv, .flac, .aac, .wav)
+  - Adaptive HLS (.m3u8) & MPEG-DASH (.mpd) stream engine with zero-rebuffer switching
+  - Real-time Audio Reactive Visualizer with dynamic frequency spectrum equalizer
+  - Low-latency hardware GPU decoding (VA-API / NVDEC / Vulkan)
+  - Seamless folder ingestion, playlist management, and instant fuzzy media search
+  - Biological sensory UI with dynamic ambient lighting and cyberpunk themes
+
+grade: stable
+confinement: strict
+
+website: https://media.lorapok.tech
+contact: https://lorapok.tech
+license: Proprietary
+issues: https://github.com/Maijied/Lorapok_Media_Player/issues
+source-code: https://github.com/Maijied/Lorapok_Media_Player
+
+apps:
+  lorapokmediaplayer:
+    command: lorapok-player/lorapok-player --no-sandbox
+    extensions: [gnome]
+    plugs:
+      - home
+      - audio-playback
+      - audio-record
+      - camera
+      - network
+      - network-bind
+      - opengl
+      - removable-media
+      - screen-inhibit-control
+      - unity7
+      - wayland
+      - x11
+
+parts:
+  lorapok-player:
+    plugin: npm
+    source: lorapok-player
+    npm-node-version: '20.18.0'
+    build-packages:
+      - libasound2-dev
+      - libpulse-dev
+      - libgbm-dev
+      - libnss3-dev
+      - libsecret-1-dev
+    stage-packages:
+      - libasound2
+      - libpulse0
+      - libgbm1
+      - libnss3
+      - fonts-liberation
+      - fonts-noto-color-emoji
+      - fonts-dejavu-core
+    override-build: |
+      npm ci --legacy-peer-deps
+      npm run build
+      mkdir -p $SNAPCRAFT_PART_INSTALL/lorapok-player
+      cp -r dist $SNAPCRAFT_PART_INSTALL/lorapok-player/
+      if [ -d "release/builds/linux-unpacked" ]; then
+        cp -r release/builds/linux-unpacked/* $SNAPCRAFT_PART_INSTALL/lorapok-player/
+      fi

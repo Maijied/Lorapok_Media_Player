@@ -20,11 +20,15 @@ export default defineConfig({
             formats: ['es', 'cjs']
         },
         rollupOptions: {
-            external: ['react', 'react-dom'],
+            external: ['react', 'react-dom', 'framer-motion', 'hls.js', 'dashjs', 'lucide-react'],
             output: {
                 globals: {
                     react: 'React',
-                    'react-dom': 'ReactDOM'
+                    'react-dom': 'ReactDOM',
+                    'framer-motion': 'FramerMotion',
+                    'hls.js': 'Hls',
+                    dashjs: 'dashjs',
+                    'lucide-react': 'LucideReact'
                 }
             }
         }

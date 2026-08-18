@@ -1,21 +1,59 @@
-MIT License
+LORAPOK LABS NON-COMMERCIAL END-USER LICENSE (LL-NC-1.0)
 
-Copyright (c) 2026 Lorapok Labs
+Copyright (c) 2026 Lorapok Labs (https://lorapok.tech)
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software, including all source code, binaries, media assets, extensions, 
+and associated documentation (collectively, the "Software"), is the proprietary 
+product of Lorapok Labs.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+==============================================================================
+1. GRANT OF LICENSE (PERSONAL & NON-COMMERCIAL USE ONLY)
+==============================================================================
+Subject to the terms and conditions of this License, Lorapok Labs hereby grants 
+to any individual or non-profit end-user a free, personal, revocable, 
+non-exclusive, non-transferable license to:
+  (a) Download, install, run, and operate the Software for personal, educational, 
+      evaluation, and non-commercial multimedia playback purposes.
+  (b) Inspect and modify the source code solely for personal private use or 
+      community contributions back to the official Lorapok Labs repositories.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+==============================================================================
+2. STRICT COMMERCIAL RESTRICTIONS & PROHIBITIONS
+==============================================================================
+You may NOT, under any circumstances, without prior express written authorization 
+and an authorized commercial license from Lorapok Labs:
+  (a) SELL, RESELL, RENT, LEASE, SUBLICENSE, OR MONETIZE the Software or any 
+      derivative work, bundle, or distribution thereof.
+  (b) USE THE SOFTWARE FOR BUSINESS, ENTERPRISE, OR COMMERCIAL PURPOSES, 
+      including but not limited to commercial broadcasting, paid streaming services, 
+      embedding within paid software products, or commercial hardware distribution.
+  (c) Distribute modified or unmodified copies of the Software as part of any 
+      commercial product, paid package, or subscription offering.
+  (d) Remove, alter, or obscure any copyright notices, lab attribution, trademarks, 
+      or links to https://lorapok.tech.
+
+==============================================================================
+3. TRADEMARK & ATTRIBUTION
+==============================================================================
+"Lorapok", "Lorapok Labs", "Lorapok Media Player", and associated logos are 
+trademarks of Lorapok Labs. This license does not grant permission to use the 
+trade names, trademarks, service marks, or product names of Lorapok Labs 
+except as required for reasonable and customary use in describing the origin of 
+the Software.
+
+==============================================================================
+4. NO WARRANTY & LIMITATION OF LIABILITY
+==============================================================================
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
+LORAPOK LABS OR ITS CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, 
+OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+THE SOFTWARE.
+
+==============================================================================
+For commercial inquiries, enterprise licensing, or partnerships, contact:
+https://lorapok.tech
+==============================================================================

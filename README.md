@@ -3,94 +3,169 @@
   <img src="Media/Logos/main_logo.png" alt="Lorapok Player Logo" width="180" height="180" />
 
   <h1 align="center" style="border-bottom: none;">LORAPOK PLAYER</h1>
-  <p align="center" style="font-weight: bold; color: #00F3FF; letter-spacing: 2px;">SUPERCOMPUTING MEDIA ENGINE BY LORAPOK LABS</p>
+  <p align="center" style="font-weight: bold; color: #00F3FF; letter-spacing: 2px;">SUPERCOMPUTING SENSORY MEDIA ENGINE BY LORAPOK LABS</p>
 
   <p align="center">
-    <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/VERSION-1.5.0-BC13FE?style=for-the-badge&labelColor=050510" alt="Version" /></a>
-    <a href="https://snapcraft.io/lorapokmediaplayer"><img src="https://snapcraft.io/lorapokmediaplayer/badge.svg" alt="Snap Store" height="28" /></a>
-    <a href="https://snapcraft.io/lorapokmediaplayer"><img src="https://snapcraft.io/lorapokmediaplayer/trending.svg?name=0" alt="Trending" height="28" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-050510?style=for-the-badge&labelColor=050510&logoColor=050510" alt="License" /></a>
-    <a href="https://github.com/Maijied/Lorapok_Media_Player"><img src="https://img.shields.io/badge/PLATFORM-ALL_OS_(+ANDROID_+TV)-FFFFFF?style=for-the-badge&labelColor=050510" alt="Platform" /></a>
+    <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/tag/v1.5.0"><img src="https://img.shields.io/badge/VERSION-1.5.0-BC13FE?style=for-the-badge&labelColor=050510" alt="Version" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-LORAPOK_LABS_NON--COMMERCIAL-00F3FF?style=for-the-badge&labelColor=050510" alt="License" /></a>
+    <a href="https://media.lorapok.tech"><img src="https://img.shields.io/badge/DOMAIN-MEDIA.LORAPOK.TECH-FFFFFF?style=for-the-badge&labelColor=050510" alt="Domain" /></a>
     <a href="https://github.com/Maijied/Lorapok_Media_Player/actions/workflows/workflow-unified.yml"><img src="https://img.shields.io/github/actions/workflow/status/Maijied/Lorapok_Media_Player/workflow-unified.yml?style=for-the-badge&labelColor=050510" alt="Build Status" /></a>
   </p>
 
-  <p align="center" style="max-width: 600px; margin: 20px auto; line-height: 1.6; opacity: 0.8;">
-    The next-generation media player blending <b>biological aesthetics</b> with <b>supercomputing performance</b>.
-    Engineered for ultra-low latency playback and high-fidelity sensory experiences across Desktop, Android, and Android TV.
+  <p align="center">
+    <a href="https://snapcraft.io/lorapokmediaplayer">
+      <img alt="Get Lorapok Media Player from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" height="42" />
+    </a>
   </p>
 
-  <div align="center" style="margin: 30px 0;">
-    <a href="https://maijied.github.io/Lorapok_Media_Player/">
-      <img src="lorapok-player/assets/btn-demo.svg" width="260" alt="Try Live Demo" />
+  <p align="center" style="max-width: 650px; margin: 20px auto; line-height: 1.6; opacity: 0.85;">
+    The next-generation sensory media engine blending <b>biological aesthetics</b> with <b>supercomputing neural performance</b>.
+    Engineered for ultra-low latency 8K video decoding, lossless audio equalization, and high-fidelity sensory experiences across Desktop, Android, and Web.
+  </p>
+
+  <div align="center" style="margin: 25px 0;">
+    <a href="https://media.lorapok.tech">
+      <img src="lorapok-player/assets/btn-demo.svg" width="240" alt="Launch Live Web App" />
     </a>
     &nbsp;&nbsp;
-    <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/latest">
-      <img src="lorapok-player/assets/btn-download.svg" width="260" alt="Download Latest" />
+    <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/tag/v1.5.0">
+      <img src="lorapok-player/assets/btn-download.svg" width="240" alt="Download Binaries" />
     </a>
   </div>
 
   <br />
 
-  <img src="Media/Marketing/marketing_hero.png" alt="Lorapok Main Interface" width="100%" style="border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1);" />
+  <img src="Media/Marketing/marketing_hero.png" alt="Lorapok Supercomputing Media Player" width="100%" style="border-radius: 16px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7); border: 1px solid rgba(0, 243, 255, 0.2);" />
 
   <br />
 
-  <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
-     <img src="Media/Marketing/marketing_feature.png" alt="Main Interface" width="48%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
-     <img src="Media/Marketing/marketing_app.png" alt="Audio Intelligence" width="48%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);" />
+  <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 25px;">
+     <img src="Media/Marketing/marketing_audio.png" alt="Neural Audio Engine" width="100%" style="border-radius: 14px; border: 1px solid rgba(188, 19, 254, 0.25);" />
   </div>
 
 </div>
 
 ---
 
-## 🏗 SYSTEM ARCHITECTURE
+## 🧬 ENGINE CAPABILITIES
 
-Lorapok Player features a unified multi-target ecosystem spanning Web, Desktop (Electron), Mobile (Android), Android TV (Leanback), Standalone NPM, and Browser Extension.
+| Feature | Description | Platform / Engine |
+| :--- | :--- | :--- |
+| **8K / 4K 60FPS Video** | Hardware GPU-accelerated decoding (VA-API, NVDEC, Vulkan, Direct3D 11, Metal). | Desktop & Android |
+| **Adaptive Neural Stream** | Native HLS (`.m3u8`) & MPEG-DASH (`.mpd`) stream engine with zero-rebuffer switching. | Web, Desktop, VS Code |
+| **Real-Time Audio Visualizer** | 32-band dynamic FFT frequency spectrum equalizer with glowing neon peak caps & harmonic pulse. | All Targets |
+| **Neural Audio Stage** | Holographic spinning vinyl disc animation, stereo oscilloscope, and studio metadata rendering. | Web & Desktop |
+| **Android TV & Leanback** | TV launcher, D-Pad directional navigation, 150% volume boost, and vertical swipe gestures. | Android Mobile & TV |
+| **Instant Fuzzy Search** | Global search (`⌘K` / `Ctrl+K`) for local media files, stream links, and demo presets. | All Surfaces |
+| **Folder Ingestion & Playlists**| Drag-and-drop folders, directory tree parsing, track shuffling (`🔀`), and repeat modes (`🔁`). | Web & Desktop |
+| **Organic Sensory UI** | Real-time ambient backlight sampling with Cyberpunk & Midnight theme matrices. | All Surfaces |
+
+---
+
+## 🏗 ECOSYSTEM PACKAGES & INSTALLATION
+
+### 1. 🐧 Snap Store (Universal Linux)
+[![Get Lorapok Media Player from the Snap Store](https://snapcraft.io/en/dark/install.svg)](https://snapcraft.io/lorapokmediaplayer)
+
+```bash
+sudo snap install lorapokmediaplayer
+```
+
+### 2. 💻 Visual Studio Code Extension
+Search **"Lorapok"** in the VS Code Extensions Marketplace or install the `.vsix` package:
+```bash
+code --install-extension lorapok-player-vscode-1.5.0.vsix
+```
+
+### 3. 🐍 Python Package (PyPI / CLI / Embed)
+```bash
+pip install lorapok
+```
+```python
+import lorapok
+
+# Launch standalone GUI media engine
+lorapok.play("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8")
+```
+
+### 4. 🐘 PHP Composer
+```bash
+composer require lorapok/player
+```
+```php
+use Lorapok\LorapokPlayer;
+
+echo LorapokPlayer::render([
+    'src' => 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    'theme' => 'midnight-core'
+]);
+```
+
+### 5. 📦 NPM / Yarn React Library
+```bash
+npm install lorapok-player
+# or
+yarn add lorapok-player
+```
+```tsx
+import { LorapokPlayer } from 'lorapok-player'
+import 'lorapok-player/style.css'
+
+export default function App() {
+  return <LorapokPlayer src="/demos/neon_waves.mp4" autoPlay />
+}
+```
+
+### 6. 🦊 Firefox AMO & Chromium Browser Extensions
+- **Firefox Add-on**: Download `lorapok-extension-firefox-1.5.0.xpi` for 1-click installation.
+- **Chrome / Edge**: Load unpacked `lorapok-extension-chrome-1.5.0.zip` via `chrome://extensions`.
+
+---
+
+## 🖥 SYSTEM ARCHITECTURE
 
 ```mermaid
 graph TD
-    %% Styling
     classDef ui fill:#0a0a1a,stroke:#BC13FE,stroke-width:2px,color:#fff;
     classDef engine fill:#0a0a1a,stroke:#00F3FF,stroke-width:2px,color:#fff;
     classDef platform fill:#050510,stroke:#555,stroke-width:1px,color:#ccc;
     
-    subgraph UI ["Organic React UI (Tailwind & Framer Motion)"]
-        Components["Player Canvas & Controls"]
+    subgraph UI ["Organic Sensory UI (Tailwind & Framer Motion)"]
+        Components["Player Canvas, Controls & Visualizer HUD"]
+        AudioStage["Neural Audio Stage & Spinning Vinyl Engine"]
         TouchGestures["Mobile Touch Gestures (Vol / Bright / Seek)"]
         DPad["Android TV D-Pad & Key Handler"]
-        Hooks["Device & Sync Hooks"]
-        Themes["Biological Aesthetics System"]
+        Themes["Midnight Core / Cyber Bloom Themes"]
     end
     
-    subgraph Engine ["Media Processing Engine"]
-        HLS["HLS.js / DASH.js"]
-        FFmpeg["Fluent-FFmpeg Pipelines"]
-        Probe["Intelligent Metadata Probing"]
+    subgraph Engine ["Supercomputing Processing Core"]
+        HLS["HLS.js / MPEG-DASH.js"]
+        WebAudio["Web Audio API Analyser & 32-Band FFT"]
+        FFmpeg["GPU-Accelerated FFmpeg / FFprobe"]
         SmartDec["Universal Smart Path Decoder"]
     end
     
     subgraph Platforms ["Deployment Targets"]
-        Web["Web / GitHub Pages Showcase"]
-        Desktop["Desktop Electron (Linux, Win, Mac)"]
-        Mobile["Android Mobile (Capacitor + Widgets + PiP)"]
-        TV["Android TV (Leanback + D-Pad Remote)"]
-        NPM["Standalone NPM Library (@lorapok/player)"]
-        Ext["Chrome / Chromium Extension"]
+        Web["Web / media.lorapok.tech"]
+        Desktop["Electron Desktop (Linux, Win, Mac)"]
+        Snap["Snap Store (lorapokmediaplayer)"]
+        Android["Android Mobile & Leanback Android TV"]
+        Packages["NPM, PIP, Composer, Yarn, VS Code"]
+        Extensions["Firefox AMO, Chrome, Edge Extensions"]
     end
 
+    Components --> AudioStage
     Components --> TouchGestures
     Components --> DPad
-    Components --> Hooks
     Components --> Themes
     UI --> Engine
     
     Engine --> Web
     Engine --> Desktop
-    Engine --> Mobile
-    Engine --> TV
-    Engine --> NPM
-    Engine --> Ext
+    Engine --> Snap
+    Engine --> Android
+    Engine --> Packages
+    Engine --> Extensions
     
     class UI ui;
     class Engine engine;
@@ -99,123 +174,32 @@ graph TD
 
 ---
 
-## 🧬 ENGINE CAPABILITIES
-
-| Feature | Description | Status |
-| :--- | :--- | :--- |
-| **Neural Decoding V2** | High-performance FFmpeg-powered pipeline for MKV, AVI, WMV, and FLV. | 🟢 Ready |
-| **Universal Stream** | Native HLS (.m3u8) and DASH (.mpd) support with zero-buffer track switching. | 🟢 Ready |
-| **Android TV & Leanback** | Native Android TV launcher, D-Pad directional navigation, and TV banner. | 🟢 Ready |
-| **Mobile Touch Gestures** | Vertical swipe for Brightness/Volume, double-tap seek, and tactile HUD. | 🟢 Ready |
-| **Picture-in-Picture** | Native PiP playback on mobile minimize and background audio handling. | 🟢 Ready |
-| **Robust Probing** | Intelligent metadata discovery (FFprobe) for 100% accurate duration/seeking. | 🟢 Ready |
-| **Organic UI** | Dynamic ambient lighting engine that reacts to video colors in real-time. | 🟢 Ready |
-| **Smart Resume** | Atomic position tracking to resume playback exactly where you left off. | 🟢 Ready |
-| **Hardware Accel** | GPU-accelerated rasterization for buttery smooth 4K/8K playback. | 🟢 Ready |
-
----
-
-## 🖥 SYSTEM REQUIREMENTS
-
-### Desktop Application
-| Component | Minimum Requirement | Recommended |
-| :--- | :--- | :--- |
-| **OS (Windows)** | Windows 10 (Build 19041+) | Windows 11 |
-| **OS (macOS)** | macOS 12.0 (Monterey) | macOS 14.0 (Sonoma) |
-| **OS (Linux)** | Ubuntu 22.04+, Debian 11+ | Latest Fedora / Arch |
-| **Processor** | Dual Core 2.0GHz | Quad Core 3.0GHz+ |
-| **Memory** | 4 GB RAM | 8 GB RAM+ |
-| **Graphics** | DirectX 11 / OpenGL 4.1 | NVIDIA GTX 1050 / Apple M1+ |
-
-### Development Environment
-- **Node.js**: v20.x or higher (LTS recommended)
-- **NPM**: v10.x or higher
-- **Git**: Latest version for source control
-
----
-
 ## 🎹 KEYBOARD SHORTCUTS
 
-### Playback
-- `SPACE` : Play / Pause
-- `← / →` : Seek 5s
-- `[ / ]` : Set A-B Loop
-- `\` : Clear Loop
-- `N / P` : Next / Prev File
-
-### Tools
-- `S` : Screenshot
-- `Shift + S` : Burst Mode
-- `Ctrl + Shift + C` : Copy Frame
-- `C` : Clip It (Export)
-- `Ghost` : Incognito Mode
-
-### Audio & Window
-- `↑ / ↓` : Volume Up / Down
-- `M` : Mute
-- `F` : Toggle Fullscreen
-- `A` : Aspect Ratio
-- `Alt + C` : Local Casting
-- `?` : Toggle Help
+| Shortcut | Action |
+|---|---|
+| `SPACE` | Play / Pause playback |
+| `←` / `→` | Seek backward / forward 10 seconds |
+| `↑` / `↓` | Increase / Decrease volume (10%) |
+| `M` | Mute / Unmute audio |
+| `F` | Toggle Fullscreen mode |
+| `A` | Cycle Aspect Ratio (16:9, 4:3, 21:9, Original) |
+| `[` / `]` | Set A-B Loop Start & End points |
+| `\` | Clear active A-B Loop |
+| `{` / `}` | Cycle playback speed (0.5x, 1x, 1.25x, 1.5x, 2x) |
+| `⌘K` / `Ctrl+K` | Open Instant File & Stream Search |
+| `?` | Toggle Interactive User Guide |
 
 ---
 
-## 📦 INSTALLATION & USAGE
+## 📜 LEGAL & PROPRIETARY LICENSE
 
-### 1. Download Pre-built (Recommended)
-Simply grab the latest installer for your OS from the [Releases Page](https://github.com/Maijied/Lorapok_Media_Player/releases/latest).
+**Copyright (c) 2026 Lorapok Labs ([https://lorapok.tech](https://lorapok.tech)). All rights reserved.**
 
-### 2. NPM Package for Developers
-Integrate the Lorapok Player core into your own React applications.
+This software is an official proprietary product of **Lorapok Labs**, licensed under the **Lorapok Labs Non-Commercial End-User License (LL-NC-1.0)**:
 
-```bash
-npm install lorapok-player
-```
+- **Permitted Use**: You are granted a free license to install and use Lorapok Media Player strictly for personal, private, educational, research, and non-commercial multimedia playback.
+- **Commercial Prohibition (NOT FOR SALE)**: No individual or corporation may sell, resell, lease, rent, sublicense, monetize, bundle, or exploit this software for commercial gain, paid business applications, or corporate revenue generation without prior express written authorization from Lorapok Labs.
+- **Attribution**: All documentation, forks, and distributions must retain the official Lorapok Labs copyright notices and link to [https://lorapok.tech](https://lorapok.tech).
 
-```tsx
-import { LorapokPlayer } from 'lorapok-player';
-import 'lorapok-player/style.css';
-
-const App = () => (
-  <LorapokPlayer 
-    src="https://example.com/stream.m3u8" 
-    className="rounded-2xl"
-  />
-);
-```
-
-### 3. Build from Source
-```bash
-# Clone the repository
-git clone https://github.com/Maijied/Lorapok_Media_Player.git
-cd Lorapok_Media_Player
-
-# Install all dependencies
-npm install
-
-# Start development mode
-npm run dev:electron
-
-# Build production binaries
-npm run build
-```
-
----
-
-## 🤝 COMMUNITY & CONDUCT
-We welcome contributors! Please see our [Code of Conduct](CODE_OF_CONDUCT.md) to understand the expectations for participating in our community. By contributing, you agree to abide by its terms.
-
----
-
-## 🏗 TECH STACK
-- **Core**: React 18, TypeScript, Tailwind CSS
-- **Runtime**: Electron 30, Capacitor (Android)
-- **Animations**: Framer Motion
-- **Media Engine**: HLS.js, Dash.js, Fluent-FFmpeg
-- **Icons**: Lucide React
-
----
-
-## 📜 LICENSE
-
-[MIT](LICENSE) © 2026 Lorapok Labs. The core media engine and biological aesthetics are optimized for high-performance open computing.
+For commercial licensing and enterprise partnerships: [https://lorapok.tech](https://lorapok.tech)

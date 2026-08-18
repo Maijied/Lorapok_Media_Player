@@ -2697,41 +2697,105 @@ const MetadataEditor = ({ filePath, onClose }: { filePath: string, onClose: () =
 
 export default App
 
-const AudioVisualizer = ({ analyser }: { analyser: AnalyserNode | null }) => {
+const AudioVisualizer = ({ 
+  analyser,
+  isPlaying = true,
+  mode = 'bar'
+}: { 
+  analyser: AnalyserNode | null;
+  isPlaying?: boolean;
+  mode?: 'bar' | 'stage' | 'wave';
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    if (!analyser || !canvasRef.current) return
+    if (!canvasRef.current) return
 
     let animationFrame: number
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const bufferLength = analyser.frequencyBinCount
+    const bufferLength = analyser ? analyser.frequencyBinCount : 32
     const dataArray = new Uint8Array(bufferLength)
+    let phase = 0
 
     const draw = () => {
       animationFrame = requestAnimationFrame(draw)
-      analyser.getByteFrequencyData(dataArray)
+      phase += 0.04
+
+      let hasRealData = false
+      if (analyser) {
+        analyser.getByteFrequencyData(dataArray)
+        for (let i = 0; i < bufferLength; i++) {
+          if (dataArray[i] > 0) {
+            hasRealData = true
+            break
+          }
+        }
+      }
+
+      if (!hasRealData && isPlaying) {
+        for (let i = 0; i < bufferLength; i++) {
+          const harmonic1 = Math.sin(phase * 1.5 + i * 0.22) * 0.5 + 0.5
+          const harmonic2 = Math.cos(phase * 2.7 + i * 0.35) * 0.5 + 0.5
+          const harmonic3 = Math.sin(phase * 0.9 + i * 0.12) * 0.5 + 0.5
+          const val = (harmonic1 * 0.5 + harmonic2 * 0.3 + harmonic3 * 0.2) * 210 + 25
+          dataArray[i] = Math.min(255, Math.max(10, val))
+        }
+      } else if (!hasRealData && !isPlaying) {
+        dataArray.fill(4)
+      }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      const barWidth = (canvas.width / bufferLength) * 2
-      let barHeight
-      let x = 0
 
-      for (let i = 0; i < bufferLength; i++) {
-        barHeight = (dataArray[i] / 255) * canvas.height
-        const opacity = dataArray[i] / 255
-        ctx.fillStyle = `rgba(0, 243, 255, ${opacity * 0.5})`
-        ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight)
-        x += barWidth
+      if (mode === 'stage') {
+        const numBars = 32
+        const barWidth = Math.max(2, (canvas.width / numBars) - 4)
+        
+        for (let i = 0; i < numBars; i++) {
+          const dataIdx = Math.floor((i / numBars) * bufferLength)
+          const val = dataArray[dataIdx] / 255
+          const barHeight = Math.max(4, val * (canvas.height - 8))
+          const x = i * (barWidth + 4) + 2
+          const y = canvas.height - barHeight
+
+          const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0)
+          gradient.addColorStop(0, 'rgba(0, 243, 255, 0.4)')
+          gradient.addColorStop(0.5, 'rgba(0, 243, 255, 0.9)')
+          gradient.addColorStop(1, 'rgba(188, 19, 254, 1)')
+
+          ctx.fillStyle = gradient
+          ctx.shadowColor = '#00f3ff'
+          ctx.shadowBlur = isPlaying ? 8 : 0
+          ctx.fillRect(x, y, barWidth, barHeight)
+
+          ctx.fillStyle = '#ffffff'
+          ctx.fillRect(x, Math.max(0, y - 2), barWidth, 2)
+        }
+      } else {
+        const barWidth = (canvas.width / bufferLength) * 2
+        let x = 0
+        for (let i = 0; i < bufferLength; i++) {
+          const barHeight = (dataArray[i] / 255) * canvas.height
+          const opacity = dataArray[i] / 255
+          ctx.fillStyle = `rgba(0, 243, 255, ${Math.max(0.2, opacity * 0.6)})`
+          ctx.fillRect(x, canvas.height - barHeight, Math.max(1, barWidth - 1), barHeight)
+          x += barWidth
+        }
       }
     }
 
     draw()
     return () => cancelAnimationFrame(animationFrame)
-  }, [analyser])
+  }, [analyser, isPlaying, mode])
 
-  return <canvas ref={canvasRef} className="w-64 h-full opacity-50 block mr-4" width={256} height={48} />
+  return (
+    <canvas 
+      ref={canvasRef} 
+      className="w-64 h-full opacity-60 block mr-4" 
+      width={256} 
+      height={48} 
+    />
+  )
 }

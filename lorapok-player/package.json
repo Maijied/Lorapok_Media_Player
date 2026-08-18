@@ -23,6 +23,7 @@
     "adminUrl": "https://cursor-dev.lorapok.tech"
   },
   "type": "module",
+  "license": "Proprietary",
   "repository": {
     "type": "git",
     "url": "https://github.com/Maijied/Lorapok_Media_Player.git"

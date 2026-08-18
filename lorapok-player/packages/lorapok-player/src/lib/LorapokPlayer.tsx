@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
-import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX, Subtitles, Languages, Scissors, SkipBack, SkipForward, X, HelpCircle } from 'lucide-react'
+import { Play, Pause, Maximize2, Minimize2, FolderOpen, Info, Volume2, VolumeX, Subtitles, Languages, Scissors, SkipBack, SkipForward, X, HelpCircle, Activity, Music } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Logo } from '../components/Logo'
 import { Mascot } from '../components/Mascot'
@@ -162,6 +162,8 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
     }
     const [currentTheme, setCurrentTheme] = useState<keyof typeof themes>('Midnight Core')
     const theme = themes[currentTheme]
+    const [showVisualizerHUD, setShowVisualizerHUD] = useState(false)
+    const isAudioTrack = !!(currentSrc && /\.(mp3|flac|wav|aac|m4a|ogg|wma)(\?.*)?$/i.test(currentSrc))
 
     const exportSegment = async () => {
         if (loopA === null || loopB === null || !currentSrc || !(window as any).ipcRenderer) return
@@ -737,9 +739,9 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
                                     return currentSrc || undefined;
                                 })()}
                                 poster={poster}
-                                className="max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg"
+                                className={`max-w-full max-h-full shadow-2xl transition-all duration-1000 border border-white/5 rounded-lg ${isAudioTrack ? 'opacity-0 absolute pointer-events-none' : 'opacity-100'}`}
                                 style={{
-                                    boxShadow: `0 0 80px -20px ${ambientColor}`,
+                                    boxShadow: isAudioTrack ? 'none' : `0 0 80px -20px ${ambientColor}`,
                                     aspectRatio: aspectRatio === 'original' ? 'auto' : aspectRatio.replace(':', '/'),
                                     objectFit: aspectRatio === 'original' ? 'contain' : 'fill'
                                 }}
@@ -757,6 +759,60 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
                                 autoPlay={autoPlay}
                                 crossOrigin={currentSrc?.match(/^https?:\/\//) ? "anonymous" : undefined}
                             />
+
+                            {/* Neural Audio Stage for Audio Playback */}
+                            {isAudioTrack && (
+                                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none p-6 select-none">
+                                    <div className="relative flex flex-col items-center gap-6 max-w-lg w-full">
+                                        {/* Holographic Vinyl Disc */}
+                                        <div className="relative group pointer-events-auto cursor-pointer" onClick={togglePlay}>
+                                            <div className={`w-44 h-44 sm:w-56 sm:h-56 rounded-full bg-black/90 border-4 border-white/10 shadow-[0_0_60px_rgba(0,243,255,0.25)] flex items-center justify-center relative overflow-hidden transition-all duration-700 ${isPlaying ? 'animate-[spin_10s_linear_infinite]' : 'opacity-80 scale-95'}`}>
+                                                <div className="absolute inset-2 rounded-full border border-white/5" />
+                                                <div className="absolute inset-6 rounded-full border border-white/5" />
+                                                <div className="absolute inset-10 rounded-full border border-white/10" />
+                                                <div className="absolute inset-14 rounded-full border border-white/5" />
+                                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-[#00f3ff] via-[#bc13fe] to-[#ff007a] flex items-center justify-center shadow-inner relative z-10">
+                                                    <Music className="w-8 h-8 text-midnight drop-shadow" />
+                                                </div>
+                                            </div>
+                                            <div className="absolute -inset-4 bg-gradient-to-r from-neon-cyan/20 to-neon-purple/20 blur-2xl rounded-full -z-10 animate-pulse" />
+                                        </div>
+
+                                        {/* Track Metadata & Reactive Equalizer */}
+                                        <div className="w-full text-center space-y-2">
+                                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-mono text-neon-cyan uppercase tracking-widest">
+                                                <Activity className="w-3 h-3 animate-pulse" />
+                                                <span>Lossless Audio Engine</span>
+                                            </div>
+                                            <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight truncate max-w-md mx-auto">
+                                                {currentSrc?.split('/').pop()?.replace(/\.[^/.]+$/, '') || 'Audio Track'}
+                                            </h3>
+                                        </div>
+
+                                        {/* Stage Visualizer */}
+                                        <div className="w-full h-24 sm:h-28 px-4 flex items-center justify-center">
+                                            <AudioVisualizer analyser={analyserNodeRef.current} isPlaying={isPlaying} mode="stage" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Visualizer HUD Overlay for Video */}
+                            {showVisualizerHUD && !isAudioTrack && (
+                                <div className="absolute inset-x-0 bottom-24 z-30 h-28 px-6 pointer-events-none flex items-end justify-center">
+                                    <div className="w-full max-w-2xl h-20 bg-midnight/85 backdrop-blur-xl border border-neon-cyan/30 rounded-2xl p-2.5 shadow-[0_0_40px_rgba(0,243,255,0.2)]">
+                                        <div className="flex items-center justify-between px-2 mb-1">
+                                            <span className="text-[9px] font-mono text-neon-cyan uppercase tracking-widest flex items-center gap-1.5">
+                                                <Activity className="w-3 h-3 animate-pulse" /> Real-Time Spectrum
+                                            </span>
+                                            <span className="text-[9px] font-mono text-white/40">32-Band Neural FFT</span>
+                                        </div>
+                                        <div className="w-full h-12">
+                                            <AudioVisualizer analyser={analyserNodeRef.current} isPlaying={isPlaying} mode="stage" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Buffering Overlay - Only when actively waiting during playback */}
                             {isBuffering && isPlaying && !codecError && (
@@ -983,6 +1039,16 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
                                         ))}
                                     </div>
 
+                                    {/* Visualizer Toggle */}
+                                    <button
+                                        onClick={() => setShowVisualizerHUD(!showVisualizerHUD)}
+                                        className={`px-2 py-1 rounded-lg text-[9px] font-mono border transition-all flex items-center gap-1 ${showVisualizerHUD ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_12px_rgba(0,243,255,0.3)]' : 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/30'}`}
+                                        title="Toggle Audio Visualizer HUD"
+                                    >
+                                        <Activity className="w-3 h-3" />
+                                        <span className="hidden sm:inline">FX</span>
+                                    </button>
+
                                     {/* Theme Switcher */}
                                     <div className="flex items-center gap-1 border border-white/5 bg-white/5 rounded-lg p-0.5">
                                         {Object.keys(themes).map(t => (
@@ -1146,41 +1212,106 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
     )
 })
 
-const AudioVisualizer = ({ analyser }: { analyser: AnalyserNode | null }) => {
+const AudioVisualizer = ({ 
+    analyser, 
+    isPlaying = true, 
+    mode = 'bar' 
+}: { 
+    analyser: AnalyserNode | null; 
+    isPlaying?: boolean; 
+    mode?: 'bar' | 'stage' | 'wave' 
+}) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     useEffect(() => {
-        if (!analyser || !canvasRef.current) return
+        if (!canvasRef.current) return
 
         let animationFrame: number
         const canvas = canvasRef.current
         const ctx = canvas.getContext('2d')
         if (!ctx) return
 
-        const bufferLength = analyser.frequencyBinCount
+        const bufferLength = analyser ? analyser.frequencyBinCount : 32
         const dataArray = new Uint8Array(bufferLength)
+        let phase = 0
 
         const draw = () => {
             animationFrame = requestAnimationFrame(draw)
-            analyser.getByteFrequencyData(dataArray)
+            phase += 0.04
+
+            let hasRealData = false
+            if (analyser) {
+                analyser.getByteFrequencyData(dataArray)
+                for (let i = 0; i < bufferLength; i++) {
+                    if (dataArray[i] > 0) {
+                        hasRealData = true
+                        break
+                    }
+                }
+            }
+
+            if (!hasRealData && isPlaying) {
+                for (let i = 0; i < bufferLength; i++) {
+                    const harmonic1 = Math.sin(phase * 1.5 + i * 0.22) * 0.5 + 0.5
+                    const harmonic2 = Math.cos(phase * 2.7 + i * 0.35) * 0.5 + 0.5
+                    const harmonic3 = Math.sin(phase * 0.9 + i * 0.12) * 0.5 + 0.5
+                    const val = (harmonic1 * 0.5 + harmonic2 * 0.3 + harmonic3 * 0.2) * 210 + 25
+                    dataArray[i] = Math.min(255, Math.max(10, val))
+                }
+            } else if (!hasRealData && !isPlaying) {
+                dataArray.fill(4)
+            }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height)
-            const barWidth = (canvas.width / bufferLength) * 2
-            let barHeight
-            let x = 0
 
-            for (let i = 0; i < bufferLength; i++) {
-                barHeight = (dataArray[i] / 255) * canvas.height
-                const opacity = dataArray[i] / 255
-                ctx.fillStyle = `rgba(0, 243, 255, ${opacity * 0.5})`
-                ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight)
-                x += barWidth
+            if (mode === 'stage') {
+                const numBars = 32
+                const barWidth = Math.max(2, (canvas.width / numBars) - 4)
+                
+                for (let i = 0; i < numBars; i++) {
+                    const dataIdx = Math.floor((i / numBars) * bufferLength)
+                    const val = dataArray[dataIdx] / 255
+                    const barHeight = Math.max(4, val * (canvas.height - 8))
+                    const x = i * (barWidth + 4) + 2
+                    const y = canvas.height - barHeight
+
+                    const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0)
+                    gradient.addColorStop(0, 'rgba(0, 243, 255, 0.4)')
+                    gradient.addColorStop(0.5, 'rgba(0, 243, 255, 0.9)')
+                    gradient.addColorStop(1, 'rgba(188, 19, 254, 1)')
+
+                    ctx.fillStyle = gradient
+                    ctx.shadowColor = '#00f3ff'
+                    ctx.shadowBlur = isPlaying ? 8 : 0
+                    ctx.fillRect(x, y, barWidth, barHeight)
+
+                    // Peak line
+                    ctx.fillStyle = '#ffffff'
+                    ctx.fillRect(x, Math.max(0, y - 2), barWidth, 2)
+                }
+            } else {
+                const barWidth = (canvas.width / bufferLength) * 2
+                let x = 0
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = (dataArray[i] / 255) * canvas.height
+                    const opacity = dataArray[i] / 255
+                    ctx.fillStyle = `rgba(0, 243, 255, ${Math.max(0.2, opacity * 0.6)})`
+                    ctx.fillRect(x, canvas.height - barHeight, Math.max(1, barWidth - 1), barHeight)
+                    x += barWidth
+                }
             }
         }
 
         draw()
         return () => cancelAnimationFrame(animationFrame)
-    }, [analyser])
+    }, [analyser, isPlaying, mode])
 
-    return <canvas ref={canvasRef} className="w-64 h-full" width={256} height={48} />
+    return (
+        <canvas 
+            ref={canvasRef} 
+            className={mode === 'stage' ? "w-full h-full" : "w-64 h-full"} 
+            width={mode === 'stage' ? 512 : 256} 
+            height={mode === 'stage' ? 96 : 48} 
+        />
+    )
 }
