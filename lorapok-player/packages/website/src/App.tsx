@@ -202,12 +202,52 @@ interface PlaylistItem {
 
 const INITIAL_MEDIA_PRESETS: PlaylistItem[] = [
     {
-        id: 'mp4',
+        id: 'mp4-neon',
         name: 'Neon Waves 1080p',
         category: 'Video',
         type: 'MP4 (H.264)',
         url: '/demos/neon_waves.mp4',
         desc: '1080p RGB spectrum color cycle benchmark with AAC audio'
+    },
+    {
+        id: 'mp4-flower',
+        name: 'Botanical Bloom 1080p',
+        category: 'Video',
+        type: 'MP4 (H.264)',
+        url: '/demos/flower.mp4',
+        desc: 'High-contrast botanical bloom capture with ambient glow'
+    },
+    {
+        id: 'mp4-rabbit',
+        name: 'Animation Sequence',
+        category: 'Video',
+        type: 'MP4 (H.264)',
+        url: '/demos/rabbit320.mp4',
+        desc: 'High frame rate animated scene motion benchmark'
+    },
+    {
+        id: 'webm-cyber',
+        name: 'Cyber Matrix VP9',
+        category: 'Video',
+        type: 'WebM (VP9)',
+        url: '/demos/cyber_matrix.webm',
+        desc: 'Cellular automata generative video stream with pink noise audio'
+    },
+    {
+        id: 'webm-flower',
+        name: 'Bloom Vector VP9',
+        category: 'Video',
+        type: 'WebM (VP9)',
+        url: '/demos/flower.webm',
+        desc: 'VP9 open video container benchmark stream'
+    },
+    {
+        id: 'webm-rabbit',
+        name: 'Motion Loop VP8/9',
+        category: 'Video',
+        type: 'WebM (VP8)',
+        url: '/demos/rabbit320.webm',
+        desc: 'Lightweight web-native VP8 motion clip'
     },
     {
         id: 'hls-mux',
@@ -226,23 +266,15 @@ const INITIAL_MEDIA_PRESETS: PlaylistItem[] = [
         desc: 'Multi-segment local HLS neural broadcast with live segment indexing'
     },
     {
-        id: 'dash',
-        name: 'Fractal Engine',
+        id: 'dash-fractal',
+        name: 'Fractal Engine DASH',
         category: 'Adaptive Stream',
         type: 'DASH (.mpd)',
         url: '/demos/dash/fractal_dash.mpd',
         desc: 'MPEG-DASH fractal stream with zero-rebuffer switching'
     },
     {
-        id: 'webm',
-        name: 'Cyber Matrix VP9',
-        category: 'Video',
-        type: 'WebM (VP9)',
-        url: '/demos/cyber_matrix.webm',
-        desc: 'Cellular automata generative video stream with pink noise audio'
-    },
-    {
-        id: 'flac',
+        id: 'flac-lossless',
         name: 'Neural 528Hz Lossless',
         category: 'Lossless Audio',
         type: 'FLAC (24-bit)',
@@ -250,7 +282,7 @@ const INITIAL_MEDIA_PRESETS: PlaylistItem[] = [
         desc: 'Audiophile lossless pure sinusoidal tone for audio visualizer testing'
     },
     {
-        id: 'mp3',
+        id: 'mp3-synthwave',
         name: 'Synthwave Neon Drive',
         category: 'Audio',
         type: 'MP3 (320kbps)',
@@ -258,12 +290,28 @@ const INITIAL_MEDIA_PRESETS: PlaylistItem[] = [
         desc: 'Dynamic retro synthwave studio master with reactive audio equalizer'
     },
     {
-        id: 'wav',
+        id: 'wav-pcm',
         name: 'Quantum Pulse 396Hz',
         category: 'Audio',
         type: 'WAV (PCM)',
         url: '/demos/audio_pulse.wav',
-        desc: 'Uncompressed PCM 48kHz audio waveform demo'
+        desc: 'Uncompressed PCM 48kHz studio audio waveform benchmark'
+    },
+    {
+        id: 'ogg-vorbis',
+        name: 'Vorbis Acoustic Master',
+        category: 'Audio',
+        type: 'OGG (Vorbis)',
+        url: '/demos/sample_audio.ogg',
+        desc: 'High-fidelity Ogg Vorbis compressed audio stream'
+    },
+    {
+        id: 'mp3-roar',
+        name: 'Acoustic Transient Dynamic',
+        category: 'Audio',
+        type: 'MP3 (Dynamic)',
+        url: '/demos/t_rex_roar.mp3',
+        desc: 'Wide dynamic range high-frequency transient response test'
     }
 ]
 
@@ -287,6 +335,7 @@ export function App() {
     const [selectedCategory, setSelectedCategory] = useState<string>('All')
     const [selectedPackageTab, setSelectedPackageTab] = useState<'npm' | 'pip' | 'composer' | 'yarn' | 'vscode'>('npm')
     const [copiedSnippet, setCopiedSnippet] = useState(false)
+    const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
     const [selectedAndroidVariant, setSelectedAndroidVariant] = useState<'universal' | 'arm64' | 'armv7' | 'x86_64' | 'aab'>('universal')
     const [showSearchModal, setShowSearchModal] = useState(false)
     const [showHowToUseModal, setShowHowToUseModal] = useState(false)
@@ -654,21 +703,56 @@ export function App() {
 
                             <div className="space-y-2 overflow-y-auto pr-1 flex-1">
                                 {filteredPresets.map((preset, idx) => (
-                                    <button
+                                    <div
                                         key={preset.id}
                                         onClick={() => selectTrack(playlist.indexOf(preset))}
-                                        className={`w-full text-left p-3.5 rounded-2xl border transition-all flex flex-col gap-1.5 ${demoUrl === preset.url ? 'bg-white/10 border-neon-cyan/60 shadow-[0_0_20px_rgba(0,243,255,0.2)]' : 'bg-black/30 border-white/5 hover:bg-white/5'}`}
+                                        className={`w-full text-left p-3.5 rounded-2xl border transition-all flex flex-col gap-2 cursor-pointer group/card ${demoUrl === preset.url ? 'bg-white/10 border-neon-cyan/60 shadow-[0_0_20px_rgba(0,243,255,0.2)]' : 'bg-black/30 border-white/5 hover:bg-white/5'}`}
                                     >
                                         <div className="flex items-center justify-between">
-                                            <span className="font-bold text-xs text-white truncate max-w-[180px]">{preset.name}</span>
-                                            <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-white/10 text-neon-cyan border border-white/10">
+                                            <div className="flex items-center gap-2 truncate">
+                                                <div className={`w-2 h-2 rounded-full ${demoUrl === preset.url ? 'bg-neon-cyan animate-pulse' : 'bg-white/20'}`} />
+                                                <span className="font-bold text-xs text-white truncate max-w-[160px]">{preset.name}</span>
+                                            </div>
+                                            <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-white/10 text-neon-cyan border border-white/10 shrink-0">
                                                 {preset.type}
                                             </span>
                                         </div>
                                         <p className="text-[10px] font-mono text-white/50 line-clamp-1">
                                             {preset.desc}
                                         </p>
-                                    </button>
+                                        <div className="flex items-center justify-between pt-1 border-t border-white/5 text-[10px] font-mono">
+                                            <span className="text-neon-cyan/70 flex items-center gap-1 group-hover/card:text-neon-cyan">
+                                                <Play className="w-3 h-3 fill-current" />
+                                                <span>{demoUrl === preset.url ? 'PLAYING NOW' : 'PLAY STREAM'}</span>
+                                            </span>
+                                            <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                                                {preset.url.startsWith('/') && !preset.url.includes('.m3u8') && !preset.url.includes('.mpd') && (
+                                                    <a
+                                                        href={preset.url}
+                                                        download
+                                                        className="px-2 py-0.5 rounded bg-white/5 hover:bg-neon-cyan/20 text-white/60 hover:text-neon-cyan border border-white/10 flex items-center gap-1 transition-all"
+                                                        title="Download test file for desktop/android player testing"
+                                                    >
+                                                        <Download className="w-2.5 h-2.5" />
+                                                        <span>SAVE</span>
+                                                    </a>
+                                                )}
+                                                <button
+                                                    onClick={() => {
+                                                        const fullUrl = preset.url.startsWith('/') ? `${window.location.origin}${preset.url}` : preset.url;
+                                                        navigator.clipboard.writeText(fullUrl);
+                                                        setCopiedIndex(9000 + idx);
+                                                        setTimeout(() => setCopiedIndex(null), 2000);
+                                                    }}
+                                                    className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/15 text-white/50 hover:text-white border border-white/10 flex items-center gap-1 transition-all"
+                                                    title="Copy stream URL"
+                                                >
+                                                    {copiedIndex === 9000 + idx ? <Check className="w-2.5 h-2.5 text-green-400" /> : <Copy className="w-2.5 h-2.5" />}
+                                                    <span>{copiedIndex === 9000 + idx ? 'COPIED' : 'COPY'}</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         </div>

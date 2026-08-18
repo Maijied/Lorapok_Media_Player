@@ -1,5 +1,6 @@
 {
     "name": "lorapok/player",
+    "version": "2.0.0",
     "description": "Lorapok Neural Media Engine & Web Player Integration for PHP / Laravel / Symfony",
     "type": "library",
     "license": "Proprietary",
