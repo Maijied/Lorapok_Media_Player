@@ -211,11 +211,13 @@ jobs:
 
       - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@v2
+        continue-on-error: true
         with:
           tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
           name: ${{ github.ref_type == 'tag' && format('Lorapok Player {0}', github.ref_name) || 'Lorapok Player (Latest Build)' }}
+          generate_release_notes: false
           body: |
-            ## Lorapok Media Player v1.5.0
+            ## Lorapok Media Player v2.0.0
             
             ${{ github.ref_type == 'tag' && format('Official stable release {0}.', github.ref_name) || '🚀 Rolling release — latest build from main branch.' }}
             
@@ -223,13 +225,13 @@ jobs:
             | Platform | File Format / Target |
             |----------|----------------------|
             | 🪟 Windows | `LorapokMediaPlayer-Windows-Setup.exe` (Setup & Portable) |
-            | 🍎 macOS | `Lorapok-Media-Player-1.5.0-arm64.dmg` / Intel DMG / Portable ZIP |
+            | 🍎 macOS | `Lorapok-Media-Player-2.0.0-arm64.dmg` / Intel DMG / Portable ZIP |
             | 🐧 Linux | `LorapokMediaPlayer-Linux.AppImage` (Portable) / `.deb` (Installable) |
             | 🤖 Android | Universal APK / ARM64 APK / Google Play AAB |
-            | 🦊 Firefox AMO | `lorapok-extension-firefox-1.5.0.xpi` (Installable) / `.zip` |
-            | 🌐 Chrome / Edge | `lorapok-extension-chrome-1.5.0.zip` / `lorapok-extension-edge-1.5.0.zip` |
-            | 💻 VS Code | `lorapok-player-vscode-1.5.0.vsix` Extension |
-            | 🐍 Python PIP | `lorapok-1.5.0-py3-none-any.whl` / `lorapok-1.5.0.tar.gz` |
+            | 🦊 Firefox AMO | `lorapok-extension-firefox-2.0.0.xpi` (Installable) / `.zip` |
+            | 🌐 Chrome / Edge | `lorapok-extension-chrome-2.0.0.zip` / `lorapok-extension-edge-2.0.0.zip` |
+            | 💻 VS Code | `lorapok-player-vscode-2.0.0.vsix` Extension |
+            | 🐍 Python PIP | `lorapok-2.0.0-py3-none-any.whl` / `lorapok-2.0.0.tar.gz` |
             
             Website: https://media.lorapok.tech
           files: |
@@ -252,7 +254,8 @@ jobs:
 
   deploy-site:
     name: Build & Deploy Website
-    needs: release-rolling
+    needs: [build-desktop, build-android, build-extensions, build-vscode-extension, build-python-package]
+    if: always() && !cancelled()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
