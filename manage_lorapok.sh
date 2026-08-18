@@ -48,6 +48,16 @@ function build_app() {
     node build_extensions.js || true
     popd > /dev/null
 
+    echo "💻 Packaging Visual Studio Code Extension (.vsix)..."
+    pushd "$(pwd)/../packages/vscode-lorapok" > /dev/null
+    node build_extension.js || true
+    popd > /dev/null
+
+    echo "🐍 Packaging Python PIP Distribution (.whl & .tar.gz)..."
+    pushd "$(pwd)/../packages/lorapok-python" > /dev/null
+    python3 setup.py sdist bdist_wheel 2>/dev/null || true
+    popd > /dev/null
+
     echo "📦 Building Standalone NPM Package & Showcase Website..."
     pushd "$(pwd)/packages/lorapok-player" > /dev/null
     npm run build 2>/dev/null || true

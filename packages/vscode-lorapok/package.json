@@ -1,0 +1,75 @@
+{
+    "name": "lorapok-vscode",
+    "displayName": "Lorapok Media Player for VS Code",
+    "description": "Hardware-accelerated media player, HLS/DASH stream previewer, and audio visualizer inside Visual Studio Code.",
+    "version": "1.5.0",
+    "publisher": "lorapok",
+    "icon": "icon.png",
+    "engines": {
+        "vscode": "^1.75.0"
+    },
+    "categories": [
+        "Other",
+        "Visualization",
+        "Formatters"
+    ],
+    "keywords": [
+        "media player",
+        "video",
+        "audio",
+        "hls",
+        "m3u8",
+        "dash",
+        "streaming",
+        "flac",
+        "webm",
+        "lorapok"
+    ],
+    "main": "./dist/extension.js",
+    "activationEvents": [
+        "onCustomEditor:lorapok.mediaPlayer",
+        "onCommand:lorapok.openStream"
+    ],
+    "contributes": {
+        "commands": [
+            {
+                "command": "lorapok.openStream",
+                "title": "Lorapok: Open Media Stream URL",
+                "category": "Lorapok"
+            },
+            {
+                "command": "lorapok.openWebPlayer",
+                "title": "Lorapok: Open Web Player in Browser",
+                "category": "Lorapok"
+            }
+        ],
+        "customEditors": [
+            {
+                "viewType": "lorapok.mediaPlayer",
+                "displayName": "Lorapok Media Player",
+                "selector": [
+                    { "filenamePattern": "*.mp4" },
+                    { "filenamePattern": "*.webm" },
+                    { "filenamePattern": "*.mkv" },
+                    { "filenamePattern": "*.avi" },
+                    { "filenamePattern": "*.mov" },
+                    { "filenamePattern": "*.flac" },
+                    { "filenamePattern": "*.mp3" },
+                    { "filenamePattern": "*.wav" },
+                    { "filenamePattern": "*.aac" },
+                    { "filenamePattern": "*.m3u8" },
+                    { "filenamePattern": "*.mpd" }
+                ],
+                "priority": "option"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run build",
+        "build": "node build_extension.js",
+        "package:vsix": "node build_extension.js"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.75.0"
+    }
+}

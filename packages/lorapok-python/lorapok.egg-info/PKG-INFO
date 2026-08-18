@@ -1,0 +1,71 @@
+Metadata-Version: 2.1
+Name: lorapok
+Version: 1.5.0
+Summary: Lorapok Neural Media Engine & Universal Streaming Toolkit for Python
+Author-email: Mohammad Maizied Hasan Majumder <mdshuvo40@gmail.com>, Lorapok Labs <lorapokdev@gmail.com>
+License: MIT
+Project-URL: Homepage, https://media.lorapok.tech
+Project-URL: Repository, https://github.com/Maijied/Lorapok_Media_Player
+Project-URL: Documentation, https://media.lorapok.tech/#developer
+Keywords: media,player,streaming,hls,dash,transcoding,video,audio,lorapok
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Multimedia :: Video
+Classifier: Topic :: Multimedia :: Sound/Audio
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+
+# Lorapok Python SDK & CLI (`lorapok`)
+
+Universal media streaming, transcoding, and player control toolkit for Python.
+
+## Installation
+
+```bash
+pip install lorapok
+```
+
+## Quick Start
+
+### 1. Launch Player via Python CLI
+
+```bash
+# Play local video or online stream in Lorapok Desktop or Web Player
+lorapok play https://example.com/live/stream.m3u8
+
+# Play local folder as playlist
+lorapok play ./movies/
+
+# Start local media streaming server
+lorapok serve ./media/ --port 8080
+```
+
+### 2. Python API
+
+```python
+import lorapok
+
+# Open stream in desktop or browser player
+lorapok.play("https://example.com/stream.m3u8")
+
+# Generate embeddable HTML player
+html_snippet = lorapok.render_player(
+    src="https://example.com/stream.m3u8",
+    auto_play=True,
+    ambient_glow=True
+)
+
+# Inspect media stream metadata
+info = lorapok.inspect_media("https://example.com/stream.m3u8")
+print(f"Format: {info.format}, Duration: {info.duration}")
+```
+
+## License
+MIT License • Lorapok Labs (https://media.lorapok.tech)

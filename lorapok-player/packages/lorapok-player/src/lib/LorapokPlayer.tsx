@@ -96,8 +96,8 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
             setCurrentTime(0)
             setDuration(0)
             setCodecError(null)
-            // Show buffering when new source is loading
-            setIsBuffering(!!src)
+            // Only set buffering if autoPlay is requested
+            setIsBuffering(autoPlay)
             if (!autoPlay) {
                 setShowControls(true)
             }
@@ -709,19 +709,19 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
                             animate={{ opacity: 1 }}
                             className="w-full h-full flex items-center justify-center relative group z-10"
                         >
-                            {!isPlaying && !isBuffering && (
+                            {!isPlaying && (
                                 <div
-                                    className="absolute inset-0 z-50 flex items-center justify-center cursor-pointer bg-black/20 hover:bg-black/10 transition-colors"
+                                    className="absolute inset-0 z-50 flex items-center justify-center cursor-pointer bg-black/25 hover:bg-black/15 transition-colors"
                                     onClick={togglePlay}
                                 >
-                                    <div className="w-24 h-24 rounded-full bg-midnight/80 backdrop-blur-md border border-neon-cyan/50 flex items-center justify-center group/play shadow-[0_0_50px_rgba(0,243,255,0.2)] hover:scale-110 transition-transform duration-300">
+                                    <div className="w-24 h-24 rounded-full bg-midnight/85 backdrop-blur-md border border-neon-cyan/50 flex items-center justify-center group/play shadow-[0_0_50px_rgba(0,243,255,0.25)] hover:scale-110 transition-transform duration-300">
                                         <Play className="w-10 h-10 text-neon-cyan fill-neon-cyan ml-1 group-hover/play:scale-125 transition-transform" />
                                     </div>
                                 </div>
                             )}
 
                             <div className="absolute top-4 right-4 z-40 scale-[0.4] origin-top-right opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Mascot state={isBuffering ? 'buffering' : (isPlaying ? 'playing' : (currentTime >= duration && duration > 0 ? 'ended' : 'idle'))} />
+                                <Mascot state={(isBuffering && isPlaying) ? 'buffering' : (isPlaying ? 'playing' : (currentTime >= duration && duration > 0 ? 'ended' : 'idle'))} />
                             </div>
 
                             <video
@@ -745,17 +745,21 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
                                 }}
                                 onTimeUpdate={handleTimeUpdate}
                                 onLoadedMetadata={handleLoadedMetadata}
+                                onCanPlay={() => setIsBuffering(false)}
+                                onCanPlayThrough={() => setIsBuffering(false)}
+                                onLoadedData={() => setIsBuffering(false)}
+                                onPause={() => setIsBuffering(false)}
                                 onEnded={() => { setIsPlaying(false); onEnded?.() }}
-                                onWaiting={() => setIsBuffering(true)}
-                                onPlaying={() => setIsBuffering(false)}
+                                onWaiting={() => { if (isPlaying) setIsBuffering(true); }}
+                                onPlaying={() => { setIsBuffering(false); setIsPlaying(true); }}
                                 onError={handleVideoError}
                                 onDoubleClick={toggleFullscreen}
                                 autoPlay={autoPlay}
                                 crossOrigin={currentSrc?.match(/^https?:\/\//) ? "anonymous" : undefined}
                             />
 
-                            {/* Buffering Overlay */}
-                            {isBuffering && !codecError && (
+                            {/* Buffering Overlay - Only when actively waiting during playback */}
+                            {isBuffering && isPlaying && !codecError && (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}

@@ -1,0 +1,33 @@
+{
+    "name": "lorapok/player",
+    "description": "Lorapok Neural Media Engine & Web Player Integration for PHP / Laravel / Symfony",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mohammad Maizied Hasan Majumder",
+            "email": "mdshuvo40@gmail.com",
+            "homepage": "https://github.com/Maijied"
+        },
+        {
+            "name": "Lorapok Labs",
+            "email": "lorapokdev@gmail.com",
+            "homepage": "https://media.lorapok.tech"
+        }
+    ],
+    "require": {
+        "php": ">=7.4 || >=8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lorapok\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Lorapok\\LorapokServiceProvider"
+            ]
+        }
+    }
+}

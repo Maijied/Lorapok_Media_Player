@@ -30,13 +30,27 @@ const copyMap = [
     { src: 'extensions/lorapok-extension-firefox-1.5.0.zip', dest: 'lorapok-extension-firefox-1.5.0.zip', id: 'ext-firefox-zip' },
     { src: 'extensions/lorapok-extension-chrome-1.5.0.zip', dest: 'lorapok-extension-chrome-1.5.0.zip', id: 'ext-chrome-zip' },
     { src: 'extensions/lorapok-extension-edge-1.5.0.zip', dest: 'lorapok-extension-edge-1.5.0.zip', id: 'ext-edge-zip' },
-    { src: 'extensions/lorapok-extension-1.5.0.zip', dest: 'lorapok-extension-1.5.0.zip', id: 'ext-universal-zip' }
+    { src: 'extensions/lorapok-extension-1.5.0.zip', dest: 'lorapok-extension-1.5.0.zip', id: 'ext-universal-zip' },
+    { src: 'extensions/lorapok-player-vscode-1.5.0.vsix', dest: 'lorapok-player-vscode-1.5.0.vsix', id: 'ext-vscode-vsix' }
 ];
+
+// Check python dist
+const pythonDist = path.resolve(rootDir, 'packages/lorapok-python/dist');
+if (fs.existsSync(pythonDist)) {
+    const files = fs.readdirSync(pythonDist);
+    for (const f of files) {
+        if (f.endsWith('.whl')) {
+            copyMap.push({ srcPath: path.join(pythonDist, f), dest: f, id: 'python-whl' });
+        } else if (f.endsWith('.tar.gz')) {
+            copyMap.push({ srcPath: path.join(pythonDist, f), dest: f, id: 'python-sdist' });
+        }
+    }
+}
 
 const copiedAssets = {};
 
 for (const item of copyMap) {
-    const srcPath = path.join(buildsDir, item.src);
+    const srcPath = item.srcPath || path.join(buildsDir, item.src);
     const destPath = path.join(downloadsDir, item.dest);
     if (fs.existsSync(srcPath)) {
         fs.copyFileSync(srcPath, destPath);
@@ -194,6 +208,13 @@ const manifest = {
                 label: "Microsoft Edge (.zip)",
                 badge: "EDGE ADD-ONS",
                 desc: "Microsoft Edge Add-ons Store package"
+            },
+            vscodeVsix: {
+                url: copiedAssets['ext-vscode-vsix']?.url || "/downloads/lorapok-player-vscode-1.5.0.vsix",
+                size: copiedAssets['ext-vscode-vsix']?.size || "21 KB",
+                label: "VS Code Extension (.vsix)",
+                badge: "IDE EXTENSION",
+                desc: "Visual Studio Code Media Player & Stream Previewer"
             }
         }
     }

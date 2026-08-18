@@ -5,7 +5,8 @@ import type { LorapokPlayerRef } from 'lorapok-player'
 import { 
     Download, Zap, Globe, Monitor, ChevronDown, Code2, Layers, Play, Smartphone, 
     Laptop, Radio, Sparkles, ArrowRight, ShieldCheck, Copy, Check, ExternalLink, 
-    Compass, Shield, FileText, CheckCircle2, Box, Cpu, HardDrive
+    Compass, Shield, FileText, CheckCircle2, Box, Cpu, HardDrive, Search, FolderPlus,
+    ListPlus, HelpCircle, X, Terminal, Shuffle, Repeat, Music, Film, Sliders
 } from 'lucide-react'
 
 interface DownloadItem {
@@ -172,19 +173,35 @@ const DEFAULT_MANIFEST: Manifest = {
                 label: "Microsoft Edge (.zip)",
                 badge: "EDGE ADD-ONS",
                 desc: "Microsoft Edge Add-ons Store package"
+            },
+            vscodeVsix: {
+                url: "/downloads/lorapok-player-vscode-1.5.0.vsix",
+                size: "21 KB",
+                label: "VS Code Extension (.vsix)",
+                badge: "IDE EXTENSION",
+                desc: "Visual Studio Code Media Player & Stream Previewer"
             }
         }
     }
 }
 
-const MEDIA_PRESETS = [
+interface PlaylistItem {
+    id: string
+    name: string
+    category: string
+    type: string
+    url: string
+    desc: string
+}
+
+const INITIAL_MEDIA_PRESETS: PlaylistItem[] = [
     {
         id: 'mp4',
-        name: 'Neon Waves',
+        name: 'Neon Waves 1080p',
         category: 'Video',
         type: 'MP4 (H.264)',
         url: '/demos/neon_waves.mp4',
-        desc: '1080p RGB spectrum color cycle benchmark with AAC 440Hz tone'
+        desc: '1080p RGB spectrum color cycle benchmark with AAC audio'
     },
     {
         id: 'hls',
@@ -236,9 +253,9 @@ const MEDIA_PRESETS = [
     },
     {
         id: 'live-akamai',
-        name: 'Akamai Live Stream',
+        name: 'Akamai Live CDN',
         category: 'Live Broadcast',
-        type: 'HLS Live CDN',
+        type: 'HLS Live',
         url: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
         desc: 'Production Akamai CDN live stream test'
     }
@@ -247,26 +264,32 @@ const MEDIA_PRESETS = [
 const FAQ_ITEMS = [
     { q: "What media formats does Lorapok support?", a: "Lorapok natively decodes HLS (.m3u8), MPEG-DASH (.mpd), MP4 (H.264/HEVC/AV1), WebM (VP8/VP9/AV1), MKV, FLV, AVI, WMV, MOV, FLAC, AAC, MP3, OGG, and WAV with hardware acceleration." },
     { q: "What is the difference between Portable and Installable versions?", a: "Installable versions (.exe setup, .deb) register system protocol handlers (lorapok://) and start menu shortcuts. Portable versions (AppImage, Standalone .exe, .zip) run without installation or administrative rights directly from any USB or directory." },
+    { q: "How do I install the Python / PHP / Yarn / VS Code packages?", a: "For Python: `pip install lorapok`. For PHP: `composer require lorapok/player`. For Yarn: `yarn add lorapok-player`. For VS Code: Download the .vsix package or search 'Lorapok' in Extensions." },
     { q: "How do I install the Android / Android TV version?", a: "Download the Universal APK directly from the website buttons or GitHub Releases. Sideload the APK onto your Android phone, tablet, or Android TV box. It includes D-Pad Leanback remote control navigation and mobile gesture scrubbing." },
-    { q: "How do I install the browser extension on Firefox / Chrome?", a: "For Firefox, download the .xpi file and install it directly or submit via AMO. For Chrome/Edge, load unpacked extension or install the provided .zip. It sniffs videos on any page and opens them in Lorapok." },
-    { q: "How do I embed Lorapok into my React web application?", a: "Run `npm install lorapok-player` and import `{ LorapokPlayer }` from 'lorapok-player'. It includes built-in ambient lighting, audio equalizer, track selectors, and full TypeScript declarations." },
-    { q: "Is Lorapok open source and free for commercial use?", a: "Yes! Lorapok is released under the permissive MIT license for personal and commercial usage." }
+    { q: "How do I install the browser extension on Firefox / Chrome / Edge?", a: "For Firefox, download the .xpi file for direct installation. For Chrome/Edge, load unpacked extension or install the provided .zip. It sniffs videos on any page and opens them in Lorapok." },
+    { q: "How do I embed Lorapok into my React web application?", a: "Run `npm install lorapok-player` and import `{ LorapokPlayer }` from 'lorapok-player'. It includes built-in ambient lighting, audio equalizer, track selectors, and full TypeScript declarations." }
 ]
 
 export function App() {
     const [manifest, setManifest] = useState<Manifest>(DEFAULT_MANIFEST)
     const [detectedOS, setDetectedOS] = useState<'android' | 'linux' | 'windows' | 'macos'>('android')
-    const [demoUrl, setDemoUrl] = useState<string>(MEDIA_PRESETS[0].url)
+    const [playlist, setPlaylist] = useState<PlaylistItem[]>(INITIAL_MEDIA_PRESETS)
+    const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(0)
+    const [demoUrl, setDemoUrl] = useState<string>(INITIAL_MEDIA_PRESETS[0].url)
     const [customUrl, setCustomUrl] = useState("")
     const [activeFaq, setActiveFaq] = useState<number | null>(null)
     const [selectedCategory, setSelectedCategory] = useState<string>('All')
-    const [copiedNpm, setCopiedNpm] = useState(false)
+    const [selectedPackageTab, setSelectedPackageTab] = useState<'npm' | 'pip' | 'composer' | 'yarn' | 'vscode'>('npm')
+    const [copiedSnippet, setCopiedSnippet] = useState(false)
     const [selectedAndroidVariant, setSelectedAndroidVariant] = useState<'universal' | 'arm64' | 'armv7' | 'x86_64' | 'aab'>('universal')
-    const [selectedWindowsType, setSelectedWindowsType] = useState<'installer' | 'portable'>('installer')
-    const [selectedLinuxType, setSelectedLinuxType] = useState<'portable' | 'deb'>('portable')
-    const [selectedMacType, setSelectedMacType] = useState<'dmgArm' | 'dmgIntel' | 'zipPortable'>('dmgArm')
+    const [showSearchModal, setShowSearchModal] = useState(false)
+    const [showHowToUseModal, setShowHowToUseModal] = useState(false)
+    const [searchQuery, setSearchQuery] = useState("")
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [isShuffle, setIsShuffle] = useState(false)
+    const [isRepeat, setIsRepeat] = useState(false)
     const playerRef = useRef<LorapokPlayerRef>(null)
+    const folderInputRef = useRef<HTMLInputElement>(null)
 
     // Load download manifest
     useEffect(() => {
@@ -277,241 +300,291 @@ export function App() {
                     setManifest(data)
                 }
             })
-            .catch(() => {
-                // Keep default manifest
-            })
+            .catch(() => {})
     }, [])
 
     // Detect user OS
     useEffect(() => {
         const ua = navigator.userAgent.toLowerCase()
-        if (ua.includes('android')) {
-            setDetectedOS('android')
-        } else if (ua.includes('linux')) {
-            setDetectedOS('linux')
-        } else if (ua.includes('win')) {
-            setDetectedOS('windows')
-        } else if (ua.includes('mac')) {
-            setDetectedOS('macos')
-        } else {
-            setDetectedOS('android')
+        if (ua.includes('android')) setDetectedOS('android')
+        else if (ua.includes('linux')) setDetectedOS('linux')
+        else if (ua.includes('win')) setDetectedOS('windows')
+        else if (ua.includes('mac')) setDetectedOS('macos')
+        else setDetectedOS('android')
+    }, [])
+
+    // Global Keyboard Shortcuts (Cmd/Ctrl+K for search, ? for How-to-use)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault()
+                setShowSearchModal(prev => !prev)
+            } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+                e.preventDefault()
+                setShowHowToUseModal(prev => !prev)
+            }
         }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
     }, [])
 
     const handleCustomUrlPlay = (e: React.FormEvent) => {
         e.preventDefault()
         if (customUrl.trim()) {
-            playerRef.current?.load(customUrl.trim())
-            setDemoUrl(customUrl.trim())
+            const newTrack: PlaylistItem = {
+                id: `custom-${Date.now()}`,
+                name: customUrl.split('/').pop()?.split('?')[0] || 'Custom Stream',
+                category: 'Custom Stream',
+                type: customUrl.includes('.m3u8') ? 'HLS' : (customUrl.includes('.mpd') ? 'DASH' : 'Direct URL'),
+                url: customUrl.trim(),
+                desc: 'User-specified media stream stream'
+            }
+            setPlaylist(prev => [newTrack, ...prev])
+            setCurrentTrackIndex(0)
+            setDemoUrl(newTrack.url)
+            playerRef.current?.load(newTrack.url)
+            setCustomUrl("")
         }
     }
 
-    const copyNpmCommand = () => {
-        navigator.clipboard.writeText('npm install lorapok-player')
-        setCopiedNpm(true)
-        setTimeout(() => setCopiedNpm(false), 2000)
+    const selectTrack = (index: number) => {
+        if (index >= 0 && index < playlist.length) {
+            setCurrentTrackIndex(index)
+            const track = playlist[index]
+            setDemoUrl(track.url)
+            playerRef.current?.load(track.url)
+        }
+    }
+
+    const playNextTrack = () => {
+        if (playlist.length === 0) return
+        if (isShuffle) {
+            const nextIdx = Math.floor(Math.random() * playlist.length)
+            selectTrack(nextIdx)
+        } else {
+            const nextIdx = (currentTrackIndex + 1) % playlist.length
+            selectTrack(nextIdx)
+        }
+    }
+
+    const playPrevTrack = () => {
+        if (playlist.length === 0) return
+        const prevIdx = (currentTrackIndex - 1 + playlist.length) % playlist.length
+        selectTrack(prevIdx)
+    }
+
+    const handleFolderUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files
+        if (!files || files.length === 0) return
+
+        const mediaExtensions = ['.mp4', '.mkv', '.webm', '.avi', '.mov', '.flac', '.mp3', '.wav', '.aac', '.ogg', '.m3u8', '.mpd']
+        const newTracks: PlaylistItem[] = []
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i]
+            const ext = '.' + file.name.split('.').pop()?.toLowerCase()
+            if (mediaExtensions.includes(ext)) {
+                const objectUrl = URL.createObjectURL(file)
+                newTracks.push({
+                    id: `local-${i}-${Date.now()}`,
+                    name: file.name,
+                    category: file.type.startsWith('audio') ? 'Audio' : 'Video',
+                    type: ext.toUpperCase().replace('.', ''),
+                    url: objectUrl,
+                    desc: `Local File • ${(file.size / (1024 * 1024)).toFixed(1)} MB`
+                })
+            }
+        }
+
+        if (newTracks.length > 0) {
+            setPlaylist(prev => [...newTracks, ...prev])
+            setCurrentTrackIndex(0)
+            setDemoUrl(newTracks[0].url)
+            playerRef.current?.load(newTracks[0].url)
+        }
+    }
+
+    const copyCode = (text: string) => {
+        navigator.clipboard.writeText(text)
+        setCopiedSnippet(true)
+        setTimeout(() => setCopiedSnippet(false), 2000)
     }
 
     const categories = ['All', 'Video', 'Adaptive Stream', 'Lossless Audio', 'Audio', 'Live Broadcast']
     const filteredPresets = selectedCategory === 'All' 
-        ? MEDIA_PRESETS 
-        : MEDIA_PRESETS.filter(p => p.category === selectedCategory)
+        ? playlist 
+        : playlist.filter(p => p.category === selectedCategory)
 
-    // Primary Download CTA based on OS
-    const primaryDownloadInfo = () => {
-        if (detectedOS === 'android') {
-            const variant = (manifest.platforms.android[selectedAndroidVariant] || manifest.platforms.android.universal) as DownloadItem
-            return {
-                label: `Download APK for Android`,
-                sub: `${manifest.version} • ${variant.size} • Signed Universal & ARM64`,
-                url: variant.url,
-                icon: Smartphone
-            }
-        }
-        if (detectedOS === 'linux') {
-            const variant = (manifest.platforms.linux.portable || manifest.platforms.linux.appimage) as DownloadItem
-            return {
-                label: `Download Linux AppImage`,
-                sub: `${manifest.version} • ${variant.size} • Portable Executable`,
-                url: variant.url,
-                icon: Laptop
-            }
-        }
-        if (detectedOS === 'windows') {
-            const variant = (manifest.platforms.windows.installer || manifest.platforms.windows.default) as DownloadItem
-            return {
-                label: `Download for Windows`,
-                sub: `${manifest.version} • ${variant.size || "78 MB"} • Installable Setup & Portable`,
-                url: typeof variant === 'string' ? variant : variant.url,
-                icon: Laptop
-            }
-        }
-        if (detectedOS === 'macos') {
-            const variant = (manifest.platforms.macos.dmgArm || manifest.platforms.macos.default) as DownloadItem
-            return {
-                label: `Download for macOS`,
-                sub: `${manifest.version} • 96 MB • Apple Silicon & Intel DMG`,
-                url: typeof variant === 'string' ? variant : variant.url,
-                icon: Laptop
-            }
-        }
-        return {
-            label: `Download APK for Android`,
-            sub: `${manifest.version} • 2.8 MB • Universal Release`,
-            url: manifest.platforms.android.default,
-            icon: Smartphone
-        }
-    }
-
-    const primaryCTA = primaryDownloadInfo()
+    const searchResults = searchQuery.trim() === ''
+        ? playlist
+        : playlist.filter(p => 
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            p.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.category.toLowerCase().includes(searchQuery.toLowerCase())
+        )
 
     return (
-        <div className="min-h-screen bg-[#030305] text-white selection:bg-neon-cyan selection:text-midnight font-sans overflow-x-hidden">
-            {/* Ambient Lighting Background */}
-            <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#00f3ff]/10 rounded-full blur-[160px]" />
-                <div className="absolute top-[30%] right-[-10%] w-[50vw] h-[50vw] bg-[#bc13fe]/10 rounded-full blur-[180px]" />
-                <div className="absolute bottom-[-10%] left-[20%] w-[60vw] h-[40vw] bg-[#00f3ff]/5 rounded-full blur-[150px]" />
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,243,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(188,19,254,0.02)_1px,transparent_1px)] bg-[size:48px_48px]" />
+        <div className="min-h-screen bg-[#050510] text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
+            {/* Ambient Background Lights */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+                <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-[#00f3ff]/10 via-[#bc13fe]/5 to-transparent blur-[140px] rounded-full" />
+                <div className="absolute top-[40%] -left-40 w-[600px] h-[600px] bg-[#bc13fe]/5 blur-[160px] rounded-full" />
+                <div className="absolute top-[60%] -right-40 w-[600px] h-[600px] bg-[#00f3ff]/5 blur-[160px] rounded-full" />
             </div>
 
-            {/* Top Header & Ultra-Professional Navbar */}
-            <header className="sticky top-0 z-50 px-4 sm:px-8 py-3 w-full backdrop-blur-2xl bg-[#030305]/85 border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    {/* Brand Logo & Domain Badge */}
-                    <div className="flex items-center gap-3">
-                        <a href="#" className="flex items-center gap-3 group">
-                            <Logo className="w-8 h-8 md:w-9 md:h-9 transition-transform group-hover:scale-105 drop-shadow-[0_0_15px_rgba(0,243,255,0.5)]" />
-                            <div className="flex flex-col">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-mono font-black tracking-tight text-base md:text-lg text-transparent bg-clip-text bg-gradient-to-r from-[#00f3ff] via-white to-[#bc13fe]">
-                                        LORAPOK
-                                    </span>
-                                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                                        v{manifest.version}
-                                    </span>
-                                </div>
-                                <span className="text-[10px] font-mono text-white/40 tracking-wider">
-                                    media.lorapok.tech
+            {/* Sticky Glassmorphism Header */}
+            <header className="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#050510]/80 border-b border-white/10 transition-all duration-300">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+                    {/* Logo Branding */}
+                    <a href="#" className="flex items-center gap-3 group">
+                        <div className="relative">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-neon-cyan to-electric-purple rounded-xl blur-sm opacity-50 group-hover:opacity-100 transition duration-300" />
+                            <div className="relative w-9 h-9 rounded-xl bg-midnight border border-white/20 flex items-center justify-center p-1.5 shadow-lg">
+                                <Logo className="w-full h-full text-neon-cyan" />
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <span className="font-black text-lg tracking-wider text-white font-mono">LORAPOK</span>
+                                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30">
+                                    v{manifest.version}
                                 </span>
                             </div>
-                        </a>
-                    </div>
+                            <span className="text-[10px] font-mono text-white/40 block -mt-1 tracking-widest">
+                                media.lorapok.tech
+                            </span>
+                        </div>
+                    </a>
 
-                    {/* Navigation Desktop Links */}
-                    <nav className="hidden lg:flex items-center gap-7 text-xs font-mono tracking-widest text-white/70">
-                        <a href="#lab" className="hover:text-neon-cyan transition-colors uppercase">Media Lab</a>
-                        <a href="#downloads" className="hover:text-neon-cyan transition-colors uppercase">Downloads</a>
-                        <a href="#extensions" className="hover:text-neon-cyan transition-colors uppercase">Extensions</a>
-                        <a href="#features" className="hover:text-neon-cyan transition-colors uppercase">Engine</a>
-                        <a href="#developer" className="hover:text-neon-cyan transition-colors uppercase">SDK</a>
-                        <a href="#faq" className="hover:text-neon-cyan transition-colors uppercase">FAQ</a>
+                    {/* Desktop Navigation Links */}
+                    <nav className="hidden md:flex items-center gap-6 text-xs font-mono tracking-wider text-white/70">
+                        <a href="#medialab" className="hover:text-neon-cyan transition-colors">Media Lab</a>
+                        <a href="#downloads" className="hover:text-neon-cyan transition-colors">Downloads</a>
+                        <a href="#extensions" className="hover:text-neon-cyan transition-colors">Extensions</a>
+                        <a href="#developer" className="hover:text-neon-cyan transition-colors">Developer SDK</a>
+                        <a href="#features" className="hover:text-neon-cyan transition-colors">Engine</a>
+                        <a href="#faq" className="hover:text-neon-cyan transition-colors">FAQ</a>
                     </nav>
 
-                    {/* Right Header CTAs */}
-                    <div className="flex items-center gap-3">
-                        <a 
-                            href="#lab" 
-                            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono font-bold text-white transition-all"
+                    {/* Top Action Buttons */}
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setShowSearchModal(true)}
+                            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-white/60 hover:text-white transition-all"
+                            title="Search Streams & Files (Cmd/Ctrl + K)"
                         >
-                            <Play className="w-3.5 h-3.5 text-neon-cyan" />
-                            <span>Web Player</span>
-                        </a>
+                            <Search className="w-3.5 h-3.5 text-neon-cyan" />
+                            <span>Search</span>
+                            <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-black/50 border border-white/10 text-white/40">⌘K</kbd>
+                        </button>
 
-                        <a 
-                            href="#downloads" 
-                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#00f3ff] to-[#bc13fe] text-midnight font-mono font-black text-xs uppercase tracking-wider hover:opacity-90 transition-all shadow-[0_0_20px_rgba(0,243,255,0.3)] flex items-center gap-2"
+                        <button
+                            onClick={() => setShowHowToUseModal(true)}
+                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-all"
+                            title="How to Use & Shortcuts (?)"
+                        >
+                            <HelpCircle className="w-4 h-4 text-neon-cyan" />
+                        </button>
+
+                        <a
+                            href="#downloads"
+                            className="px-4 py-2 rounded-xl bg-neon-cyan hover:bg-white text-midnight font-mono font-black text-xs uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(0,243,255,0.3)] flex items-center gap-1.5"
                         >
                             <Download className="w-3.5 h-3.5" />
-                            <span>Downloads</span>
+                            <span>Download</span>
                         </a>
                     </div>
                 </div>
             </header>
 
-            <main className="relative z-10 max-w-7xl mx-auto px-6 py-12 flex flex-col gap-28">
-
+            {/* Main Content Area */}
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24 relative z-10">
+                
                 {/* Hero Section */}
-                <section className="flex flex-col items-center text-center gap-8 pt-6 min-h-[60vh] justify-center relative">
-                    <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-[#00f3ff]/30 to-[#bc13fe]/30 blur-3xl rounded-full scale-150 animate-pulse" />
-                        <Logo className="w-32 h-32 md:w-40 md:h-40 relative z-10 drop-shadow-[0_0_60px_rgba(0,243,255,0.4)]" />
+                <section className="text-center space-y-8 pt-8">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-neon-cyan text-xs font-mono uppercase tracking-widest backdrop-blur-md">
+                        <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Neural Computing & Sensory Media Engine
                     </div>
 
-                    <div className="space-y-4 max-w-4xl px-4">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-                            <Sparkles className="w-3.5 h-3.5 text-neon-cyan" />
-                            <span className="text-[11px] font-mono tracking-widest uppercase text-white/80">
-                                Official Production Release v{manifest.version} • media.lorapok.tech
-                            </span>
-                        </div>
-                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight uppercase leading-[0.95]">
-                            The Universal<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#00f3ff] to-[#bc13fe]">
-                                Media Engine
-                            </span>
-                        </h1>
-                        <p className="text-base md:text-xl text-white/70 font-mono max-w-2xl mx-auto leading-relaxed">
-                            Hardware-accelerated playback with Portable & Installable binaries for Android TV, Android Mobile, Linux, Windows, macOS, and Browser Extensions.
-                        </p>
-                    </div>
+                    <h1 className="fluid-title font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400">
+                        The Universal Playback Engine for Every Screen
+                    </h1>
 
-                    {/* Primary Dynamic Download Button */}
-                    <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
+                    <p className="text-white/60 font-mono text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+                        Hardware-accelerated 8K video, lossless 24-bit audio, adaptive HLS/DASH streaming, and biological ambient lighting. Available across Desktop, Android, Browser Extensions, VS Code, and NPM.
+                    </p>
+
+                    {/* Hero CTA Hub */}
+                    <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                         <a
-                            href={primaryCTA.url}
-                            download
-                            className="group relative px-8 py-5 rounded-2xl bg-gradient-to-r from-[#00f3ff] to-[#bc13fe] text-midnight font-bold transition-all duration-300 shadow-[0_0_40px_rgba(0,243,255,0.4)] hover:shadow-[0_0_60px_rgba(188,19,254,0.6)] hover:scale-105 active:scale-95 flex items-center gap-4 text-left"
+                            href="#medialab"
+                            className="px-8 py-4 rounded-2xl bg-white text-midnight font-mono font-black text-sm uppercase tracking-wider hover:bg-neon-cyan transition-all shadow-[0_0_30px_rgba(0,243,255,0.4)] flex items-center gap-3"
                         >
-                            <primaryCTA.icon className="w-8 h-8 text-midnight" />
-                            <div>
-                                <div className="text-xs font-mono uppercase tracking-widest text-midnight/80 font-bold">
-                                    Instant Direct Download
-                                </div>
-                                <div className="text-lg md:text-xl font-black tracking-tight leading-tight">
-                                    {primaryCTA.label}
-                                </div>
-                                <div className="text-[11px] font-mono text-midnight/70 font-medium mt-0.5">
-                                    {primaryCTA.sub}
-                                </div>
-                            </div>
+                            <Play className="w-4 h-4 fill-current" />
+                            <span>Launch Live Media Lab</span>
                         </a>
 
                         <a
                             href="#downloads"
-                            className="px-6 py-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/15 font-mono text-xs uppercase tracking-wider transition-all flex items-center gap-3 backdrop-blur-md text-white/80 hover:text-white"
+                            className="px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/15 border border-white/10 font-mono font-bold text-sm uppercase tracking-wider text-white transition-all flex items-center gap-3"
                         >
-                            <span>All Platforms (Portable & Setup)</span>
-                            <ChevronDown className="w-4 h-4 text-neon-cyan" />
+                            <Download className="w-4 h-4 text-neon-cyan" />
+                            <span>Get App & Packages</span>
                         </a>
                     </div>
                 </section>
 
-                {/* Interactive Media Testing Laboratory */}
+                {/* Media Sandbox / Codec Lab */}
                 <section id="medialab" className="deferred-render scroll-mt-28 flex flex-col gap-8">
                     <div className="text-center space-y-3">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan text-xs font-mono uppercase tracking-widest">
-                            <Radio className="w-4 h-4" /> Live Interactive Laboratory
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-electric-purple/10 border border-electric-purple/30 text-purple-300 text-xs font-mono uppercase tracking-widest">
+                            <Radio className="w-4 h-4 text-electric-purple animate-pulse" /> Live Multi-Codec Testing Lab
                         </div>
                         <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight">
-                            Stream Testing Sandbox
+                            Interactive Stream Engine
                         </h2>
                         <p className="text-white/50 font-mono text-sm max-w-xl mx-auto">
-                            Test all 8 formats directly in your browser or input any custom stream URL.
+                            Test all 8 formats directly in your browser, import local folders, or input any custom stream URL.
                         </p>
                     </div>
 
-                    {/* Category Filter Pills */}
-                    <div className="flex items-center justify-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                        {categories.map((cat) => (
+                    {/* Toolbar: Category Filters, Folder Upload, Search, Playlist Toggle */}
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        {/* Category Filter Pills */}
+                        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    className={`px-4 py-2 rounded-xl text-xs font-mono tracking-wider uppercase transition-all whitespace-nowrap ${selectedCategory === cat ? 'bg-gradient-to-r from-neon-cyan to-electric-purple text-midnight font-black shadow-[0_0_15px_rgba(0,243,255,0.3)]' : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/5'}`}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Local Folder & File Ingestion */}
+                        <div className="flex items-center gap-2">
+                            <input
+                                ref={folderInputRef}
+                                type="file"
+                                // @ts-ignore
+                                webkitdirectory=""
+                                directory=""
+                                multiple
+                                onChange={handleFolderUpload}
+                                className="hidden"
+                            />
                             <button
-                                key={cat}
-                                onClick={() => setSelectedCategory(cat)}
-                                className={`px-4 py-2 rounded-xl text-xs font-mono tracking-wider uppercase transition-all whitespace-nowrap ${selectedCategory === cat ? 'bg-gradient-to-r from-neon-cyan to-electric-purple text-midnight font-black shadow-[0_0_15px_rgba(0,243,255,0.3)]' : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/5'}`}
+                                onClick={() => folderInputRef.current?.click()}
+                                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-xs font-mono text-white/80 hover:text-white flex items-center gap-2 transition-all"
+                                title="Add Folder with Videos/Audios to Playlist"
                             >
-                                {cat}
+                                <FolderPlus className="w-4 h-4 text-neon-cyan" />
+                                <span>Add Folder</span>
                             </button>
-                        ))}
+                        </div>
                     </div>
 
                     {/* Media Sandbox Player Canvas */}
@@ -523,12 +596,11 @@ export function App() {
                                     ref={playerRef}
                                     src={demoUrl}
                                     autoPlay={false}
-                                    ambientLighting={true}
                                     className="w-full h-full"
                                 />
                             </div>
 
-                            {/* Custom URL Input Bar */}
+                            {/* Custom URL Input Bar & Controls */}
                             <form onSubmit={handleCustomUrlPlay} className="flex gap-2">
                                 <input
                                     type="text"
@@ -547,31 +619,50 @@ export function App() {
                             </form>
                         </div>
 
-                        {/* Presets List */}
-                        <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-                            <div className="text-xs font-mono text-white/40 uppercase tracking-widest px-1">
-                                Test Media Presets ({filteredPresets.length})
+                        {/* Playlist & Presets Explorer */}
+                        <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4 backdrop-blur-xl max-h-[580px] flex flex-col justify-between">
+                            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                <div>
+                                    <div className="text-xs font-mono font-bold uppercase tracking-wider text-white">Media Playlist</div>
+                                    <div className="text-[10px] font-mono text-white/40">{playlist.length} items loaded</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setIsShuffle(prev => !prev)}
+                                        className={`p-1.5 rounded-lg border transition-all ${isShuffle ? 'bg-neon-cyan/20 text-neon-cyan border-neon-cyan/40' : 'text-white/40 border-white/5 hover:text-white'}`}
+                                        title="Toggle Shuffle"
+                                    >
+                                        <Shuffle className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                        onClick={() => setIsRepeat(prev => !prev)}
+                                        className={`p-1.5 rounded-lg border transition-all ${isRepeat ? 'bg-electric-purple/20 text-purple-300 border-purple-500/40' : 'text-white/40 border-white/5 hover:text-white'}`}
+                                        title="Toggle Repeat"
+                                    >
+                                        <Repeat className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
                             </div>
-                            {filteredPresets.map((preset) => (
-                                <button
-                                    key={preset.id}
-                                    onClick={() => {
-                                        setDemoUrl(preset.url)
-                                        playerRef.current?.load(preset.url)
-                                    }}
-                                    className={`w-full text-left p-4 rounded-2xl border transition-all flex flex-col gap-2 ${demoUrl === preset.url ? 'bg-white/10 border-neon-cyan/60 shadow-[0_0_20px_rgba(0,243,255,0.2)]' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-bold text-sm text-white">{preset.name}</span>
-                                        <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-white/10 text-neon-cyan border border-white/10">
-                                            {preset.type}
-                                        </span>
-                                    </div>
-                                    <p className="text-[11px] font-mono text-white/60 leading-relaxed">
-                                        {preset.desc}
-                                    </p>
-                                </button>
-                            ))}
+
+                            <div className="space-y-2 overflow-y-auto pr-1 flex-1">
+                                {filteredPresets.map((preset, idx) => (
+                                    <button
+                                        key={preset.id}
+                                        onClick={() => selectTrack(playlist.indexOf(preset))}
+                                        className={`w-full text-left p-3.5 rounded-2xl border transition-all flex flex-col gap-1.5 ${demoUrl === preset.url ? 'bg-white/10 border-neon-cyan/60 shadow-[0_0_20px_rgba(0,243,255,0.2)]' : 'bg-black/30 border-white/5 hover:bg-white/5'}`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-bold text-xs text-white truncate max-w-[180px]">{preset.name}</span>
+                                            <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-white/10 text-neon-cyan border border-white/10">
+                                                {preset.type}
+                                            </span>
+                                        </div>
+                                        <p className="text-[10px] font-mono text-white/50 line-clamp-1">
+                                            {preset.desc}
+                                        </p>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -725,7 +816,7 @@ export function App() {
 
                             <div className="space-y-2">
                                 <a
-                                    href={(manifest.platforms.linux.portable as DownloadItem)?.url || (manifest.platforms.linux.appimage as DownloadItem)?.url || "/downloads/lorapok-player-1.5.0-x86_64.AppImage"}
+                                    href={(manifest.platforms.linux.portable as DownloadItem)?.url || "/downloads/lorapok-player-1.5.0-x86_64.AppImage"}
                                     download
                                     className="w-full py-3 px-4 rounded-xl bg-neon-cyan hover:bg-white text-midnight font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-between shadow-[0_0_20px_rgba(0,243,255,0.3)]"
                                 >
@@ -799,18 +890,18 @@ export function App() {
                     </div>
                 </section>
 
-                {/* Browser Extensions for All Browsers (Firefox AMO, Chrome, Edge) */}
+                {/* Universal Browser Extensions & VS Code Extension */}
                 <section id="extensions" className="deferred-render scroll-mt-28 bg-gradient-to-br from-[#bc13fe]/10 via-white/5 to-transparent border border-white/15 rounded-3xl p-8 lg:p-12 backdrop-blur-2xl space-y-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="space-y-3 max-w-2xl">
                             <div className="inline-flex items-center gap-2 text-electric-purple font-mono text-xs uppercase tracking-widest">
-                                <Compass className="w-4 h-4" /> Universal Browser Extension Hub
+                                <Compass className="w-4 h-4" /> Universal Extensions Hub
                             </div>
                             <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">
-                                Lorapok Browser Connector
+                                Browser & IDE Connectors
                             </h2>
                             <p className="text-white/70 font-mono text-sm leading-relaxed">
-                                Sniff any active video, audio, HLS (.m3u8), or DASH stream on any webpage and send it directly to Lorapok Player desktop or web player with 1 click.
+                                Sniff any active video, audio, HLS (.m3u8), or DASH stream on any webpage or preview media directly in Visual Studio Code.
                             </p>
                         </div>
 
@@ -821,12 +912,12 @@ export function App() {
                             className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-mono flex items-center gap-2 transition-all self-start md:self-auto"
                         >
                             <FileText className="w-4 h-4 text-neon-cyan" />
-                            <span>AMO / Store Submission Guide</span>
+                            <span>AMO / Store Submission Details</span>
                             <ExternalLink className="w-3.5 h-3.5 opacity-60" />
                         </a>
                     </div>
 
-                    {/* Browser Download Cards */}
+                    {/* Browser & VS Code Download Cards */}
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         
                         {/* Firefox AMO Card */}
@@ -901,81 +992,237 @@ export function App() {
                             </a>
                         </div>
 
-                        {/* Firefox Source Archive */}
-                        <div className="bg-black/40 border border-white/10 rounded-2xl p-5 space-y-4 hover:border-white/30 transition-all flex flex-col justify-between">
+                        {/* VS Code Extension Card */}
+                        <div className="bg-black/40 border border-purple-500/30 rounded-2xl p-5 space-y-4 hover:border-purple-400 transition-all flex flex-col justify-between">
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-lg">📦</span>
-                                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-white/10 text-white/70 border border-white/15">
-                                        AMO ARCHIVE
+                                    <span className="text-lg">💻</span>
+                                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                        VS CODE IDE
                                     </span>
                                 </div>
-                                <h4 className="font-bold text-sm">Firefox (.zip)</h4>
+                                <h4 className="font-bold text-sm">VS Code Extension</h4>
                                 <p className="text-[11px] font-mono text-white/50 leading-relaxed">
-                                    Complete source zip for Firefox Developer Edition manual loading.
+                                    Custom media editor & stream previewer inside Visual Studio Code.
                                 </p>
                             </div>
                             <a
-                                href="/downloads/lorapok-extension-firefox-1.5.0.zip"
+                                href="/downloads/lorapok-player-vscode-1.5.0.vsix"
                                 download
-                                className="w-full py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 font-mono text-xs uppercase tracking-wider transition-all flex items-center justify-between border border-white/10 text-white/80"
+                                className="w-full py-2.5 px-3 rounded-xl bg-electric-purple hover:bg-white text-white hover:text-midnight font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-between shadow-[0_0_15px_rgba(188,19,254,0.3)]"
                             >
-                                <span>Download (.zip)</span>
-                                <span className="opacity-60 text-[10px]">428 KB</span>
+                                <span>Get VSIX Package</span>
+                                <span className="opacity-80 text-[10px]">21 KB</span>
                             </a>
                         </div>
 
                     </div>
                 </section>
 
-                {/* Developer SDK & NPM Section */}
-                <section id="developer" className="deferred-render scroll-mt-28 bg-white/5 border border-white/10 rounded-3xl p-8 lg:p-12 backdrop-blur-xl flex flex-col lg:flex-row gap-10">
-                    <div className="lg:w-1/2 space-y-6 flex flex-col justify-center">
-                        <div className="flex items-center gap-2 text-electric-purple font-mono text-xs uppercase tracking-widest">
-                            <Code2 className="w-4 h-4" /> Standalone React NPM Library
+                {/* Developer SDK Hub: NPM, Python PIP, PHP Composer, Yarn, VS Code */}
+                <section id="developer" className="deferred-render scroll-mt-28 bg-white/5 border border-white/10 rounded-3xl p-8 lg:p-12 backdrop-blur-xl space-y-8">
+                    <div className="space-y-3">
+                        <div className="inline-flex items-center gap-2 text-electric-purple font-mono text-xs uppercase tracking-widest">
+                            <Code2 className="w-4 h-4" /> Multi-Language Ecosystem SDK
                         </div>
                         <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">
-                            Build with @lorapok/player
+                            Developer Packages & Integration
                         </h2>
-                        <p className="text-white/60 font-mono text-sm leading-relaxed">
-                            Embed the entire Lorapok playback engine into your own React web applications. Includes hardware decoding, ambient lighting, custom controls, and TypeScript definitions.
+                        <p className="text-white/60 font-mono text-sm max-w-2xl leading-relaxed">
+                            Integrate the Lorapok media engine into any tech stack with zero friction.
                         </p>
-
-                        <div className="flex flex-wrap gap-4 pt-2">
-                            <button
-                                onClick={copyNpmCommand}
-                                className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 font-mono text-xs flex items-center gap-3 transition-all"
-                            >
-                                {copiedNpm ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-neon-cyan" />}
-                                <span>npm install lorapok-player</span>
-                            </button>
-
-                            <a
-                                href="https://www.npmjs.com/package/lorapok-player"
-                                target="_blank"
-                                rel="noreferrer"
-                                className="px-5 py-3 rounded-xl bg-white text-midnight font-mono font-bold text-xs uppercase tracking-wider hover:bg-neon-cyan transition-all flex items-center gap-2"
-                            >
-                                <span>NPM Package</span>
-                                <ArrowRight className="w-3.5 h-3.5" />
-                            </a>
-                        </div>
                     </div>
 
-                    <div className="lg:w-1/2 bg-[#09090c] border border-white/10 rounded-2xl p-6 font-mono text-xs text-white/80 leading-relaxed overflow-x-auto">
-                        <div className="text-white/30 mb-2">// App.tsx</div>
-                        <div><span className="text-neon-cyan">import</span> {'{ LorapokPlayer }'} <span className="text-neon-cyan">from</span> <span className="text-green-400">'lorapok-player'</span>;</div>
-                        <div><span className="text-neon-cyan">import</span> <span className="text-green-400">'lorapok-player/style.css'</span>;</div>
-                        <br />
-                        <div><span className="text-neon-cyan">function</span> <span className="text-blue-400">MediaPlayerView</span>() {'{'}</div>
-                        <div className="pl-4"><span className="text-neon-cyan">return</span> (</div>
-                        <div className="pl-8 text-white/90">{'<LorapokPlayer'}</div>
-                        <div className="pl-12 text-electric-purple">src=<span className="text-green-400">"https://example.com/stream.m3u8"</span></div>
-                        <div className="pl-12 text-electric-purple">autoPlay=<span className="text-orange-400">true</span></div>
-                        <div className="pl-12 text-electric-purple">ambientLighting=<span className="text-orange-400">true</span></div>
-                        <div className="pl-8 text-white/90">{'/>'}</div>
-                        <div className="pl-4">);</div>
-                        <div>{'}'}</div>
+                    {/* Language / Package Tabs */}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-white/10">
+                        {[
+                            { id: 'npm', label: 'JavaScript / React', badge: 'NPM' },
+                            { id: 'pip', label: 'Python SDK & CLI', badge: 'PIP' },
+                            { id: 'composer', label: 'PHP / Laravel', badge: 'Composer' },
+                            { id: 'yarn', label: 'Yarn Monorepo', badge: 'Yarn' },
+                            { id: 'vscode', label: 'VS Code Extension', badge: 'VSIX' },
+                        ].map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setSelectedPackageTab(tab.id as any)}
+                                className={`px-4 py-2.5 rounded-xl font-mono text-xs flex items-center gap-2 transition-all whitespace-nowrap ${selectedPackageTab === tab.id ? 'bg-neon-cyan text-midnight font-bold shadow-[0_0_15px_rgba(0,243,255,0.3)]' : 'bg-white/5 text-white/60 hover:text-white'}`}
+                            >
+                                <span>{tab.label}</span>
+                                <span className="px-1.5 py-0.5 rounded text-[9px] bg-black/30 font-mono font-bold">
+                                    {tab.badge}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Tab Panels */}
+                    <div className="grid lg:grid-cols-2 gap-8 items-center">
+                        {/* Left description & install command */}
+                        <div className="space-y-6">
+                            {selectedPackageTab === 'npm' && (
+                                <>
+                                    <h3 className="text-2xl font-bold">React & TypeScript Component</h3>
+                                    <p className="text-xs font-mono text-white/70 leading-relaxed">
+                                        Embed the hardware-accelerated video/audio player, ambient lighting, and audio equalization into your React applications with native TypeScript types.
+                                    </p>
+                                    <button
+                                        onClick={() => copyCode('npm install lorapok-player')}
+                                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-black/60 border border-white/15 font-mono text-xs text-neon-cyan flex items-center justify-between gap-4 hover:border-neon-cyan transition-all"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Terminal className="w-4 h-4 opacity-60" />
+                                            <span>npm install lorapok-player</span>
+                                        </div>
+                                        {copiedSnippet ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 opacity-60" />}
+                                    </button>
+                                </>
+                            )}
+
+                            {selectedPackageTab === 'pip' && (
+                                <>
+                                    <h3 className="text-2xl font-bold">Python SDK & CLI Streaming Server</h3>
+                                    <p className="text-xs font-mono text-white/70 leading-relaxed">
+                                        Launch streams from Python scripts, generate HTML player embeds, run the local media streaming server, and inspect HLS/DASH media characteristics.
+                                    </p>
+                                    <button
+                                        onClick={() => copyCode('pip install lorapok')}
+                                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-black/60 border border-white/15 font-mono text-xs text-neon-cyan flex items-center justify-between gap-4 hover:border-neon-cyan transition-all"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Terminal className="w-4 h-4 opacity-60" />
+                                            <span>pip install lorapok</span>
+                                        </div>
+                                        {copiedSnippet ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 opacity-60" />}
+                                    </button>
+                                </>
+                            )}
+
+                            {selectedPackageTab === 'composer' && (
+                                <>
+                                    <h3 className="text-2xl font-bold">PHP & Laravel Media Player Library</h3>
+                                    <p className="text-xs font-mono text-white/70 leading-relaxed">
+                                        Render self-contained player components in Blade/Twig templates and generate master adaptive HLS (.m3u8) playlists directly in PHP.
+                                    </p>
+                                    <button
+                                        onClick={() => copyCode('composer require lorapok/player')}
+                                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-black/60 border border-white/15 font-mono text-xs text-neon-cyan flex items-center justify-between gap-4 hover:border-neon-cyan transition-all"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Terminal className="w-4 h-4 opacity-60" />
+                                            <span>composer require lorapok/player</span>
+                                        </div>
+                                        {copiedSnippet ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 opacity-60" />}
+                                    </button>
+                                </>
+                            )}
+
+                            {selectedPackageTab === 'yarn' && (
+                                <>
+                                    <h3 className="text-2xl font-bold">Yarn Modern & Classic Support</h3>
+                                    <p className="text-xs font-mono text-white/70 leading-relaxed">
+                                        Fully compatible with Yarn Berry (v3/v4) and Yarn Classic monorepos with zero hoisting conflicts.
+                                    </p>
+                                    <button
+                                        onClick={() => copyCode('yarn add lorapok-player')}
+                                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-black/60 border border-white/15 font-mono text-xs text-neon-cyan flex items-center justify-between gap-4 hover:border-neon-cyan transition-all"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Terminal className="w-4 h-4 opacity-60" />
+                                            <span>yarn add lorapok-player</span>
+                                        </div>
+                                        {copiedSnippet ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 opacity-60" />}
+                                    </button>
+                                </>
+                            )}
+
+                            {selectedPackageTab === 'vscode' && (
+                                <>
+                                    <h3 className="text-2xl font-bold">VS Code Custom Media Editor</h3>
+                                    <p className="text-xs font-mono text-white/70 leading-relaxed">
+                                        Preview all media types (.mp4, .webm, .mkv, .m3u8, .flac, .mp3) directly inside Visual Studio Code with hardware acceleration.
+                                    </p>
+                                    <a
+                                        href="/downloads/lorapok-player-vscode-1.5.0.vsix"
+                                        download
+                                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-electric-purple text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between gap-4 hover:bg-white hover:text-midnight transition-all shadow-[0_0_20px_rgba(188,19,254,0.3)]"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Download className="w-4 h-4" />
+                                            <span>Download .vsix Extension (21 KB)</span>
+                                        </div>
+                                    </a>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Right code snippet box */}
+                        <div className="bg-[#09090c] border border-white/10 rounded-2xl p-6 font-mono text-xs text-white/80 leading-relaxed overflow-x-auto shadow-2xl">
+                            {selectedPackageTab === 'npm' && (
+                                <>
+                                    <div className="text-white/30 mb-2">// React App.tsx</div>
+                                    <div><span className="text-neon-cyan">import</span> {'{ LorapokPlayer }'} <span className="text-neon-cyan">from</span> <span className="text-green-400">'lorapok-player'</span>;</div>
+                                    <div><span className="text-neon-cyan">import</span> <span className="text-green-400">'lorapok-player/style.css'</span>;</div>
+                                    <br />
+                                    <div><span className="text-neon-cyan">export default function</span> <span className="text-blue-400">App</span>() {'{'}</div>
+                                    <div className="pl-4"><span className="text-neon-cyan">return</span> (</div>
+                                    <div className="pl-8 text-white/90">{'<LorapokPlayer'}</div>
+                                    <div className="pl-12 text-electric-purple">src=<span className="text-green-400">"https://example.com/stream.m3u8"</span></div>
+                                    <div className="pl-12 text-electric-purple">autoPlay=<span className="text-orange-400">true</span></div>
+                                    <div className="pl-12 text-electric-purple">ambientLighting=<span className="text-orange-400">true</span></div>
+                                    <div className="pl-8 text-white/90">{'/>'}</div>
+                                    <div className="pl-4">);</div>
+                                    <div>{'}'}</div>
+                                </>
+                            )}
+
+                            {selectedPackageTab === 'pip' && (
+                                <>
+                                    <div className="text-white/30 mb-2"># Python main.py</div>
+                                    <div><span className="text-neon-cyan">import</span> lorapok</div>
+                                    <br />
+                                    <div className="text-white/40"># 1. Open stream in desktop/web player</div>
+                                    <div>lorapok.<span className="text-blue-400">play</span>(<span className="text-green-400">"https://example.com/stream.m3u8"</span>)</div>
+                                    <br />
+                                    <div className="text-white/40"># 2. Inspect media characteristics</div>
+                                    <div>info = lorapok.<span className="text-blue-400">inspect_media</span>(<span className="text-green-400">"https://example.com/stream.m3u8"</span>)</div>
+                                    <div><span className="text-neon-cyan">print</span>(f<span className="text-green-400">"Format: &#123;info.format&#125;"</span>)</div>
+                                </>
+                            )}
+
+                            {selectedPackageTab === 'composer' && (
+                                <>
+                                    <div className="text-white/30 mb-2">// PHP / Laravel Blade</div>
+                                    <div><span className="text-neon-cyan">use</span> Lorapok\LorapokPlayer;</div>
+                                    <br />
+                                    <div className="text-white/40">// Render player component</div>
+                                    <div><span className="text-neon-cyan">echo</span> LorapokPlayer::<span className="text-blue-400">create</span>(<span className="text-green-400">"https://example.com/stream.m3u8"</span>, [</div>
+                                    <div className="pl-4"><span className="text-green-400">'autoPlay'</span> =&gt; <span className="text-orange-400">true</span>,</div>
+                                    <div className="pl-4"><span className="text-green-400">'ambientLighting'</span> =&gt; <span className="text-orange-400">true</span></div>
+                                    <div>]);</div>
+                                </>
+                            )}
+
+                            {selectedPackageTab === 'yarn' && (
+                                <>
+                                    <div className="text-white/30 mb-2">// package.json</div>
+                                    <div>{'{'}</div>
+                                    <div className="pl-4"><span className="text-neon-cyan">"dependencies"</span>: {'{'}</div>
+                                    <div className="pl-8"><span className="text-green-400">"lorapok-player"</span>: <span className="text-orange-400">"^1.5.0"</span></div>
+                                    <div className="pl-4">{'}'}</div>
+                                    <div>{'}'}</div>
+                                </>
+                            )}
+
+                            {selectedPackageTab === 'vscode' && (
+                                <>
+                                    <div className="text-white/30 mb-2">// VS Code Command Palette</div>
+                                    <div className="text-white/50">&gt; Lorapok: Open Media Stream URL</div>
+                                    <div className="text-green-400">&gt; Enter: https://example.com/stream.m3u8</div>
+                                    <br />
+                                    <div className="text-white/50">// Or simply click any .mp4, .webm, .mkv file in your project explorer</div>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </section>
 
@@ -997,7 +1244,7 @@ export function App() {
                             { icon: Globe, title: "Universal Adaptive HLS/DASH", desc: "Zero-rebuffer track switching, multi-bitrate segment caching, and live low-latency stream playback." },
                             { icon: Layers, title: "Biological Ambient Glow", desc: "Real-time canvas color extraction synchronizes responsive ambient halo with media frames." },
                             { icon: Zap, title: "GPU Hardware Acceleration", desc: "Direct hardware decoding pipeline for effortless 4K/8K 60fps high-bitrate video playback." },
-                            { icon: ShieldCheck, title: "Portable & Installable Packages", desc: "Universal release APKs, Debian .deb, Windows setup & portable, macOS DMG, and Firefox/Chrome extensions." }
+                            { icon: ShieldCheck, title: "Multi-Ecosystem Toolchain", desc: "Universal release APKs, Debian .deb, Windows setup, macOS DMG, Python PIP, PHP Composer, and VS Code extension." }
                         ].map((feat, i) => (
                             <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md space-y-3 hover:border-neon-cyan/40 transition-all">
                                 <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-neon-cyan">
@@ -1052,6 +1299,160 @@ export function App() {
                 </section>
 
             </main>
+
+            {/* Global Search Modal (Cmd/Ctrl + K) */}
+            <AnimatePresence>
+                {showSearchModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowSearchModal(false)}
+                        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-start justify-center pt-24 px-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: -20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: -20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-[#0b0e18] border border-white/15 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-4 p-6"
+                        >
+                            <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                                <Search className="w-5 h-5 text-neon-cyan" />
+                                <input
+                                    type="text"
+                                    autoFocus
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search test media presets, formats, audio or custom streams..."
+                                    className="flex-1 bg-transparent text-white font-mono text-sm focus:outline-none placeholder-white/40"
+                                />
+                                <button onClick={() => setShowSearchModal(false)}>
+                                    <X className="w-5 h-5 text-white/40 hover:text-white" />
+                                </button>
+                            </div>
+
+                            <div className="max-h-96 overflow-y-auto space-y-2 pr-1">
+                                {searchResults.length === 0 ? (
+                                    <div className="py-8 text-center text-xs font-mono text-white/40">
+                                        No media found matching "{searchQuery}"
+                                    </div>
+                                ) : (
+                                    searchResults.map((item, idx) => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => {
+                                                selectTrack(playlist.indexOf(item))
+                                                setShowSearchModal(false)
+                                                document.getElementById('medialab')?.scrollIntoView({ behavior: 'smooth' })
+                                            }}
+                                            className="w-full text-left p-3 rounded-xl border border-white/5 hover:border-neon-cyan/40 bg-white/5 hover:bg-white/10 transition-all flex items-center justify-between group"
+                                        >
+                                            <div>
+                                                <div className="font-bold text-sm text-white group-hover:text-neon-cyan transition-colors">{item.name}</div>
+                                                <div className="text-[10px] font-mono text-white/50">{item.desc}</div>
+                                            </div>
+                                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-neon-cyan">
+                                                {item.type}
+                                            </span>
+                                        </button>
+                                    ))
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Interactive "How to Use" Guide Modal */}
+            <AnimatePresence>
+                {showHowToUseModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowHowToUseModal(false)}
+                        className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-[#0b0e18] border border-white/15 rounded-3xl max-w-3xl w-full max-h-[85vh] overflow-y-auto p-8 space-y-8 shadow-2xl"
+                        >
+                            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                                <div>
+                                    <h2 className="text-2xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">
+                                        How to Use Lorapok Player
+                                    </h2>
+                                    <p className="text-xs font-mono text-white/50">Complete user guide, shortcuts & ecosystem features</p>
+                                </div>
+                                <button onClick={() => setShowHowToUseModal(false)}>
+                                    <X className="w-6 h-6 text-white/40 hover:text-white" />
+                                </button>
+                            </div>
+
+                            {/* Section 1: Keyboard Shortcuts */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-mono font-bold text-neon-cyan uppercase tracking-wider flex items-center gap-2">
+                                    <Laptop className="w-4 h-4" /> 1. Desktop Keyboard Shortcuts
+                                </h3>
+                                <div className="grid sm:grid-cols-2 gap-3 text-xs font-mono">
+                                    {[
+                                        { key: "SPACE", action: "Play / Pause playback" },
+                                        { key: "← / →", action: "Seek backward / forward 10 seconds" },
+                                        { key: "↑ / ↓", action: "Increase / Decrease volume (10%)" },
+                                        { key: "M", action: "Mute / Unmute audio" },
+                                        { key: "F", action: "Toggle Fullscreen mode" },
+                                        { key: "A", action: "Cycle Aspect Ratio (16:9, 4:3, 21:9, Original)" },
+                                        { key: "[ / ]", action: "Set A-B Loop Start & End points" },
+                                        { key: "\\", action: "Clear active A-B Loop" },
+                                        { key: "{ / }", action: "Cycle playback speed (0.5x, 1x, 1.25x, 1.5x, 2x)" },
+                                        { key: "⌘K / Ctrl+K", action: "Open Instant File & Stream Search" },
+                                    ].map((s, i) => (
+                                        <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                            <span className="font-bold text-white bg-black/40 px-2 py-0.5 rounded border border-white/10">{s.key}</span>
+                                            <span className="text-white/60">{s.action}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Section 2: Mobile Gestures */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-mono font-bold text-green-400 uppercase tracking-wider flex items-center gap-2">
+                                    <Smartphone className="w-4 h-4" /> 2. Android Mobile Gestures & Android TV
+                                </h3>
+                                <div className="grid sm:grid-cols-3 gap-3 text-xs font-mono">
+                                    <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                                        <div className="font-bold text-green-300">Left Vertical Swipe</div>
+                                        <div className="text-white/50 text-[11px]">Adjust screen brightness (0.2x to 2.0x)</div>
+                                    </div>
+                                    <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                                        <div className="font-bold text-green-300">Right Vertical Swipe</div>
+                                        <div className="text-white/50 text-[11px]">Adjust audio volume with 150% boost</div>
+                                    </div>
+                                    <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                                        <div className="font-bold text-green-300">Double Tap & Remote</div>
+                                        <div className="text-white/50 text-[11px]">Double tap to seek 10s • Full D-Pad TV remote support</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section 3: Browser & IDE Extensions */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-mono font-bold text-electric-purple uppercase tracking-wider flex items-center gap-2">
+                                    <Compass className="w-4 h-4" /> 3. Browser Connector & VS Code Extension
+                                </h3>
+                                <p className="text-xs font-mono text-white/60 leading-relaxed">
+                                    Install the Firefox AMO (.xpi), Chrome (.zip), Edge (.zip), or VS Code (.vsix) extensions to sniff media streams on any webpage or preview video files directly in your IDE code editor with 1 click.
+                                </p>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Footer */}
             <footer className="border-t border-white/10 bg-[#020204] py-12 mt-20 text-center text-xs font-mono text-white/50 space-y-4">

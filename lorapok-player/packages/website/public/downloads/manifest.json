@@ -1,7 +1,7 @@
 {
   "version": "1.5.0",
   "releaseName": "Lorapok 1.5.0 Neural Release",
-  "updatedAt": "2026-08-18T12:07:37.757Z",
+  "updatedAt": "2026-08-18T13:37:34.336Z",
   "platforms": {
     "windows": {
       "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Windows-Setup-1.5.0.exe",
@@ -131,6 +131,13 @@
         "label": "Microsoft Edge (.zip)",
         "badge": "EDGE ADD-ONS",
         "desc": "Microsoft Edge Add-ons Store package"
+      },
+      "vscodeVsix": {
+        "url": "/downloads/lorapok-player-vscode-1.5.0.vsix",
+        "size": "21 KB",
+        "label": "VS Code Extension (.vsix)",
+        "badge": "IDE EXTENSION",
+        "desc": "Visual Studio Code Media Player & Stream Previewer"
       }
     }
   }

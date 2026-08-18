@@ -2134,9 +2134,13 @@ function App() {
                           }}
                           onTimeUpdate={handleTimeUpdate}
                           onLoadedMetadata={handleLoadedMetadata}
+                          onCanPlay={() => setIsBuffering(false)}
+                          onCanPlayThrough={() => setIsBuffering(false)}
+                          onLoadedData={() => setIsBuffering(false)}
+                          onPause={() => setIsBuffering(false)}
                           onEnded={() => { playlist.length > 1 ? playNext() : setIsPlaying(false) }}
-                          onWaiting={() => setIsBuffering(true)}
-                          onPlaying={() => setIsBuffering(false)}
+                          onWaiting={() => { if (isPlaying) setIsBuffering(true); }}
+                          onPlaying={() => { setIsBuffering(false); setIsPlaying(true); }}
                           onError={handleVideoError}
                           onDoubleClick={toggleFullscreen}
                           crossOrigin={filePath?.match(/^https?:\/\//) ? "anonymous" : undefined}
@@ -2145,7 +2149,7 @@ function App() {
                       )}
 
                     {/* Buffering Overlay */}
-                    {isBuffering && !codecError && (
+                    {isBuffering && isPlaying && !codecError && (
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

@@ -63,6 +63,60 @@ jobs:
             lorapok-player/release/builds/extensions/*.xpi
             lorapok-player/release/builds/extensions/*.zip
 
+  build-vscode-extension:
+    name: Build Visual Studio Code Extension (.vsix)
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Package VS Code Extension
+        working-directory: packages/vscode-lorapok
+        run: |
+          sudo apt-get update && sudo apt-get install -y zip
+          node build_extension.js
+
+      - name: Store VS Code Extension Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Binaries-VSCode
+          path: |
+            lorapok-player/release/builds/extensions/*.vsix
+
+  build-python-package:
+    name: Build Python PIP Package (Wheel & Sdist)
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Build Tools
+        run: pip install --upgrade setuptools wheel build
+
+      - name: Build Python Package
+        working-directory: packages/lorapok-python
+        run: python -m build
+
+      - name: Store Python Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Binaries-Python
+          path: |
+            packages/lorapok-python/dist/*.whl
+            packages/lorapok-python/dist/*.tar.gz
+
   build-desktop:
     name: Build Desktop (${{ matrix.os }})
     needs: quality-gate
@@ -120,83 +174,44 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install Dependencies
-        working-directory: lorapok-player
-        run: npm install
-
-      - name: Build Web Assets & Sync Capacitor
+      - name: Install Dependencies & Sync Android
         working-directory: lorapok-player
         run: |
+          npm install
           npm run build:only
           npx cap sync android
 
-      - name: Decode Keystore
-        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_B64 }}
-        run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -di > lorapok-player/android/app/lorapok-release.jks
-          echo "ANDROID_KEYSTORE_FILE=$(pwd)/lorapok-player/android/app/lorapok-release.jks" >> $GITHUB_ENV
-
-      - name: Set Signing Env
-        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_B64 }}
-        run: |
-          echo "ANDROID_KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
-          echo "ANDROID_KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
-          echo "ANDROID_KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
-
-      - name: Make gradlew executable
+      - name: Build Android Universal & Splits APK + Bundle
         working-directory: lorapok-player/android
-        run: chmod +x ./gradlew
-
-      - name: Build Release APK & AAB
-        working-directory: lorapok-player/android
-        run: ./gradlew assembleRelease bundleRelease
-
-      - name: Package Android Artifacts
-        working-directory: lorapok-player
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          mkdir -p release/builds/android
-          for apk in android/app/build/outputs/apk/release/*.apk; do
-            if [ -f "$apk" ]; then
-              base=$(basename "$apk")
-              cp "$apk" "release/builds/android/LorapokPlayer-v${VERSION}-${base}"
-            fi
-          done
-          AAB=$(find android/app/build/outputs/bundle/release -name "*.aab" | head -n1)
-          if [ -n "$AAB" ]; then
-            cp "$AAB" "release/builds/android/LorapokPlayer-v${VERSION}-release.aab"
-          fi
+          chmod +x gradlew
+          ./gradlew assembleRelease bundleRelease
 
       - name: Store Android Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Binaries-Android
+          name: Binaries-android
           path: |
-            lorapok-player/release/builds/android/*.apk
-            lorapok-player/release/builds/android/*.aab
+            lorapok-player/android/app/build/outputs/apk/release/*.apk
+            lorapok-player/android/app/build/outputs/bundle/release/*.aab
 
   release-rolling:
-    name: Update Rolling Release
-    needs: [build-desktop, build-android, build-extensions]
+    name: Aggregate & Publish Rolling Release
+    needs: [build-desktop, build-android, build-extensions, build-vscode-extension, build-python-package]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download all artifacts
+      - name: Download all built binaries
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-          merge-multiple: true
 
-      - name: List artifacts
-        run: find artifacts -type f | sort
+      - name: Display Downloaded Files
+        run: ls -R artifacts/
 
-      - name: Create/Update Release
+      - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
@@ -215,6 +230,8 @@ jobs:
             | 🤖 Android | Universal APK / ARM64 APK / Google Play AAB |
             | 🦊 Firefox AMO | `lorapok-extension-firefox-1.5.0.xpi` (Installable) / `.zip` |
             | 🌐 Chrome / Edge | `lorapok-extension-chrome-1.5.0.zip` / `lorapok-extension-edge-1.5.0.zip` |
+            | 💻 VS Code | `lorapok-player-vscode-1.5.0.vsix` Extension |
+            | 🐍 Python PIP | `lorapok-1.5.0-py3-none-any.whl` / `lorapok-1.5.0.tar.gz` |
             
             Website: https://media.lorapok.tech
           files: |
@@ -227,6 +244,9 @@ jobs:
             artifacts/**/*.apk
             artifacts/**/*.aab
             artifacts/**/*.xpi
+            artifacts/**/*.vsix
+            artifacts/**/*.whl
+            artifacts/**/*.tar.gz
           make_latest: ${{ github.ref_type == 'tag' && 'true' || 'false' }}
           prerelease: ${{ github.ref_type != 'tag' }}
         env:
@@ -245,6 +265,11 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install Dependencies
         working-directory: lorapok-player
         run: npm install
@@ -258,6 +283,16 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y zip
           node build_extensions.js
+
+      - name: Package VS Code Extension for Website
+        working-directory: packages/vscode-lorapok
+        run: node build_extension.js
+
+      - name: Package Python SDK for Website
+        working-directory: packages/lorapok-python
+        run: |
+          pip install --upgrade setuptools wheel
+          python setup.py sdist bdist_wheel
 
       - name: Generate Demos & Build Website
         working-directory: lorapok-player/packages/website
