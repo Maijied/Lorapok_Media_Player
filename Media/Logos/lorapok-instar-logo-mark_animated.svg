@@ -1,0 +1,199 @@
+<svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="instarCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F3FF">
+        <animate attributeName="stop-color" values="#00F3FF;#39FF14;#00F3FF" dur="5s" repeatCount="indefinite" />
+      </stop>
+      <stop offset="100%" stop-color="#BC13FE">
+        <animate attributeName="stop-color" values="#BC13FE;#00F3FF;#BC13FE" dur="5s" repeatCount="indefinite" />
+      </stop>
+    </linearGradient>
+
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a2f38" />
+      <stop offset="45%" stop-color="#1a1d24" />
+      <stop offset="100%" stop-color="#3d4450" />
+    </linearGradient>
+
+    <linearGradient id="panelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#39FF14" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#00F3FF" stop-opacity="0.55" />
+    </linearGradient>
+
+    <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="35%" stop-color="#39FF14" />
+      <stop offset="100%" stop-color="#00F3FF" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="ambientPulse" cx="50%" cy="55%" r="45%">
+      <stop offset="0%" stop-color="#00F3FF" stop-opacity="0.35" />
+      <stop offset="55%" stop-color="#BC13FE" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="neonBloom" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <style>
+    @keyframes spinCW {
+      from { transform: rotate(0deg); transform-origin: 256px 256px; }
+      to { transform: rotate(360deg); transform-origin: 256px 256px; }
+    }
+    @keyframes spinCCW {
+      from { transform: rotate(360deg); transform-origin: 256px 256px; }
+      to { transform: rotate(0deg); transform-origin: 256px 256px; }
+    }
+    @keyframes breathe {
+      0%, 100% { transform: scale(1) translateY(0); }
+      50% { transform: scale(1.03) translateY(-3px); }
+    }
+    @keyframes floatBracket {
+      0%, 100% { transform: translateY(0); opacity: 0.45; }
+      50% { transform: translateY(-8px); opacity: 0.9; }
+    }
+    @keyframes particleDrift {
+      0% { transform: translate(0, 0); opacity: 0.2; }
+      50% { transform: translate(6px, -10px); opacity: 0.85; }
+      100% { transform: translate(0, 0); opacity: 0.2; }
+    }
+    .ring-outer { animation: spinCW 24s linear infinite; }
+    .ring-inner { animation: spinCCW 14s linear infinite; }
+    .larva-body { animation: breathe 3.6s ease-in-out infinite; transform-origin: 256px 290px; }
+    .bracket-a { animation: floatBracket 4s ease-in-out infinite; }
+    .bracket-b { animation: floatBracket 4s ease-in-out infinite 2s; }
+    .particle-1 { animation: particleDrift 5s ease-in-out infinite; }
+    .particle-2 { animation: particleDrift 6s ease-in-out infinite 1.5s; }
+    .particle-3 { animation: particleDrift 4.5s ease-in-out infinite 0.8s; }
+  </style>
+
+  <!-- Ambient pulse (transparent canvas  no background rect) -->
+  <circle cx="256" cy="280" r="175" fill="url(#ambientPulse)">
+    <animate attributeName="r" values="165;185;165" dur="4s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.55;1;0.55" dur="4s" repeatCount="indefinite" />
+  </circle>
+
+  <!-- Orbital cyber rings -->
+  <circle class="ring-outer" cx="256" cy="256" r="210" stroke="url(#instarCyanGrad)" stroke-width="1.2" stroke-dasharray="10 22" opacity="0.4" />
+  <circle class="ring-inner" cx="256" cy="256" r="185" stroke="#00F3FF" stroke-width="0.8" stroke-dasharray="4 14" opacity="0.28" />
+
+  <!-- Hexagonal frame -->
+  <polygon
+    points="256,88 372,152 372,296 256,360 120,296 120,152"
+    stroke="url(#instarCyanGrad)"
+    stroke-width="2.5"
+    fill="none"
+    opacity="0.75"
+    filter="url(#softGlow)"
+  >
+    <animate attributeName="stroke-opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite" />
+  </polygon>
+
+  <!-- Floating code brackets -->
+  <g class="bracket-a" filter="url(#softGlow)">
+    <text x="108" y="148" fill="#00F3FF" font-family="monospace" font-size="28" font-weight="700" opacity="0.7">{</text>
+    <text x="138" y="148" fill="#BC13FE" font-family="monospace" font-size="28" font-weight="700" opacity="0.7">}</text>
+  </g>
+  <g class="bracket-b" filter="url(#softGlow)">
+    <text x="348" y="332" fill="#00F3FF" font-family="monospace" font-size="28" font-weight="700" opacity="0.7">{</text>
+    <text x="378" y="332" fill="#BC13FE" font-family="monospace" font-size="28" font-weight="700" opacity="0.7">}</text>
+  </g>
+
+  <!-- Data particles -->
+  <circle class="particle-1" cx="170" cy="210" r="2.5" fill="#00F3FF" />
+  <circle class="particle-2" cx="330" cy="240" r="2" fill="#39FF14" />
+  <circle class="particle-3" cx="290" cy="340" r="2.5" fill="#BC13FE" />
+
+  <!-- Cybernetic Instar larva -->
+  <g class="larva-body" filter="url(#neonBloom)">
+    <!-- Tail segment -->
+    <ellipse cx="340" cy="318" rx="38" ry="30" fill="url(#metalGrad)" />
+    <ellipse cx="340" cy="318" rx="28" ry="20" fill="url(#panelGrad)" opacity="0.65">
+      <animate attributeName="opacity" values="0.45;0.85;0.45" dur="2.2s" repeatCount="indefinite" />
+    </ellipse>
+    <circle cx="362" cy="318" r="10" fill="#00F3FF" opacity="0.9">
+      <animate attributeName="r" values="8;11;8" dur="2s" repeatCount="indefinite" />
+    </circle>
+
+    <!-- Mid segments -->
+    <ellipse cx="298" cy="302" rx="40" ry="32" fill="url(#metalGrad)" />
+    <ellipse cx="298" cy="302" rx="30" ry="22" fill="url(#panelGrad)" opacity="0.6">
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.4s" repeatCount="indefinite" />
+    </ellipse>
+    <!-- Internal gear -->
+    <g transform="translate(298,302)">
+      <circle r="9" fill="none" stroke="#39FF14" stroke-width="1.5" opacity="0.8">
+        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6s" repeatCount="indefinite" />
+      </circle>
+      <line x1="-7" y1="0" x2="7" y2="0" stroke="#00F3FF" stroke-width="1.2" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6s" repeatCount="indefinite" />
+      </line>
+      <line x1="0" y1="-7" x2="0" y2="7" stroke="#00F3FF" stroke-width="1.2" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6s" repeatCount="indefinite" />
+      </line>
+    </g>
+
+    <ellipse cx="252" cy="288" rx="42" ry="34" fill="url(#metalGrad)" />
+    <ellipse cx="252" cy="288" rx="32" ry="24" fill="url(#panelGrad)" opacity="0.55">
+      <animate attributeName="opacity" values="0.35;0.75;0.35" dur="2.6s" repeatCount="indefinite" />
+    </ellipse>
+
+    <ellipse cx="208" cy="268" rx="40" ry="32" fill="url(#metalGrad)" />
+    <ellipse cx="208" cy="268" rx="30" ry="22" fill="url(#panelGrad)" opacity="0.5">
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.8s" repeatCount="indefinite" />
+    </ellipse>
+
+    <!-- Robotic legs -->
+    <g stroke="#1a1d24" stroke-width="3" stroke-linecap="round">
+      <line x1="220" y1="310" x2="210" y2="328" />
+      <line x1="240" y1="318" x2="232" y2="338" />
+      <line x1="268" y1="320" x2="260" y2="340" />
+      <line x1="296" y1="322" x2="288" y2="342" />
+      <line x1="324" y1="328" x2="318" y2="348" />
+    </g>
+
+    <!-- Head -->
+    <ellipse cx="168" cy="228" rx="52" ry="44" fill="url(#metalGrad)" />
+    <ellipse cx="168" cy="228" rx="42" ry="34" fill="url(#panelGrad)" opacity="0.5">
+      <animate attributeName="opacity" values="0.35;0.7;0.35" dur="3s" repeatCount="indefinite" />
+    </ellipse>
+
+    <!-- Eyes -->
+    <circle cx="148" cy="218" r="18" fill="url(#eyeGlow)" filter="url(#softGlow)">
+      <animate attributeName="r" values="16;20;16" dur="2.5s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="188" cy="218" r="18" fill="url(#eyeGlow)" filter="url(#softGlow)">
+      <animate attributeName="r" values="16;20;16" dur="2.5s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="148" cy="218" r="8" fill="#FFFFFF" opacity="0.95" />
+    <circle cx="188" cy="218" r="8" fill="#FFFFFF" opacity="0.95" />
+    <circle cx="152" cy="214" r="3" fill="#FFFFFF" opacity="0.8" />
+    <circle cx="192" cy="214" r="3" fill="#FFFFFF" opacity="0.8" />
+
+    <!-- Antennae -->
+    <path d="M138 196 Q128 178 120 168" stroke="#3d4450" stroke-width="3" stroke-linecap="round" fill="none" />
+    <path d="M198 196 Q208 178 216 168" stroke="#3d4450" stroke-width="3" stroke-linecap="round" fill="none" />
+    <circle cx="120" cy="168" r="4" fill="#00F3FF" opacity="0.8">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="216" cy="168" r="4" fill="#39FF14" opacity="0.8">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite" />
+    </circle>
+  </g>
+
+  <!-- Instar version pulse dot -->
+  <circle cx="256" cy="380" r="4" fill="#BC13FE" filter="url(#softGlow)">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" />
+  </circle>
+</svg>

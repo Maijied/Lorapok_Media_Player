@@ -193,11 +193,21 @@ export const LorapokPlayer = forwardRef<LorapokPlayerRef, LorapokPlayerProps>(({
     const [currentSubtitleTrack, setCurrentSubtitleTrack] = useState(-1)
 
     const setupAudio = () => {
-        if (!videoRef.current || audioCtxRef.current) return
+        if (!videoRef.current) return
+
+        if (audioCtxRef.current) {
+            if (audioCtxRef.current.state === 'suspended') {
+                audioCtxRef.current.resume().catch(() => {})
+            }
+            return
+        }
 
         try {
             const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
             audioCtxRef.current = ctx
+            if (ctx.state === 'suspended') {
+                ctx.resume().catch(() => {})
+            }
 
             const source = ctx.createMediaElementSource(videoRef.current)
             sourceNodeRef.current = source
