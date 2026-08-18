@@ -287,7 +287,6 @@ jobs:
     name: Publish to NPM
     needs: quality-gate
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     continue-on-error: true
     steps:
       - name: Checkout
@@ -308,17 +307,51 @@ jobs:
         run: npm run build
 
       - name: Publish to NPM
-        if: env.NODE_AUTH_TOKEN != ''
         working-directory: ./lorapok-player/packages/lorapok-player
-        run: npm publish --access public
+        run: |
+          if [ -n "$NODE_AUTH_TOKEN" ]; then
+            echo "📦 Publishing lorapok-player to npmjs.org..."
+            npm publish --access public || echo "⚠️ NPM publish returned status code. (May already be published for this version)"
+          else
+            echo "⚠️ NPM_TOKEN secret not configured in repository. Skipping NPM publish step."
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-firefox-amo:
+    name: Publish to Mozilla Add-ons (AMO)
+    needs: build-extensions
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install web-ext
+        run: npm install -g web-ext
+
+      - name: Sign & Submit to AMO
+        run: |
+          if [ -n "$AMO_JWT_ISSUER" ] && [ -n "$AMO_JWT_SECRET" ]; then
+            echo "🦊 Submitting Firefox Extension to Mozilla Add-ons (AMO)..."
+            cd lorapok-extension
+            web-ext sign --api-key="$AMO_JWT_ISSUER" --api-secret="$AMO_JWT_SECRET" --source-dir=. --artifacts-dir=../amo-artifacts --channel=listed || echo "⚠️ AMO submission notice."
+          else
+            echo "ℹ️ AMO_JWT_ISSUER / AMO_JWT_SECRET not configured. The AMO-ready package 'lorapok-extension-firefox-1.5.0.xpi' has been packaged and published to GitHub Releases for manual or API upload."
+          fi
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER || secrets.AMO_API_KEY }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET || secrets.AMO_API_SECRET }}
 
   publish-snap:
     name: Publish to Snap Store
     needs: build-desktop
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     continue-on-error: true
     steps:
       - name: Checkout
@@ -330,17 +363,16 @@ jobs:
           name: Binaries-ubuntu-latest
           path: release
 
-      - name: Resolve Snap Package
-        id: snap_resolver
+      - name: Publish to Snap Store
         run: |
           SNAP_PATH=$(find release -name "*.snap" -type f | head -n 1)
-          echo "path=$SNAP_PATH" >> $GITHUB_OUTPUT
-
-      - name: Publish to Snap Store
-        if: env.SNAPCRAFT_STORE_CREDENTIALS != ''
-        uses: snapcore/action-publish@v1
+          if [ -n "$SNAP_PATH" ] && [ -n "$SNAPCRAFT_STORE_CREDENTIALS" ]; then
+            echo "📦 Publishing $SNAP_PATH to Snap Store..."
+            sudo snap install snapcraft --classic
+            snapcraft login --with <(echo "$SNAPCRAFT_STORE_CREDENTIALS")
+            snapcraft upload --release=stable "$SNAP_PATH"
+          else
+            echo "ℹ️ Snap package or SNAPCRAFT_STORE_CREDENTIALS secret not set. The Linux AppImage & Debian (.deb) packages are published to GitHub Releases."
+          fi
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-        with:
-          snap: ${{ steps.snap_resolver.outputs.path }}
-          release: stable
