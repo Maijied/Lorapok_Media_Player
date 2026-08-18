@@ -106,8 +106,8 @@ if (fs.existsSync(iconSrc)) {
 const releaseBuildDir = path.join(root, '../../lorapok-player/release/builds/extensions');
 if (!fs.existsSync(releaseBuildDir)) fs.mkdirSync(releaseBuildDir, { recursive: true });
 
-const vsixTarget = path.join(releaseBuildDir, 'lorapok-player-vscode-1.5.0.vsix');
-const vsixZip = path.join(releaseBuildDir, 'lorapok-player-vscode-1.5.0.zip');
+const vsixTarget = path.join(releaseBuildDir, 'lorapok-player-vscode-2.0.0.vsix');
+const vsixZip = path.join(releaseBuildDir, 'lorapok-player-vscode-2.0.0.zip');
 
 try {
     // Try npx @vscode/vsce package if available

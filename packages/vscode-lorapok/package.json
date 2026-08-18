@@ -2,7 +2,7 @@
     "name": "lorapok-vscode",
     "displayName": "Lorapok Media Player for VS Code",
     "description": "Hardware-accelerated media player, HLS/DASH stream previewer, and audio visualizer inside Visual Studio Code.",
-    "version": "1.5.0",
+    "version": "2.0.0",
     "publisher": "lorapok",
     "icon": "icon.png",
     "engines": {

@@ -38,11 +38,11 @@ interface Manifest {
     }
 }
 
-const GITHUB_RELEASE_BASE = "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0"
+const GITHUB_RELEASE_BASE = "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0"
 
 const DEFAULT_MANIFEST: Manifest = {
-    version: "1.5.0",
-    releaseName: "Lorapok 1.5.0 Neural Release",
+    version: "2.0.0",
+    releaseName: "Version \"Instar\" (v2.0 Instar) — Biological Metamorphosis Release",
     updatedAt: new Date().toISOString(),
     platforms: {
         windows: {
@@ -154,35 +154,35 @@ const DEFAULT_MANIFEST: Manifest = {
         },
         extensions: {
             firefoxXpi: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-1.5.0.xpi`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-2.0.0.xpi`,
                 size: "428 KB",
                 label: "Firefox Add-on (.xpi)",
                 badge: "AMO READY",
                 desc: "Mozilla Firefox Add-ons (AMO) installable package"
             },
             firefoxZip: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-1.5.0.zip`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-2.0.0.zip`,
                 size: "428 KB",
                 label: "Firefox Source (.zip)",
                 badge: "AMO ARCHIVE",
                 desc: "Firefox Developer Edition / AMO submission archive"
             },
             chromeZip: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-chrome-1.5.0.zip`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-chrome-2.0.0.zip`,
                 size: "428 KB",
                 label: "Google Chrome (.zip)",
                 badge: "CHROME MV3",
                 desc: "Chrome Web Store / Chromium unpacked extension"
             },
             edgeZip: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-edge-1.5.0.zip`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-edge-2.0.0.zip`,
                 size: "428 KB",
                 label: "Microsoft Edge (.zip)",
                 badge: "EDGE ADD-ONS",
                 desc: "Microsoft Edge Add-ons Store package"
             },
             vscodeVsix: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-player-vscode-1.5.0.vsix`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-player-vscode-2.0.0.vsix`,
                 size: "21 KB",
                 label: "VS Code Extension (.vsix)",
                 badge: "IDE EXTENSION",
@@ -511,8 +511,9 @@ export function App() {
                 
                 {/* Hero Section */}
                 <section className="text-center space-y-8 pt-8">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-neon-cyan text-xs font-mono uppercase tracking-widest backdrop-blur-md">
-                        <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Neural Computing & Sensory Media Engine
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-neon-cyan/15 to-electric-purple/15 border border-neon-cyan/30 text-neon-cyan text-xs font-mono uppercase tracking-widest backdrop-blur-md shadow-[0_0_20px_rgba(0,243,255,0.2)]">
+                        <Sparkles className="w-3.5 h-3.5 animate-pulse text-neon-cyan" />
+                        <span>VERSION 2.0 "INSTAR" • BIOLOGICAL METAMORPHOSIS ENGINE</span>
                     </div>
 
                     <h1 className="fluid-title font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400">
@@ -955,7 +956,7 @@ export function App() {
                                 </p>
                             </div>
                             <a
-                                href="/downloads/lorapok-extension-firefox-1.5.0.xpi"
+                                href={(manifest.platforms.extensions?.firefoxXpi as DownloadItem)?.url || `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-2.0.0.xpi`}
                                 download
                                 className="w-full py-2.5 px-3 rounded-xl bg-orange-500 hover:bg-white text-midnight font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-between shadow-[0_0_15px_rgba(249,115,22,0.3)]"
                             >
@@ -979,7 +980,7 @@ export function App() {
                                 </p>
                             </div>
                             <a
-                                href="/downloads/lorapok-extension-chrome-1.5.0.zip"
+                                href={(manifest.platforms.extensions?.chromeZip as DownloadItem)?.url || `${GITHUB_RELEASE_BASE}/lorapok-extension-chrome-2.0.0.zip`}
                                 download
                                 className="w-full py-2.5 px-3 rounded-xl bg-blue-500 hover:bg-white text-midnight font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-between shadow-[0_0_15px_rgba(59,130,246,0.3)]"
                             >
@@ -1003,7 +1004,7 @@ export function App() {
                                 </p>
                             </div>
                             <a
-                                href="/downloads/lorapok-extension-edge-1.5.0.zip"
+                                href={(manifest.platforms.extensions?.edgeZip as DownloadItem)?.url || `${GITHUB_RELEASE_BASE}/lorapok-extension-edge-2.0.0.zip`}
                                 download
                                 className="w-full py-2.5 px-3 rounded-xl bg-teal-500 hover:bg-white text-midnight font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-between shadow-[0_0_15px_rgba(20,184,166,0.3)]"
                             >
@@ -1027,7 +1028,7 @@ export function App() {
                                 </p>
                             </div>
                             <a
-                                href="/downloads/lorapok-player-vscode-1.5.0.vsix"
+                                href={(manifest.platforms.extensions?.vscodeVsix as DownloadItem)?.url || `${GITHUB_RELEASE_BASE}/lorapok-player-vscode-2.0.0.vsix`}
                                 download
                                 className="w-full py-2.5 px-3 rounded-xl bg-electric-purple hover:bg-white text-white hover:text-midnight font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-between shadow-[0_0_15px_rgba(188,19,254,0.3)]"
                             >
@@ -1162,7 +1163,7 @@ export function App() {
                                         Preview all media types (.mp4, .webm, .mkv, .m3u8, .flac, .mp3) directly inside Visual Studio Code with hardware acceleration.
                                     </p>
                                     <a
-                                        href="/downloads/lorapok-player-vscode-1.5.0.vsix"
+                                        href={(manifest.platforms.extensions?.vscodeVsix as DownloadItem)?.url || `${GITHUB_RELEASE_BASE}/lorapok-player-vscode-2.0.0.vsix`}
                                         download
                                         className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-electric-purple text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between gap-4 hover:bg-white hover:text-midnight transition-all shadow-[0_0_20px_rgba(188,19,254,0.3)]"
                                     >
@@ -1227,7 +1228,7 @@ export function App() {
                                     <div className="text-white/30 mb-2">// package.json</div>
                                     <div>{'{'}</div>
                                     <div className="pl-4"><span className="text-neon-cyan">"dependencies"</span>: {'{'}</div>
-                                    <div className="pl-8"><span className="text-green-400">"lorapok-player"</span>: <span className="text-orange-400">"^1.5.0"</span></div>
+                                    <div className="pl-8"><span className="text-green-400">"lorapok-player"</span>: <span className="text-orange-400">"^2.0.0"</span></div>
                                     <div className="pl-4">{'}'}</div>
                                     <div>{'}'}</div>
                                 </>
@@ -1555,6 +1556,8 @@ export function App() {
                     <a href="https://media.lorapok.tech" className="hover:text-neon-cyan">media.lorapok.tech</a>
                     <span>•</span>
                     <a href="https://lorapok.tech" target="_blank" rel="noopener noreferrer" className="hover:text-neon-cyan">lorapok.tech</a>
+                    <span>•</span>
+                    <a href="https://reddit.com/r/LorapokLabs" target="_blank" rel="noopener noreferrer" className="hover:text-neon-cyan text-orange-400 font-bold">r/LorapokLabs Collective</a>
                     <span>•</span>
                     <a href="https://snapcraft.io/lorapokmediaplayer" target="_blank" rel="noopener noreferrer" className="hover:text-neon-cyan">Snap Store</a>
                     <span>•</span>

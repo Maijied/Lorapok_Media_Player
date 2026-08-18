@@ -1,0 +1,53 @@
+<svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F3FF" />
+      <stop offset="100%" stop-color="#BC13FE" />
+    </linearGradient>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#030712" />
+      <stop offset="50%" stop-color="#080f26" />
+      <stop offset="100%" stop-color="#020308" />
+    </linearGradient>
+    <radialGradient id="glowGradiant" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00F3FF" stop-opacity="0.4" />
+      <stop offset="70%" stop-color="#BC13FE" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="512" height="512" rx="110" fill="url(#bgGradient)" />
+  <rect x="2" y="2" width="508" height="508" rx="108" stroke="url(#brandGradient)" stroke-width="3" stroke-opacity="0.3" />
+  
+  <!-- Subtle Ambient Glow -->
+  <circle cx="256" cy="256" r="210" fill="url(#glowGradiant)" />
+
+  <!-- Orbital Cyber Rings -->
+  <circle cx="256" cy="256" r="220" stroke="url(#brandGradient)" stroke-width="1.5" stroke-dasharray="14 28" opacity="0.25" />
+  <circle cx="256" cy="256" r="180" stroke="#00F3FF" stroke-width="1" stroke-dasharray="6 18" opacity="0.2" />
+
+  <!-- The "Instar Metamorphosis" Bio-Acoustic Spiral -->
+  <g transform="translate(45, 45) scale(0.82)" filter="url(#neonGlow)">
+    <circle cx="378" cy="382" r="65" fill="url(#brandGradient)" fill-opacity="1" />
+    <circle cx="311" cy="422" r="60" fill="url(#brandGradient)" fill-opacity="0.92" />
+    <circle cx="233" cy="430" r="55" fill="url(#brandGradient)" fill-opacity="0.84" />
+    <circle cx="160" cy="402" r="50" fill="url(#brandGradient)" fill-opacity="0.76" />
+    <circle cx="106" cy="346" r="45" fill="url(#brandGradient)" fill-opacity="0.68" />
+    <circle cx="82"  cy="272" r="40" fill="url(#brandGradient)" fill-opacity="0.60" />
+    <circle cx="92"  cy="195" r="35" fill="url(#brandGradient)" fill-opacity="0.52" />
+    <circle cx="135" cy="129" r="30" fill="url(#brandGradient)" fill-opacity="0.44" />
+    <circle cx="202" cy="89"  r="25" fill="url(#brandGradient)" fill-opacity="0.36" />
+    
+    <!-- Intelligence Spark Core -->
+    <circle cx="388" cy="372" r="15" fill="#00F3FF" />
+    <circle cx="388" cy="372" r="7" fill="#FFFFFF" />
+    
+    <!-- Central Play Vector Glyphs -->
+    <path d="M260 240 L245 255 L260 270 M300 240 L315 255 L300 270" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.9" transform="translate(97.5, 100.4) rotate(30)" />
+  </g>
+</svg>

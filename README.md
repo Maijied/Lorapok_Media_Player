@@ -1,14 +1,15 @@
 <div align="center">
 
-  <img src="Media/Logos/main_logo.png" alt="Lorapok Player Logo" width="180" height="180" />
+  <img src="Media/Logos/main_logo_animated.svg" alt="Lorapok Player Logo" width="180" height="180" />
 
   <h1 align="center" style="border-bottom: none;">LORAPOK PLAYER</h1>
-  <p align="center" style="font-weight: bold; color: #00F3FF; letter-spacing: 2px;">SUPERCOMPUTING SENSORY MEDIA ENGINE BY LORAPOK LABS</p>
+  <p align="center" style="font-weight: bold; color: #00F3FF; letter-spacing: 2px;">VERSION "INSTAR" (v2.0 INSTAR) — BIOLOGICAL SUPERCOMPUTING MEDIA ENGINE</p>
 
   <p align="center">
-    <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/tag/v1.5.0"><img src="https://img.shields.io/badge/VERSION-1.5.0-BC13FE?style=for-the-badge&labelColor=050510" alt="Version" /></a>
+    <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/tag/v2.0.0"><img src="https://img.shields.io/badge/VERSION-2.0.0_\"INSTAR\"-BC13FE?style=for-the-badge&labelColor=050510" alt="Version 2.0 Instar" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-LORAPOK_LABS_NON--COMMERCIAL-00F3FF?style=for-the-badge&labelColor=050510" alt="License" /></a>
     <a href="https://media.lorapok.tech"><img src="https://img.shields.io/badge/DOMAIN-MEDIA.LORAPOK.TECH-FFFFFF?style=for-the-badge&labelColor=050510" alt="Domain" /></a>
+    <a href="https://reddit.com/r/LorapokLabs"><img src="https://img.shields.io/badge/COMMUNITY-r%2FLorapokLabs_COLLECTIVE-FF4500?style=for-the-badge&labelColor=050510&logo=reddit" alt="Reddit Collective" /></a>
     <a href="https://github.com/Maijied/Lorapok_Media_Player/actions/workflows/workflow-unified.yml"><img src="https://img.shields.io/github/actions/workflow/status/Maijied/Lorapok_Media_Player/workflow-unified.yml?style=for-the-badge&labelColor=050510" alt="Build Status" /></a>
   </p>
 
@@ -18,9 +19,8 @@
     </a>
   </p>
 
-  <p align="center" style="max-width: 650px; margin: 20px auto; line-height: 1.6; opacity: 0.85;">
-    The next-generation sensory media engine blending <b>biological aesthetics</b> with <b>supercomputing neural performance</b>.
-    Engineered for ultra-low latency 8K video decoding, lossless audio equalization, and high-fidelity sensory experiences across Desktop, Android, and Web.
+  <p align="center" style="max-width: 680px; margin: 20px auto; line-height: 1.6; opacity: 0.85;">
+    <b>Version "Instar" (v2.0)</b> marks a major metamorphosis in the Lorapok ecosystem. Inspired by the distinct biological growth phases of <i>Hermetia illucens</i> (Black Soldier Fly) larvae between molts, this release represents an evolutionary leap into high-performance neural video decoding, lossless FFT audio visualizers, and organic ambient computing.
   </p>
 
   <div align="center" style="margin: 25px 0;">
@@ -28,8 +28,8 @@
       <img src="lorapok-player/assets/btn-demo.svg" width="240" alt="Launch Live Web App" />
     </a>
     &nbsp;&nbsp;
-    <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/tag/v1.5.0">
-      <img src="lorapok-player/assets/btn-download.svg" width="240" alt="Download Binaries" />
+    <a href="https://github.com/Maijied/Lorapok_Media_Player/releases/tag/v2.0.0">
+      <img src="lorapok-player/assets/btn-download.svg" width="240" alt="Download v2.0 Instar" />
     </a>
   </div>
 
@@ -44,6 +44,30 @@
   </div>
 
 </div>
+
+---
+
+## 🧬 BIOLOGICAL METAMORPHOSIS & VERSIONING ("INSTAR")
+
+The scientific classification of Black Soldier Fly (*Hermetia illucens*) larvae into **six distinct growth stages (Instars)** offers a foundational metaphor for software versioning and evolution across the Lorapok ecosystem:
+
+> *"In the Lorapok ecosystem, a product is never static or merely 'done'; it exists within an organic life cycle—advancing from its initial instar (alpha phase) to its prepupal stage (feature-complete resilience) and ultimately emerging into fully realized adult flight."*
+
+### 🌐 The r/LorapokLabs Collective
+The Lorapok Labs community is not just a user base but an active **co-developer collective**. The [r/LorapokLabs Collective](https://reddit.com/r/LorapokLabs) is governed by rules reflecting a professional, technical, and open engineering tone, steering future growth stages and sensory computing features.
+
+---
+
+## 🎨 MULTI-TARGET ECOSYSTEM LOGOS & ICONS
+
+Lorapok provides crisp, scalable visual assets across all file formats:
+
+| Asset Type | Formats Available | Primary Surface |
+|---|---|---|
+| **Master Logo** | `.svg` • `.png` (1024/512) • `.jpg` • animated `.svg` | Web, Marketing, GitHub |
+| **App & System Icon** | `.ico` (16-256px) • `.png` (192/128/64/32) • `.svg` | Windows (.exe), Linux Desktop, macOS |
+| **Extension & IDE Icon** | `.png` (128x128) • `.svg` | Firefox AMO, Chrome Web Store, VS Code |
+| **Animated Metamorphosis Logo** | `main_logo_animated.svg` • `icon_animated.svg` | Web App Header, Dynamic Splash Screens |
 
 ---
 
@@ -74,12 +98,12 @@ sudo snap install lorapokmediaplayer
 ### 2. 💻 Visual Studio Code Extension
 Search **"Lorapok"** in the VS Code Extensions Marketplace or install the `.vsix` package:
 ```bash
-code --install-extension lorapok-player-vscode-1.5.0.vsix
+code --install-extension lorapok-player-vscode-2.0.0.vsix
 ```
 
 ### 3. 🐍 Python Package (PyPI / CLI / Embed)
 ```bash
-pip install lorapok
+pip install lorapok==2.0.0
 ```
 ```python
 import lorapok
@@ -90,7 +114,7 @@ lorapok.play("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8")
 
 ### 4. 🐘 PHP Composer
 ```bash
-composer require lorapok/player
+composer require lorapok/player:^2.0.0
 ```
 ```php
 use Lorapok\LorapokPlayer;
@@ -103,9 +127,9 @@ echo LorapokPlayer::render([
 
 ### 5. 📦 NPM / Yarn React Library
 ```bash
-npm install lorapok-player
+npm install lorapok-player@2.0.0
 # or
-yarn add lorapok-player
+yarn add lorapok-player@2.0.0
 ```
 ```tsx
 import { LorapokPlayer } from 'lorapok-player'
@@ -117,8 +141,8 @@ export default function App() {
 ```
 
 ### 6. 🦊 Firefox AMO & Chromium Browser Extensions
-- **Firefox Add-on**: Download `lorapok-extension-firefox-1.5.0.xpi` for 1-click installation.
-- **Chrome / Edge**: Load unpacked `lorapok-extension-chrome-1.5.0.zip` via `chrome://extensions`.
+- **Firefox Add-on**: Download `lorapok-extension-firefox-2.0.0.xpi` for 1-click installation.
+- **Chrome / Edge**: Load unpacked `lorapok-extension-chrome-2.0.0.zip` via `chrome://extensions`.
 
 ---
 

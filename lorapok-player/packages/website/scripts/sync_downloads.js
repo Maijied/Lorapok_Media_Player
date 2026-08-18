@@ -9,11 +9,11 @@ const downloadsDir = path.resolve(__dirname, '../public/downloads');
 
 fs.mkdirSync(downloadsDir, { recursive: true });
 
-const GITHUB_RELEASE_BASE = "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0";
+const GITHUB_RELEASE_BASE = "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0";
 
 const manifest = {
-    version: "1.5.0",
-    releaseName: "Lorapok 1.5.0 Neural Release",
+    version: "2.0.0",
+    releaseName: "Lorapok 2.0.0 Neural Release",
     updatedAt: new Date().toISOString(),
     platforms: {
         windows: {
@@ -125,35 +125,35 @@ const manifest = {
         },
         extensions: {
             firefoxXpi: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-1.5.0.xpi`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-2.0.0.xpi`,
                 size: "428 KB",
                 label: "Firefox Add-on (.xpi)",
                 badge: "AMO READY",
                 desc: "Mozilla Firefox Add-ons (AMO) installable package"
             },
             firefoxZip: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-1.5.0.zip`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-2.0.0.zip`,
                 size: "428 KB",
                 label: "Firefox Source (.zip)",
                 badge: "AMO ARCHIVE",
                 desc: "Firefox Developer Edition / AMO submission archive"
             },
             chromeZip: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-chrome-1.5.0.zip`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-chrome-2.0.0.zip`,
                 size: "428 KB",
                 label: "Google Chrome (.zip)",
                 badge: "CHROME MV3",
                 desc: "Chrome Web Store / Chromium unpacked extension"
             },
             edgeZip: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-edge-1.5.0.zip`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-extension-edge-2.0.0.zip`,
                 size: "428 KB",
                 label: "Microsoft Edge (.zip)",
                 badge: "EDGE ADD-ONS",
                 desc: "Microsoft Edge Add-ons Store package"
             },
             vscodeVsix: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-player-vscode-1.5.0.vsix`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-player-vscode-2.0.0.vsix`,
                 size: "21 KB",
                 label: "VS Code Extension (.vsix)",
                 badge: "IDE EXTENSION",
@@ -162,14 +162,14 @@ const manifest = {
         },
         packages: {
             pythonWhl: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-1.5.0-py3-none-any.whl`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-2.0.0-py3-none-any.whl`,
                 size: "4.5 KB",
                 label: "Python Wheel (.whl)",
                 badge: "PIP",
                 desc: "Install via pip install lorapok"
             },
             pythonSdist: {
-                url: `${GITHUB_RELEASE_BASE}/lorapok-1.5.0.tar.gz`,
+                url: `${GITHUB_RELEASE_BASE}/lorapok-2.0.0.tar.gz`,
                 size: "4.2 KB",
                 label: "Python Source (.tar.gz)",
                 badge: "SDIST",

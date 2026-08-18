@@ -11,9 +11,9 @@ Preview and stream all modern media formats directly inside Visual Studio Code w
 
 ## Installation
 
-1. Download `lorapok-player-vscode-1.5.0.vsix` from [media.lorapok.tech](https://media.lorapok.tech) or GitHub Releases.
+1. Download `lorapok-player-vscode-2.0.0.vsix` from [media.lorapok.tech](https://media.lorapok.tech) or GitHub Releases.
 2. In VS Code, press `Ctrl+Shift+P` (or `Cmd+Shift+P`) and choose **Extensions: Install from VSIX...**
-3. Select `lorapok-player-vscode-1.5.0.vsix`.
+3. Select `lorapok-player-vscode-2.0.0.vsix`.
 
 ## License
 MIT License • Lorapok Labs (https://media.lorapok.tech)

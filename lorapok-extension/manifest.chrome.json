@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Lorapok Connector - Media Stream Sniffer & Player",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "Seamlessly sniff and stream video & audio from any webpage directly into Lorapok Media Player or Web Player.",
   "author": "Mohammad Maizied Hasan Majumder",
   "homepage_url": "https://media.lorapok.tech",

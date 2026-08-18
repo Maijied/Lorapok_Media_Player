@@ -46,11 +46,11 @@ function packageExtension(manifestSource, outputFilename) {
 function buildAll() {
   console.log('🚀 Building Browser Extensions for All Browsers (Chrome, Firefox AMO, Edge)...');
   try {
-    packageExtension('manifest.chrome.json', 'lorapok-extension-chrome-1.5.0.zip');
-    packageExtension('manifest.chrome.json', 'lorapok-extension-edge-1.5.0.zip');
-    packageExtension('manifest.firefox.json', 'lorapok-extension-firefox-1.5.0.xpi');
-    packageExtension('manifest.firefox.json', 'lorapok-extension-firefox-1.5.0.zip');
-    packageExtension('manifest.chrome.json', 'lorapok-extension-1.5.0.zip');
+    packageExtension('manifest.chrome.json', 'lorapok-extension-chrome-2.0.0.zip');
+    packageExtension('manifest.chrome.json', 'lorapok-extension-edge-2.0.0.zip');
+    packageExtension('manifest.firefox.json', 'lorapok-extension-firefox-2.0.0.xpi');
+    packageExtension('manifest.firefox.json', 'lorapok-extension-firefox-2.0.0.zip');
+    packageExtension('manifest.chrome.json', 'lorapok-extension-2.0.0.zip');
     console.log('🎉 All Browser Extension Packages Created Successfully!');
   } catch (err) {
     console.error('❌ Error packaging extensions:', err);

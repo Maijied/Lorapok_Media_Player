@@ -1,6 +1,6 @@
 name: lorapokmediaplayer
 base: core22
-version: '1.5.0'
+version: '2.0.0'
 summary: Next-Gen Sensory Neural Supercomputing Media Player
 description: |
   Lorapok Media Player is an ultra-high performance, hardware-accelerated media engine 
@@ -45,7 +45,7 @@ parts:
   lorapok-player:
     plugin: npm
     source: lorapok-player
-    npm-node-version: '20.18.0'
+    npm-node-version: '2.0.0'
     build-packages:
       - libasound2-dev
       - libpulse-dev

@@ -1,20 +1,20 @@
 {
-  "version": "1.5.0",
-  "releaseName": "Lorapok 1.5.0 Neural Release",
-  "updatedAt": "2026-08-18T15:29:56.434Z",
+  "version": "2.0.0",
+  "releaseName": "Lorapok 2.0.0 Neural Release",
+  "updatedAt": "2026-08-18T16:37:36.339Z",
   "platforms": {
     "windows": {
-      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Windows-Setup.exe",
+      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer-Windows-Setup.exe",
       "size": "78 MB",
       "installer": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Windows-Setup.exe",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer-Windows-Setup.exe",
         "size": "78 MB",
         "label": "Windows Installer (.exe)",
         "badge": "INSTALLABLE",
         "desc": "Complete installer for Windows 10 & 11 (64-bit)"
       },
       "portable": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer.exe",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer.exe",
         "size": "68 MB",
         "label": "Windows Standalone (.exe)",
         "badge": "PORTABLE",
@@ -22,17 +22,17 @@
       }
     },
     "linux": {
-      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Linux.AppImage",
+      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer-Linux.AppImage",
       "size": "108 MB",
       "portable": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Linux.AppImage",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer-Linux.AppImage",
         "size": "108 MB",
         "label": "Linux AppImage",
         "badge": "PORTABLE",
         "desc": "Self-contained universal executable for all Linux distributions"
       },
       "deb": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Linux.deb",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer-Linux.deb",
         "size": "70 MB",
         "label": "Debian / Ubuntu (.deb)",
         "badge": "INSTALLABLE",
@@ -47,24 +47,24 @@
       }
     },
     "macos": {
-      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Mac-Installer.dmg",
+      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer-Mac-Installer.dmg",
       "size": "96 MB",
       "dmgArm": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Mac-Installer.dmg",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer-Mac-Installer.dmg",
         "size": "96 MB",
         "label": "macOS Apple Silicon (.dmg)",
         "badge": "INSTALLABLE",
         "desc": "Optimized for Apple M1, M2, M3, M4 Macs"
       },
       "dmgIntel": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Mac-Installer.dmg",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer-Mac-Installer.dmg",
         "size": "96 MB",
         "label": "macOS Intel (.dmg)",
         "badge": "INSTALLABLE",
         "desc": "For Intel-based Mac systems"
       },
       "zipPortable": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/LorapokMediaPlayer-Mac-Installer.zip",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/LorapokMediaPlayer-Mac-Installer.zip",
         "size": "97 MB",
         "label": "macOS Portable (.zip)",
         "badge": "PORTABLE",
@@ -72,38 +72,38 @@
       }
     },
     "android": {
-      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/app-universal-release.apk",
+      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-universal-release.apk",
       "size": "2.8 MB",
       "universal": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/app-universal-release.apk",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-universal-release.apk",
         "size": "2.8 MB",
         "label": "Universal APK",
         "badge": "INSTALLABLE",
         "desc": "Compatible with all Android phones, tablets & TV"
       },
       "arm64": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/app-arm64-v8a-release.apk",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-arm64-v8a-release.apk",
         "size": "2.8 MB",
         "label": "ARM64-v8a APK",
         "badge": "INSTALLABLE",
         "desc": "Native 64-bit performance for modern Android flagships"
       },
       "armv7": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/app-armeabi-v7a-release.apk",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-armeabi-v7a-release.apk",
         "size": "2.8 MB",
         "label": "ARMv7 APK",
         "badge": "INSTALLABLE",
         "desc": "For legacy Android devices & TV sticks"
       },
       "x86_64": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/app-x86_64-release.apk",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-x86_64-release.apk",
         "size": "2.8 MB",
         "label": "x86_64 APK",
         "badge": "INSTALLABLE",
         "desc": "For Android emulators and ChromeOS"
       },
       "aab": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/app-release.aab",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/app-release.aab",
         "size": "3.3 MB",
         "label": "Google Play Bundle (.aab)",
         "badge": "STORE BUNDLE",
@@ -112,35 +112,35 @@
     },
     "extensions": {
       "firefoxXpi": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/lorapok-extension-firefox-1.5.0.xpi",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/lorapok-extension-firefox-2.0.0.xpi",
         "size": "428 KB",
         "label": "Firefox Add-on (.xpi)",
         "badge": "AMO READY",
         "desc": "Mozilla Firefox Add-ons (AMO) installable package"
       },
       "firefoxZip": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/lorapok-extension-firefox-1.5.0.zip",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/lorapok-extension-firefox-2.0.0.zip",
         "size": "428 KB",
         "label": "Firefox Source (.zip)",
         "badge": "AMO ARCHIVE",
         "desc": "Firefox Developer Edition / AMO submission archive"
       },
       "chromeZip": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/lorapok-extension-chrome-1.5.0.zip",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/lorapok-extension-chrome-2.0.0.zip",
         "size": "428 KB",
         "label": "Google Chrome (.zip)",
         "badge": "CHROME MV3",
         "desc": "Chrome Web Store / Chromium unpacked extension"
       },
       "edgeZip": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/lorapok-extension-edge-1.5.0.zip",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/lorapok-extension-edge-2.0.0.zip",
         "size": "428 KB",
         "label": "Microsoft Edge (.zip)",
         "badge": "EDGE ADD-ONS",
         "desc": "Microsoft Edge Add-ons Store package"
       },
       "vscodeVsix": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/lorapok-player-vscode-1.5.0.vsix",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/lorapok-player-vscode-2.0.0.vsix",
         "size": "21 KB",
         "label": "VS Code Extension (.vsix)",
         "badge": "IDE EXTENSION",
@@ -149,14 +149,14 @@
     },
     "packages": {
       "pythonWhl": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/lorapok-1.5.0-py3-none-any.whl",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/lorapok-2.0.0-py3-none-any.whl",
         "size": "4.5 KB",
         "label": "Python Wheel (.whl)",
         "badge": "PIP",
         "desc": "Install via pip install lorapok"
       },
       "pythonSdist": {
-        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v1.5.0/lorapok-1.5.0.tar.gz",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/v2.0.0/lorapok-2.0.0.tar.gz",
         "size": "4.2 KB",
         "label": "Python Source (.tar.gz)",
         "badge": "SDIST",

@@ -9,7 +9,7 @@ from .player import play, inspect_media, create_playlist
 from .server import MediaStreamServer
 
 @click.group()
-@click.version_option(version="1.5.0", prog_name="lorapok")
+@click.version_option(version="2.0.0", prog_name="lorapok")
 def main():
     """Lorapok Media Engine & Universal Streaming CLI"""
     pass

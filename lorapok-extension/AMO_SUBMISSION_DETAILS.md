@@ -12,7 +12,7 @@ This document contains **all official metadata, descriptions, permissions justif
 - **Gecko ID**: `lorapok-connector@media.lorapok.tech`
 - **Supported Application**: Firefox Desktop (`109.0` to `*`), Firefox for Android
 - **Category**: `Photos, Music & Videos` / `Feeds, News & Blogging`
-- **Version**: `1.5.0`
+- **Version**: `2.0.0`
 - **License**: `MIT License`
 - **Support Email**: `lorapokdev@gmail.com`
 - **Support Website**: `https://media.lorapok.tech`
@@ -50,7 +50,7 @@ https://media.lorapok.tech
 
 ### Source Code Submission (AMO)
 - **Do you use a bundler or minifier?**: `No` (Pure standard ES6 JavaScript and HTML/CSS).
-- **Archive to Upload**: `lorapok-extension/release/builds/extensions/lorapok-extension-firefox-1.5.0.xpi` (or `.zip`).
+- **Archive to Upload**: `lorapok-extension/release/builds/extensions/lorapok-extension-firefox-2.0.0.xpi` (or `.zip`).
 
 ---
 
@@ -61,7 +61,7 @@ https://media.lorapok.tech
 - **Short Description**: `Sniff and stream videos, HLS, DASH, and audio directly to Lorapok Media Player and Web Player.`
 - **Primary Category**: `Productivity` / `Accessibility` / `Multimedia`
 - **Visibility**: `Public`
-- **Package Archive**: `lorapok-extension-chrome-1.5.0.zip`
+- **Package Archive**: `lorapok-extension-chrome-2.0.0.zip`
 
 ### Privacy Policy Declaration
 - **Single Purpose**: To allow users to detect video/audio streams on web pages and forward them to the local or web-based Lorapok Media Player.
@@ -75,13 +75,13 @@ https://media.lorapok.tech
 ### For Mozilla AMO:
 1. Navigate to: [https://addons.mozilla.org/developers/addon/submit/upload-listed](https://addons.mozilla.org/developers/addon/submit/upload-listed)
 2. Sign in with your Mozilla developer account.
-3. Upload `lorapok-extension/release/builds/extensions/lorapok-extension-firefox-1.5.0.xpi`.
+3. Upload `lorapok-extension/release/builds/extensions/lorapok-extension-firefox-2.0.0.xpi`.
 4. Paste the **Gecko ID**, **Summary**, and **Full Description** from above.
 5. Provide the **Permissions Justification** text.
 6. Submit for automated validation and review!
 
 ### For Chrome Web Store:
 1. Navigate to: [https://chrome.google.com/webstore/devconsole/](https://chrome.google.com/webstore/devconsole/)
-2. Click **New Item** and upload `lorapok-extension/release/builds/extensions/lorapok-extension-chrome-1.5.0.zip`.
+2. Click **New Item** and upload `lorapok-extension/release/builds/extensions/lorapok-extension-chrome-2.0.0.zip`.
 3. Fill in the listing details, 128x128 icon, and store description.
 4. Submit for review.

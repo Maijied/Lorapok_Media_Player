@@ -2,7 +2,7 @@
     "name": "lorapok/player",
     "description": "Lorapok Neural Media Engine & Web Player Integration for PHP / Laravel / Symfony",
     "type": "library",
-    "license": "MIT",
+    "license": "Proprietary",
     "authors": [
         {
             "name": "Mohammad Maizied Hasan Majumder",
