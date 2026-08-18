@@ -49,4 +49,9 @@ test_media/
 Media/*.zip
 *.zip
 *.log
+debug.log
+dev.log
 build_execution.log
+__pycache__/
+*.pyc
+*.pyo

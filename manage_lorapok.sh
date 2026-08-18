@@ -189,9 +189,9 @@ function test_features() {
         
         # MPEG-DASH (MPD) Streams
         ["DASH • BBB 30fps"]="https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"
-        ["DASH • Qualcomm MultiRes"]="https://dash.akamaized.net/dash264/TestCases/2c/qualcomm/1/MultiRes.mpd"
+        ["DASH • Envivio MultiRate"]="https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd"
         ["DASH • Tears of Steel Cleartext"]="https://www.bok.net/dash/tears_of_steel/cleartext/stream.mpd"
-        ["DASH • Qualcomm MultiRate"]="http://dash.akamaized.net/dash264/TestCases/1a/qualcomm/1/MultiRate.mpd"
+        ["DASH • Qualcomm MultiRate"]="https://dash.akamaized.net/dash264/TestCases/1a/qualcomm/1/MultiRate.mpd"
     )
 
     for name in "${!stream_urls[@]}"; do

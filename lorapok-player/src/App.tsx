@@ -1,11 +1,17 @@
-import { useState, useRef, useEffect, useCallback, memo } from 'react'
+import { useState, useRef, useEffect, useCallback, memo, forwardRef } from 'react'
 import { Play, Pause, SkipForward, SkipBack, Maximize2, Minimize2, FolderOpen, X, Minus, Square, Info, List, Plus, Trash2, Volume2, VolumeX, Globe, Ghost, Edit, Settings, Sliders, Menu, Film, FileVideo, Music, Image as ImageIcon, Monitor, Mic, Radio, Scissors, AudioLines, Download } from 'lucide-react'
 import Hls from 'hls.js'
 import { MediaPlayer } from 'dashjs'
-import { motion, AnimatePresence } from 'framer-motion'
 import { MediaSession } from '@capgo/capacitor-media-session'
 import { WidgetBridgePlugin } from 'capacitor-widget-bridge'
 import { AudioLibrary } from './components/AudioLibrary'
+
+const motion = {
+  div: forwardRef<HTMLDivElement, any>(({ initial, animate, exit, transition, whileHover, whileTap, layout, ...props }, ref) => <div ref={ref} {...props} />),
+  footer: forwardRef<HTMLElement, any>(({ initial, animate, exit, transition, whileHover, whileTap, layout, ...props }, ref) => <footer ref={ref} {...props} />),
+  h2: forwardRef<HTMLHeadingElement, any>(({ initial, animate, exit, transition, whileHover, whileTap, layout, ...props }, ref) => <h2 ref={ref} {...props} />),
+}
+const AnimatePresence = ({ children }: { children?: React.ReactNode; [key: string]: any }) => <>{children}</>
 
 interface Track {
   index: number

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Disc3, FolderSearch, Music, AudioLines } from 'lucide-react';
 import { useDeviceScanner } from '../hooks/useDeviceScanner';
 import { Capacitor } from '@capacitor/core';
@@ -29,17 +28,12 @@ export function AudioLibrary({ onClose, onPlay }: AudioLibraryProps) {
   };
 
   const handleScanClick = () => {
-    // If desktop, prompt for directory (we default to empty to let main process use Music folder,
-    // or we could show a dialog in the future).
     startScan();
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 50 }}
-      className="absolute inset-0 z-[200] bg-midnight/95 backdrop-blur-2xl flex flex-col font-inter"
+    <div
+      className="absolute inset-0 z-[200] bg-midnight/95 backdrop-blur-2xl flex flex-col font-inter transition-all duration-300 animate-fadeIn"
     >
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-white/10 bg-black/20">
@@ -110,46 +104,38 @@ export function AudioLibrary({ onClose, onPlay }: AudioLibraryProps) {
           </div>
         )}
 
-        <motion.div
-          layout
+        <div
           className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
         >
-          <AnimatePresence>
-            {filteredFiles.map((file, i) => (
-              <motion.div
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ delay: Math.min(i * 0.05, 0.5) }}
-                key={file.path}
-                onClick={() => onPlay(file.path)}
-                className="group relative bg-white/5 hover:bg-white/10 border border-white/5 hover:border-neon-cyan/50 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,243,255,0.15)] flex items-center gap-4"
-              >
-                <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getGradient(file.name)} flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden relative`}>
-                  <Music className="w-8 h-8 text-white/50" />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-white font-bold truncate group-hover:text-neon-cyan transition-colors">
-                    {file.name.replace(file.extension, '')}
-                  </h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/10 text-white/60 tracking-wider">
-                      {file.extension.toUpperCase().replace('.', '')}
+          {filteredFiles.map((file) => (
+            <div
+              key={file.path}
+              onClick={() => onPlay(file.path)}
+              className="group relative bg-white/5 hover:bg-white/10 border border-white/5 hover:border-neon-cyan/50 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,243,255,0.15)] flex items-center gap-4"
+            >
+              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getGradient(file.name)} flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden relative`}>
+                <Music className="w-8 h-8 text-white/50" />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-white font-bold truncate group-hover:text-neon-cyan transition-colors">
+                  {file.name.replace(file.extension, '')}
+                </h4>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/10 text-white/60 tracking-wider">
+                    {file.extension.toUpperCase().replace('.', '')}
+                  </span>
+                  {file.size && (
+                    <span className="text-[10px] font-mono text-white/30 truncate">
+                      {(file.size / 1024 / 1024).toFixed(1)} MB
                     </span>
-                    {file.size && (
-                      <span className="text-[10px] font-mono text-white/30 truncate">
-                        {(file.size / 1024 / 1024).toFixed(1)} MB
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
