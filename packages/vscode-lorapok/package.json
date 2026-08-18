@@ -65,7 +65,7 @@
         ]
     },
     "scripts": {
-        "vscode:prepublish": "npm run build",
+        "vscode:prepublish": "node -e \"console.log('prep')\"",
         "build": "node build_extension.js",
         "package:vsix": "node build_extension.js"
     },
