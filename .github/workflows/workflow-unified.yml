@@ -140,8 +140,6 @@ jobs:
       - name: Build Electron App
         working-directory: lorapok-player
         run: npm run build
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Store Binaries
         uses: actions/upload-artifact@v4

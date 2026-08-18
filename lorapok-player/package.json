@@ -35,7 +35,7 @@
     "dev": "vite",
     "dev:linux": "ELECTRON_DISABLE_SANDBOX=1 vite",
     "dev:electron": "vite build && electron . --no-sandbox",
-    "build": "tsc && vite build && electron-builder",
+    "build": "tsc && vite build && electron-builder --publish never",
     "build:only": "tsc && vite build",
     "test": "vitest run",
     "test:ui": "vitest --ui",
