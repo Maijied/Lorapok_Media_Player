@@ -202,6 +202,14 @@ interface PlaylistItem {
 
 const INITIAL_MEDIA_PRESETS: PlaylistItem[] = [
     {
+        id: 'lorapok-documentary-1080p',
+        name: 'Lorapok Labs Project Documentary',
+        category: 'Documentary',
+        type: 'MP4 (1080p Master)',
+        url: '/lorapok_documentary.mp4',
+        desc: 'Official 60FPS Documentary: Spidernet Swarm, Biological Metamorphosis & Supercomputing Engine'
+    },
+    {
         id: 'mp4-neon',
         name: 'Neon Waves 1080p',
         category: 'Video',
@@ -410,6 +418,36 @@ export function App() {
             const track = playlist[index]
             setDemoUrl(track.url)
             playerRef.current?.load(track.url)
+            setTimeout(() => {
+                playerRef.current?.play()
+            }, 60)
+        }
+    }
+
+    const playTrackUrl = (url: string, name?: string, type?: string, desc?: string) => {
+        const existingIdx = playlist.findIndex(p => p.url === url)
+        if (existingIdx !== -1) {
+            selectTrack(existingIdx)
+        } else {
+            const newTrack: PlaylistItem = {
+                id: `track-${Date.now()}`,
+                name: name || url.split('/').pop()?.split('?')[0] || 'Media Stream',
+                category: type?.includes('Documentary') ? 'Documentary' : (url.includes('.mp3') || url.includes('.flac') || url.includes('.wav') || url.includes('.ogg') ? 'Audio' : 'Video'),
+                type: type || (url.includes('.m3u8') ? 'HLS' : (url.includes('.mpd') ? 'DASH' : 'Direct Media')),
+                url: url,
+                desc: desc || 'Lorapok Ecosystem Stream'
+            }
+            setPlaylist(prev => [newTrack, ...prev])
+            setCurrentTrackIndex(0)
+            setDemoUrl(url)
+            playerRef.current?.load(url)
+            setTimeout(() => {
+                playerRef.current?.play()
+            }, 60)
+        }
+        const mediaElem = document.getElementById('medialab')
+        if (mediaElem) {
+            mediaElem.scrollIntoView({ behavior: 'smooth' })
         }
     }
 
@@ -467,7 +505,7 @@ export function App() {
         setTimeout(() => setCopiedSnippet(false), 2000)
     }
 
-    const categories = ['All', 'Video', 'Adaptive Stream', 'Lossless Audio', 'Audio', 'Live Broadcast']
+    const categories = ['All', 'Documentary', 'Video', 'Adaptive Stream', 'Lossless Audio', 'Audio', 'Live Broadcast']
     const filteredPresets = selectedCategory === 'All' 
         ? playlist 
         : playlist.filter(p => p.category === selectedCategory)
@@ -495,8 +533,8 @@ export function App() {
                     {/* Logo Branding */}
                     <a href="#" className="flex items-center gap-3 group">
                         <div className="relative">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-neon-cyan to-electric-purple rounded-xl blur-sm opacity-50 group-hover:opacity-100 transition duration-300" />
-                            <div className="relative w-9 h-9 rounded-xl bg-midnight border border-white/20 flex items-center justify-center p-1.5 shadow-lg">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-neon-cyan to-electric-purple rounded-xl blur opacity-40 group-hover:opacity-100 transition duration-500" />
+                            <div className="relative w-8 h-8 rounded-lg bg-midnight p-1 border border-white/10 flex items-center justify-center">
                                 <Logo className="w-full h-full text-neon-cyan" />
                             </div>
                         </div>
@@ -515,6 +553,10 @@ export function App() {
 
                     {/* Desktop Navigation Links */}
                     <nav className="hidden md:flex items-center gap-6 text-xs font-mono tracking-wider text-white/70">
+                        <a href="#documentary" className="hover:text-neon-cyan transition-colors flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse" />
+                            <span>Documentary</span>
+                        </a>
                         <a href="#medialab" className="hover:text-neon-cyan transition-colors">Media Lab</a>
                         <a href="#downloads" className="hover:text-neon-cyan transition-colors">Downloads</a>
                         <a href="#extensions" className="hover:text-neon-cyan transition-colors">Extensions</a>
@@ -598,6 +640,142 @@ export function App() {
                             <span>All Binaries</span>
                             <ChevronDown className="w-4 h-4" />
                         </a>
+                    </div>
+                </section>
+
+                {/* Lorapok Lab Documentary & Project Chronicle Section */}
+                <section id="documentary" className="scroll-mt-28 flex flex-col gap-10">
+                    <div className="text-center space-y-3">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan text-xs font-mono uppercase tracking-widest">
+                            <Film className="w-4 h-4 text-neon-cyan animate-pulse" /> Official Project Documentary & Lab Space Chronicle
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight">
+                            The Lorapok Lab Ecosystem
+                        </h2>
+                        <p className="text-white/60 font-mono text-sm max-w-2xl mx-auto">
+                            A deep dive documentary into our organic sensory intelligence research, autonomous 108-agent Spidernet swarm, and supercomputing media engine.
+                        </p>
+                    </div>
+
+                    {/* Master Documentary Banner Card */}
+                    <div className="relative rounded-3xl overflow-hidden border border-neon-cyan/40 bg-gradient-to-br from-midnight via-black/80 to-electric-purple/20 p-6 md:p-10 shadow-[0_0_60px_rgba(0,243,255,0.2)]">
+                        <div className="grid lg:grid-cols-12 gap-8 items-center">
+                            <div className="lg:col-span-7 space-y-5">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/10 text-white font-mono text-xs">
+                                    <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                                    <span>60 FPS 1080P UHD MASTER · 49 MB</span>
+                                </div>
+                                <h3 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tight leading-tight">
+                                    Lorapok Labs: Organic Intelligence & Swarm Computing
+                                </h3>
+                                <p className="text-white/70 font-mono text-xs sm:text-sm leading-relaxed">
+                                    Explore the full chronicle of Lorapok Labs: from Black Soldier Fly larval metamorphosis sensory models to the 108-agent autonomous development hive and our cross-platform 8K hardware-accelerated media engine.
+                                </p>
+                                
+                                <div className="flex flex-wrap items-center gap-4 pt-2">
+                                    <button
+                                        onClick={() => playTrackUrl('/lorapok_documentary.mp4', 'Lorapok Labs Project Documentary', 'Documentary', 'Official 60FPS Documentary Chronicle')}
+                                        className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-neon-cyan to-electric-purple hover:from-white hover:to-white text-midnight font-mono font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-[0_0_25px_rgba(0,243,255,0.4)]"
+                                    >
+                                        <Play className="w-4 h-4 fill-current" />
+                                        <span>Watch Documentary in Media Lab</span>
+                                    </button>
+
+                                    <a
+                                        href="/lorapok_documentary.mp4"
+                                        download="Lorapok_Labs_Documentary_1080p.mp4"
+                                        className="px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/15 border border-white/15 text-white font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2"
+                                    >
+                                        <Download className="w-4 h-4 text-neon-cyan" />
+                                        <span>Direct 1080p Download (49 MB)</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-5 relative group cursor-pointer" onClick={() => playTrackUrl('/lorapok_documentary.mp4', 'Lorapok Labs Project Documentary', 'Documentary', 'Official 60FPS Documentary Chronicle')}>
+                                <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
+                                    <img
+                                        src="/images/doc_swarm.jpg"
+                                        alt="Lorapok Documentary Master"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                                        <div className="w-16 h-16 rounded-full bg-neon-cyan/90 text-midnight flex items-center justify-center shadow-[0_0_30px_rgba(0,243,255,0.8)] group-hover:scale-110 transition-transform">
+                                            <Play className="w-7 h-7 fill-current ml-1" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded bg-black/80 backdrop-blur-md text-[10px] font-mono text-neon-cyan border border-white/10">
+                                        01:01 · 60.00 FPS UHD
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Lab Projects & Chapters Interactive Grid */}
+                    <div className="grid md:grid-cols-3 gap-6">
+                        {/* Project 1: Spidernet Swarm */}
+                        <div className="bg-white/5 border border-white/10 hover:border-neon-cyan/40 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between gap-5 transition-all group">
+                            <div className="space-y-4">
+                                <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 relative">
+                                    <img src="/images/doc_swarm.jpg" alt="Spidernet Swarm" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-midnight/90 text-neon-cyan border border-neon-cyan/30">CHAPTER I</span>
+                                </div>
+                                <h4 className="text-lg font-bold text-white uppercase tracking-wide">Spidernet Multi-Agent Swarm</h4>
+                                <p className="text-xs font-mono text-white/60 leading-relaxed">
+                                    108 specialized autonomous agents orchestrated by Boss, Tech Director, Watchman, Cache Collector, and Workspace Guard.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => playTrackUrl('/lorapok_documentary.mp4', 'Chapter I: Spidernet Swarm', 'Documentary', 'Autonomous 108-Agent Hive Matrix')}
+                                className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-neon-cyan/20 border border-white/10 text-white font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all group-hover:border-neon-cyan/40"
+                            >
+                                <Play className="w-3.5 h-3.5 text-neon-cyan fill-neon-cyan" />
+                                <span>Play Chapter</span>
+                            </button>
+                        </div>
+
+                        {/* Project 2: Biometamorphosis */}
+                        <div className="bg-white/5 border border-white/10 hover:border-neon-magenta/40 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between gap-5 transition-all group">
+                            <div className="space-y-4">
+                                <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 relative">
+                                    <img src="/images/doc_biometamorphosis.jpg" alt="Biometamorphosis" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-midnight/90 text-neon-magenta border border-neon-magenta/30">CHAPTER II</span>
+                                </div>
+                                <h4 className="text-lg font-bold text-white uppercase tracking-wide">Organic Intelligence & BSF</h4>
+                                <p className="text-xs font-mono text-white/60 leading-relaxed">
+                                    Black Soldier Fly biological metamorphosis principles mapped to software lifecycle states, self-healing, and adaptive memory loops.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => playTrackUrl('/lorapok_documentary.mp4', 'Chapter II: Organic Intelligence', 'Documentary', 'BSF Biological Metamorphosis Engineering')}
+                                className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-neon-magenta/20 border border-white/10 text-white font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all group-hover:border-neon-magenta/40"
+                            >
+                                <Play className="w-3.5 h-3.5 text-neon-magenta fill-neon-magenta" />
+                                <span>Play Chapter</span>
+                            </button>
+                        </div>
+
+                        {/* Project 3: Supercomputing Media Engine */}
+                        <div className="bg-white/5 border border-white/10 hover:border-electric-purple/40 rounded-3xl p-6 backdrop-blur-xl flex flex-col justify-between gap-5 transition-all group">
+                            <div className="space-y-4">
+                                <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 relative">
+                                    <img src="/images/doc_supercomputing.jpg" alt="Supercomputing Media Engine" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-midnight/90 text-purple-300 border border-purple-500/30">CHAPTER III</span>
+                                </div>
+                                <h4 className="text-lg font-bold text-white uppercase tracking-wide">Supercomputing Media Engine</h4>
+                                <p className="text-xs font-mono text-white/60 leading-relaxed">
+                                    Hardware-accelerated 8K video pipelines, WebAudio 32-band FFT spatial audio, dynamic ambient backlight sampling, and EBU R128 mastering.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => playTrackUrl('/demos/neon_waves.mp4', 'Chapter III: 8K Media Engine Benchmark', 'Video', 'Hardware Accelerated 8K Video Processing')}
+                                className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-electric-purple/20 border border-white/10 text-white font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all group-hover:border-purple-500/40"
+                            >
+                                <Play className="w-3.5 h-3.5 text-purple-300 fill-purple-300" />
+                                <span>Play Benchmark</span>
+                            </button>
+                        </div>
                     </div>
                 </section>
 
