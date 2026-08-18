@@ -1,31 +1,41 @@
-# Lorapok Project Architecture & Guidelines
+# Loragent - Dynamic Formation & Self-Improvement Rules
 
-## Project Structure
-This repository contains the Lorapok Media Player project, split into two main components:
-1. **`lorapok-player/`**: The core desktop application built with Electron, React 18, TypeScript, and Vite.
-2. **`lorapok-extension/`**: A Chrome extension (Manifest V3) that integrates with the player using a custom protocol handler (`lorapok://`).
+These rules apply universally to the Loragent system and all 108 constituent agents in the ecosystem. 
 
-## Technology Stack
-- **Frontend UI**: React 18, Tailwind CSS, Framer Motion, and Lucide React.
-- **Media Engine**: `fluent-ffmpeg`, `dashjs`, and `hls.js` for robust playback, HLS, and MPEG-DASH support.
-- **Build System**: Vite, TypeScript, and `electron-builder` for multi-platform distribution.
-- **Testing**: A custom script (`manage_lorapok.sh`) at the root directory handles downloading test media and testing the protocol handler and streams.
+## 1. Dynamic Formation Engine
+`loragent-boss` is the central orchestrator. When a user submits a prompt, `loragent-teacher` will clarify the requirements, and then the Boss will assemble the team using one of four modes:
 
-## Important Commands
-Always use the provided `manage_lorapok.sh` script in the project root for building and testing to ensure consistency:
-- **Build**: `./manage_lorapok.sh build` (Installs dependencies and uses electron-builder for Linux, Windows, macOS, and packages the extension).
-- **Test**: `./manage_lorapok.sh test` (Downloads test files into `test_media/` and tests the protocol handler, local files, and streaming URLs).
-- **Setup Media Only**: `./manage_lorapok.sh setup-media` (Downloads sample files for manual testing).
-- **Build & Test**: `./manage_lorapok.sh all`
+1. **Auto Team Formation**: For standard software projects. The Boss delegates to `loragent-tech-director`, `loragent-backend-se`, `loragent-frontend-se`, and `loragent-sqa`.
+2. **Office Formation**: For full-scale business launches. The Boss delegates to `loragent-project-coordinator`, `loragent-marketing-strategy-manager`, `loragent-publisher`, `loragent-pr-specialist`, etc.
+3. **Freelance Formation**: For isolated, single-agent gig work. The Boss delegates to a single specialist (e.g., `loragent-logo-designer`, `loragent-3d-designer`).
+4. **Chela Formation**: For aggressive, high-priority bug hunting and complex Git issues. The Boss delegates to `loragent-bug-hunter`, `loragent-shift-engineer`, and `loragent-git-specialist`.
 
-## Guidelines
-- When making UI changes, adhere to the "biological aesthetics" and "organic UI" design language specified in the README, leveraging Tailwind CSS and Framer Motion.
-- When working on the player core, start from `lorapok-player/` and ensure compatibility with Electron.
+## 2. Firebase Self-Improvement Loop
+- **Continuous Learning**: All generated code, successful workflows, prompt optimizations, and resolved bugs MUST be logged to a centralized Firebase database.
+- **The Updater**: `loragent-database-updater` is responsible for parsing successful workflows and syncing them to Firebase.
+- **Collective Memory**: Before starting a complex task, agents should query the Firebase collective memory (or ask the Boss to do so) to retrieve past learnings and avoid repeating mistakes.
 
-## Lorapok Virtual Office Guidelines
-<RULE[lorapok-process-rule]>
-1. **Chain of Command**: Follow the `lorapok-workflow-orchestrator` flow strictly. Never skip the Project Architect when assigning tasks to the Specialized Developer, and never skip SQA before merging.
-2. **High-Tech Standards**: All code produced by `lorapok-specialized-developer` must adhere to SOLID principles, use modern syntax (e.g., React hooks, TypeScript strictly typed), and ensure zero-regression.
-3. **Bug Triage**: `lorapok-sqa-lead` is the only entity allowed to declare a feature complete. If bugs are found, they must be formatted in the structured Bug Report format and assigned back to the Project Architect.
-4. **CI/CD Integration**: SEO optimizations (`lorapok-seo-analyst`) must happen seamlessly during the CI/CD phase without breaking build pipelines. Use `manage_lorapok.sh build` to verify builds.
-</RULE[lorapok-process-rule]>
+## 3. Loragent MCP Server Integration & Lazy Loading
+- **Summon**: To save context tokens, only the Core Operations Team is installed by default. The Boss MUST use the `loragent_summon_agent` MCP tool to pull specialized agents into the workspace on-demand.
+- **Dismiss**: When a specialist is no longer needed, use `loragent_dismiss_agent` to remove them from context.
+- **Steer**: Agents MUST use the `loragent_steer` MCP tool to explicitly hand off data/context between one another, ensuring the `loragent-workflow-manager` logs the path.
+- **Hooks**: Agents MUST use the `loragent_trigger_hook` MCP tool to execute lifecycle events (e.g. `pre-commit`, `deploy-retry`) securely.
+- **State**: The `loragent_get_state` MCP tool should be queried to see the current active agent.
+
+## 4. Professionalism & Consistency
+- **Strict Handoffs**: Sub-agents MUST return their specialized output to the Boss (or `loragent-office-assistant`) for the next routing step.
+- **Secure Credentials**: `loragent-accounts-specialist` is the ONLY agent allowed to manage tokens using the `secure-cred-vault` standard. Never print plain text secrets.
+- **Efficiency**: `loragent-cache-collector` organizes the workspace context to reduce token usage and speed up AI editor processing (Parallel Collaboration & Multi-Task Execution).
+- **Workspace Guard**: The `loragent-workspace-guard` monitors and strictly blocks destructive operations (e.g., `rm -rf`) unless explicitly permitted by the user.
+
+## 5. Multi-AI Support
+- This ruleset and the associated skills are framework-agnostic. Loragent can be installed via NPM, PIP, or Composer and is compatible with Claude Code, Cursor, Codex, and Antigravity IDEs.
+
+## 6. The Watchman & Prompt Engineering Commands
+Loragent supports custom Slash Commands to effortlessly steer the workflow. The `loragent-watchman` agent maintains an uninterrupted execution cache.
+- **/loragent-watchman continue**: Resumes execution from the exact `.loragent/watchman-cache.json` state if the AI gets stuck.
+- **/loragent-boss auto**: Instantly triggers the Auto-Team formation.
+- **/loragent-boss chela**: Instantly triggers the Chela (Debugging) formation.
+- **/loragent-teacher clarify**: Forces the teacher agent to ask clarifying requirements.
+- **/loragent-inspector rca**: Forces a Root Cause Analysis report on the current bug.
+
