@@ -29,6 +29,7 @@ lorapok-player/packages/website/public/downloads/*.aab
 lorapok-player/packages/website/public/downloads/*.AppImage
 lorapok-player/packages/website/public/downloads/*.deb
 lorapok-player/packages/website/public/downloads/*.zip
+lorapok-player/packages/website/public/downloads/*.xpi
 lorapok-player/packages/website/public/downloads/*.exe
 lorapok-player/packages/website/public/downloads/*.dmg
 

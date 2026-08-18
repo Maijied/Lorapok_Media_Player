@@ -1,0 +1,12 @@
+{
+  "name": "lorapok-extension",
+  "version": "1.5.0",
+  "description": "Lorapok Connector browser extension for Chrome, Firefox AMO, Edge, and WebExtensions.",
+  "type": "module",
+  "scripts": {
+    "build": "node build_extensions.js"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1"
+  }
+}

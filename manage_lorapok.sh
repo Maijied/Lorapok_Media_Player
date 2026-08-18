@@ -43,9 +43,9 @@ function build_app() {
     echo "🍎 Building for macOS..."
     npx electron-builder --mac --x64 -c.directories.output="$OUTPUT_DIR/mac" || echo "⚠️  macOS build failed (Requires macOS usually). Skipping."
 
-    echo "🧩 Packaging Chrome Extension..."
+    echo "🧩 Packaging Browser Extensions (Firefox AMO, Chrome, Edge)..."
     pushd "$(pwd)/../lorapok-extension" > /dev/null
-    zip -r "$OUTPUT_DIR/lorapok-extension.zip" * -x "*.DS_Store" > /dev/null
+    node build_extensions.js || true
     popd > /dev/null
 
     echo "📦 Building Standalone NPM Package & Showcase Website..."
@@ -53,6 +53,7 @@ function build_app() {
     npm run build 2>/dev/null || true
     popd > /dev/null
     pushd "$(pwd)/packages/website" > /dev/null
+    node scripts/sync_downloads.js 2>/dev/null || true
     npm run build 2>/dev/null || true
     popd > /dev/null
 

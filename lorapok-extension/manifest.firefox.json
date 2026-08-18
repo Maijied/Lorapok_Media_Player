@@ -11,7 +11,7 @@
     "scripting"
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"]
   },
   "action": {
     "default_title": "Lorapok Connector",
@@ -22,5 +22,11 @@
   },
   "icons": {
     "128": "icon128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "lorapok-connector@media.lorapok.tech",
+      "strict_min_version": "109.0"
+    }
   }
 }
