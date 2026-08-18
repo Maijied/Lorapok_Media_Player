@@ -2249,6 +2249,13 @@ function App() {
                               <span>CLIP IT</span>
                             </button>
                           )}
+                          <button onClick={() => { setLoopA(null); setLoopB(null) }} className="hover:text-red-400 transition-colors">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                     {/* Floating Immersive Top Bar */}
                     <AnimatePresence>
                       {showControls && (
