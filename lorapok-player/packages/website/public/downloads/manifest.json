@@ -1,13 +1,13 @@
 {
   "version": "2.0.0",
   "releaseName": "Lorapok 2.0.0 Neural Release",
-  "updatedAt": "2026-08-19T13:12:01.726Z",
+  "updatedAt": "2026-08-19T18:48:36.333Z",
   "platforms": {
     "windows": {
-      "default": "/downloads/LorapokMediaPlayer-Windows-Setup.exe",
-      "size": "78 MB",
+      "default": "/downloads/LorapokMediaPlayer.exe",
+      "size": "168.8 MB",
       "installer": {
-        "url": "/downloads/LorapokMediaPlayer-Windows-Setup.exe",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/latest/LorapokMediaPlayer-Windows-Setup.exe",
         "size": "78 MB",
         "label": "Windows Installer (.exe)",
         "badge": "INSTALLABLE",
@@ -47,24 +47,24 @@
       }
     },
     "macos": {
-      "default": "/downloads/LorapokMediaPlayer-Mac-Installer.dmg",
+      "default": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/latest/LorapokMediaPlayer-Mac-Installer.dmg",
       "size": "96 MB",
       "dmgArm": {
-        "url": "/downloads/LorapokMediaPlayer-Mac-Installer.dmg",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/latest/LorapokMediaPlayer-Mac-Installer.dmg",
         "size": "96 MB",
         "label": "macOS Apple Silicon (.dmg)",
         "badge": "INSTALLABLE",
         "desc": "Optimized for Apple M1, M2, M3, M4 Macs"
       },
       "dmgIntel": {
-        "url": "/downloads/LorapokMediaPlayer-Mac-Installer.dmg",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/latest/LorapokMediaPlayer-Mac-Installer.dmg",
         "size": "96 MB",
         "label": "macOS Intel (.dmg)",
         "badge": "INSTALLABLE",
         "desc": "For Intel-based Mac systems"
       },
       "zipPortable": {
-        "url": "/downloads/LorapokMediaPlayer-Mac-Installer.zip",
+        "url": "https://github.com/Maijied/Lorapok_Media_Player/releases/download/latest/LorapokMediaPlayer-Mac-Installer.zip",
         "size": "97 MB",
         "label": "macOS Portable (.zip)",
         "badge": "PORTABLE",

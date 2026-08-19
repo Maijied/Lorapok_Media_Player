@@ -106,73 +106,75 @@ for (const item of copyMap) {
     }
 }
 
+const GITHUB_RELEASE_BASE = "https://github.com/Maijied/Lorapok_Media_Player/releases/download/latest";
+
 const manifest = {
     version: "2.0.0",
     releaseName: "Lorapok 2.0.0 Neural Release",
     updatedAt: new Date().toISOString(),
     platforms: {
         windows: {
-            default: copiedAssets['windows-exe']?.url || "/downloads/LorapokMediaPlayer-Windows-Setup.exe",
-            size: copiedAssets['windows-exe']?.size || "78 MB",
+            default: copiedAssets['windows-exe']?.url || copiedAssets['windows-portable']?.url || `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Windows-Setup.exe`,
+            size: copiedAssets['windows-exe']?.size || copiedAssets['windows-portable']?.size || "78 MB",
             installer: {
-                url: copiedAssets['windows-exe']?.url || "/downloads/LorapokMediaPlayer-Windows-Setup.exe",
+                url: copiedAssets['windows-exe']?.url || `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Windows-Setup.exe`,
                 size: copiedAssets['windows-exe']?.size || "78 MB",
                 label: "Windows Installer (.exe)",
                 badge: "INSTALLABLE",
                 desc: "Complete installer for Windows 10 & 11 (64-bit)"
             },
             portable: {
-                url: copiedAssets['windows-portable']?.url || "/downloads/LorapokMediaPlayer.exe",
-                size: copiedAssets['windows-portable']?.size || "68 MB",
+                url: copiedAssets['windows-portable']?.url || `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer.exe`,
+                size: copiedAssets['windows-portable']?.size || "168.8 MB",
                 label: "Windows Standalone (.exe)",
                 badge: "PORTABLE",
                 desc: "Zero-install standalone binary for USB / portable drives"
             }
         },
         linux: {
-            default: copiedAssets['linux-appimage']?.url || "/downloads/LorapokMediaPlayer-Linux.AppImage",
-            size: copiedAssets['linux-appimage']?.size || "108 MB",
+            default: copiedAssets['linux-appimage']?.url || `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Linux.AppImage`,
+            size: copiedAssets['linux-appimage']?.size || "254 MB",
             portable: {
-                url: copiedAssets['linux-appimage']?.url || "/downloads/LorapokMediaPlayer-Linux.AppImage",
-                size: copiedAssets['linux-appimage']?.size || "108 MB",
+                url: copiedAssets['linux-appimage']?.url || `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Linux.AppImage`,
+                size: copiedAssets['linux-appimage']?.size || "254 MB",
                 label: "Linux AppImage",
                 badge: "PORTABLE",
                 desc: "Self-contained universal executable for all Linux distributions"
             },
             deb: {
-                url: copiedAssets['linux-deb']?.url || "/downloads/LorapokMediaPlayer-Linux.deb",
-                size: copiedAssets['linux-deb']?.size || "70 MB",
+                url: copiedAssets['linux-deb']?.url || `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Linux.deb`,
+                size: copiedAssets['linux-deb']?.size || "154 MB",
                 label: "Debian / Ubuntu (.deb)",
                 badge: "INSTALLABLE",
                 desc: "Native APT package installer with desktop integration"
             },
             snap: {
                 url: `https://snapcraft.io/lorapokmediaplayer`,
-                size: copiedAssets['linux-snap']?.size || "93 MB",
+                size: copiedAssets['linux-snap']?.size || "214 MB",
                 label: "Snap Store (Universal Linux)",
                 badge: "SNAP STORE",
                 desc: "Install directly via snap install lorapokmediaplayer"
             }
         },
         macos: {
-            default: copiedAssets['macos-dmg']?.url || "/downloads/LorapokMediaPlayer-Mac-Installer.dmg",
+            default: copiedAssets['macos-dmg']?.url || `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Mac-Installer.dmg`,
             size: copiedAssets['macos-dmg']?.size || "96 MB",
             dmgArm: {
-                url: copiedAssets['macos-dmg']?.url || "/downloads/LorapokMediaPlayer-Mac-Installer.dmg",
+                url: copiedAssets['macos-dmg']?.url || `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Mac-Installer.dmg`,
                 size: copiedAssets['macos-dmg']?.size || "96 MB",
                 label: "macOS Apple Silicon (.dmg)",
                 badge: "INSTALLABLE",
                 desc: "Optimized for Apple M1, M2, M3, M4 Macs"
             },
             dmgIntel: {
-                url: copiedAssets['macos-dmg']?.url || "/downloads/LorapokMediaPlayer-Mac-Installer.dmg",
+                url: copiedAssets['macos-dmg']?.url || `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Mac-Installer.dmg`,
                 size: copiedAssets['macos-dmg']?.size || "96 MB",
                 label: "macOS Intel (.dmg)",
                 badge: "INSTALLABLE",
                 desc: "For Intel-based Mac systems"
             },
             zipPortable: {
-                url: copiedAssets['macos-zip']?.url || "/downloads/LorapokMediaPlayer-Mac-Installer.zip",
+                url: copiedAssets['macos-zip']?.url || `${GITHUB_RELEASE_BASE}/LorapokMediaPlayer-Mac-Installer.zip`,
                 size: copiedAssets['macos-zip']?.size || "97 MB",
                 label: "macOS Portable (.zip)",
                 badge: "PORTABLE",
@@ -180,38 +182,38 @@ const manifest = {
             }
         },
         android: {
-            default: copiedAssets['android-universal']?.url || "/downloads/app-universal-release.apk",
+            default: copiedAssets['android-universal']?.url || `${GITHUB_RELEASE_BASE}/app-universal-release.apk`,
             size: copiedAssets['android-universal']?.size || "4.9 MB",
             universal: {
-                url: copiedAssets['android-universal']?.url || "/downloads/app-universal-release.apk",
+                url: copiedAssets['android-universal']?.url || `${GITHUB_RELEASE_BASE}/app-universal-release.apk`,
                 size: copiedAssets['android-universal']?.size || "4.9 MB",
                 label: "Universal APK",
                 badge: "INSTALLABLE",
                 desc: "Compatible with all Android phones, tablets & TV"
             },
             arm64: {
-                url: copiedAssets['android-arm64']?.url || "/downloads/app-arm64-v8a-release.apk",
+                url: copiedAssets['android-arm64']?.url || `${GITHUB_RELEASE_BASE}/app-arm64-v8a-release.apk`,
                 size: copiedAssets['android-arm64']?.size || "4.9 MB",
                 label: "ARM64-v8a APK",
                 badge: "INSTALLABLE",
                 desc: "Native 64-bit performance for modern Android flagships"
             },
             armv7: {
-                url: copiedAssets['android-armv7']?.url || "/downloads/app-armeabi-v7a-release.apk",
+                url: copiedAssets['android-armv7']?.url || `${GITHUB_RELEASE_BASE}/app-armeabi-v7a-release.apk`,
                 size: copiedAssets['android-armv7']?.size || "4.9 MB",
                 label: "ARMv7 APK",
                 badge: "INSTALLABLE",
                 desc: "For legacy Android devices & TV sticks"
             },
             x86_64: {
-                url: copiedAssets['android-x86_64']?.url || "/downloads/app-x86_64-release.apk",
+                url: copiedAssets['android-x86_64']?.url || `${GITHUB_RELEASE_BASE}/app-x86_64-release.apk`,
                 size: copiedAssets['android-x86_64']?.size || "4.9 MB",
                 label: "x86_64 APK",
                 badge: "INSTALLABLE",
                 desc: "For Android emulators and ChromeOS"
             },
             aab: {
-                url: copiedAssets['android-aab']?.url || "/downloads/app-release.aab",
+                url: copiedAssets['android-aab']?.url || `${GITHUB_RELEASE_BASE}/app-release.aab`,
                 size: copiedAssets['android-aab']?.size || "4.7 MB",
                 label: "Google Play Bundle (.aab)",
                 badge: "STORE BUNDLE",
@@ -220,35 +222,35 @@ const manifest = {
         },
         extensions: {
             firefoxXpi: {
-                url: copiedAssets['ext-firefox-xpi']?.url || "/downloads/lorapok-extension-firefox-2.0.0.xpi",
+                url: copiedAssets['ext-firefox-xpi']?.url || `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-2.0.0.xpi`,
                 size: copiedAssets['ext-firefox-xpi']?.size || "25 KB",
                 label: "Firefox Add-on (.xpi)",
                 badge: "AMO READY",
                 desc: "Mozilla Firefox Add-ons (AMO) installable package"
             },
             firefoxZip: {
-                url: copiedAssets['ext-firefox-zip']?.url || "/downloads/lorapok-extension-firefox-2.0.0.zip",
+                url: copiedAssets['ext-firefox-zip']?.url || `${GITHUB_RELEASE_BASE}/lorapok-extension-firefox-2.0.0.zip`,
                 size: copiedAssets['ext-firefox-zip']?.size || "25 KB",
                 label: "Firefox Source (.zip)",
                 badge: "AMO ARCHIVE",
                 desc: "Firefox Developer Edition / AMO submission archive"
             },
             chromeZip: {
-                url: copiedAssets['ext-chrome-zip']?.url || "/downloads/lorapok-extension-chrome-2.0.0.zip",
+                url: copiedAssets['ext-chrome-zip']?.url || `${GITHUB_RELEASE_BASE}/lorapok-extension-chrome-2.0.0.zip`,
                 size: copiedAssets['ext-chrome-zip']?.size || "25 KB",
                 label: "Google Chrome (.zip)",
                 badge: "CHROME MV3",
                 desc: "Chrome Web Store / Chromium unpacked extension"
             },
             edgeZip: {
-                url: copiedAssets['ext-edge-zip']?.url || "/downloads/lorapok-extension-edge-2.0.0.zip",
+                url: copiedAssets['ext-edge-zip']?.url || `${GITHUB_RELEASE_BASE}/lorapok-extension-edge-2.0.0.zip`,
                 size: copiedAssets['ext-edge-zip']?.size || "25 KB",
                 label: "Microsoft Edge (.zip)",
                 badge: "EDGE ADD-ONS",
                 desc: "Microsoft Edge Add-ons Store package"
             },
             vscodeVsix: {
-                url: copiedAssets['ext-vscode-vsix']?.url || "/downloads/lorapok-player-vscode-2.0.0.vsix",
+                url: copiedAssets['ext-vscode-vsix']?.url || `${GITHUB_RELEASE_BASE}/lorapok-player-vscode-2.0.0.vsix`,
                 size: copiedAssets['ext-vscode-vsix']?.size || "735 KB",
                 label: "VS Code Extension (.vsix)",
                 badge: "IDE EXTENSION",
@@ -257,14 +259,14 @@ const manifest = {
         },
         packages: {
             pythonWhl: {
-                url: copiedAssets['python-whl']?.url || "/downloads/lorapok-2.0.0-py3-none-any.whl",
+                url: copiedAssets['python-whl']?.url || `${GITHUB_RELEASE_BASE}/lorapok-2.0.0-py3-none-any.whl`,
                 size: copiedAssets['python-whl']?.size || "6 KB",
                 label: "Python Wheel (.whl)",
                 badge: "PIP",
                 desc: "Install via pip install lorapok"
             },
             pythonSdist: {
-                url: copiedAssets['python-sdist']?.url || "/downloads/lorapok-2.0.0.tar.gz",
+                url: copiedAssets['python-sdist']?.url || `${GITHUB_RELEASE_BASE}/lorapok-2.0.0.tar.gz`,
                 size: copiedAssets['python-sdist']?.size || "5.2 KB",
                 label: "Python Source (.tar.gz)",
                 badge: "SDIST",
@@ -275,4 +277,4 @@ const manifest = {
 };
 
 fs.writeFileSync(path.join(downloadsDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
-console.log('✅ Generated public/downloads/manifest.json with direct binary copies.');
+console.log('✅ Generated public/downloads/manifest.json with verified direct binary & release copies.');
