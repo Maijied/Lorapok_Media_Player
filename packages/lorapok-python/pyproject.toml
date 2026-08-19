@@ -5,37 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lorapok"
 version = "2.0.0"
-description = "Lorapok Neural Media Engine & Universal Streaming Toolkit for Python"
+description = "Lorapok Media Player Python SDK & CLI Stream Controller"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = { text = "MIT" }
 authors = [
-    {name = "Mohammad Maizied Hasan Majumder", email = "mdshuvo40@gmail.com"},
-    {name = "Lorapok Labs", email = "lorapokdev@gmail.com"}
-]
-keywords = ["media", "player", "streaming", "hls", "dash", "transcoding", "video", "audio", "lorapok"]
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Multimedia :: Video",
-    "Topic :: Multimedia :: Sound/Audio",
+    { name = "Lorapok Labs", email = "labs@lorapok.tech" }
 ]
 dependencies = [
     "requests>=2.25.0",
-    "click>=8.0.0",
+    "click>=8.0.0"
 ]
-
-[project.urls]
-Homepage = "https://media.lorapok.tech"
-Repository = "https://github.com/Maijied/Lorapok_Media_Player"
-Documentation = "https://media.lorapok.tech/#developer"
 
 [project.scripts]
 lorapok = "lorapok.cli:main"

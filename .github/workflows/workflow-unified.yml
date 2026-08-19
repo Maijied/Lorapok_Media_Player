@@ -271,6 +271,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Download all built binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
       - name: Install Dependencies
         working-directory: lorapok-player
         run: npm install
@@ -378,7 +383,7 @@ jobs:
             cd lorapok-extension
             web-ext sign --api-key="$AMO_JWT_ISSUER" --api-secret="$AMO_JWT_SECRET" --source-dir=. --artifacts-dir=../amo-artifacts --channel=listed || echo "⚠️ AMO submission notice."
           else
-            echo "ℹ️ AMO_JWT_ISSUER / AMO_JWT_SECRET not configured. The AMO-ready package 'lorapok-extension-firefox-1.5.0.xpi' has been packaged and published to GitHub Releases for manual or API upload."
+            echo "ℹ️ AMO_JWT_ISSUER / AMO_JWT_SECRET not configured. The AMO-ready package 'lorapok-extension-firefox-2.0.0.xpi' has been packaged and published to GitHub Releases for manual or API upload."
           fi
         env:
           AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER || secrets.AMO_API_KEY }}

@@ -113,39 +113,39 @@ const DEFAULT_MANIFEST: Manifest = {
             }
         },
         android: {
-            default: `${GITHUB_RELEASE_BASE}/app-universal-release-unsigned.apk`,
-            size: "18.8 MB",
+            default: `${GITHUB_RELEASE_BASE}/app-universal-release.apk`,
+            size: "2.8 MB",
             universal: {
-                url: `${GITHUB_RELEASE_BASE}/app-universal-release-unsigned.apk`,
-                size: "18.8 MB",
+                url: `${GITHUB_RELEASE_BASE}/app-universal-release.apk`,
+                size: "2.8 MB",
                 label: "Universal APK",
                 badge: "INSTALLABLE",
                 desc: "Compatible with all Android phones, tablets & TV"
             },
             arm64: {
-                url: `${GITHUB_RELEASE_BASE}/app-arm64-v8a-release-unsigned.apk`,
-                size: "3.2 MB",
+                url: `${GITHUB_RELEASE_BASE}/app-arm64-v8a-release.apk`,
+                size: "2.8 MB",
                 label: "ARM64-v8a APK",
                 badge: "INSTALLABLE",
                 desc: "Native 64-bit performance for modern Android flagships"
             },
             armv7: {
-                url: `${GITHUB_RELEASE_BASE}/app-armeabi-v7a-release-unsigned.apk`,
-                size: "3.2 MB",
+                url: `${GITHUB_RELEASE_BASE}/app-armeabi-v7a-release.apk`,
+                size: "2.8 MB",
                 label: "ARMv7 APK",
                 badge: "INSTALLABLE",
                 desc: "For legacy Android devices & TV sticks"
             },
             x86_64: {
-                url: `${GITHUB_RELEASE_BASE}/app-x86_64-release-unsigned.apk`,
-                size: "3.2 MB",
+                url: `${GITHUB_RELEASE_BASE}/app-x86_64-release.apk`,
+                size: "2.8 MB",
                 label: "x86_64 APK",
                 badge: "INSTALLABLE",
                 desc: "For Android emulators and ChromeOS"
             },
             aab: {
                 url: `${GITHUB_RELEASE_BASE}/app-release.aab`,
-                size: "3.7 MB",
+                size: "3.3 MB",
                 label: "Google Play Bundle (.aab)",
                 badge: "STORE BUNDLE",
                 desc: "Signed Android App Bundle for Store deployment"

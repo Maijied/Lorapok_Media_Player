@@ -221,6 +221,14 @@ function test_features() {
     echo "🏁 Testing complete."
 }
 
+sync_downloads() {
+    echo "📦 Syncing latest v2.0.0 signed release artifacts to public downloads..."
+    mkdir -p lorapok-player/packages/website/public/downloads/
+    cp -v lorapok-player/release/builds/android/*.apk lorapok-player/release/builds/android/*.aab lorapok-player/packages/website/public/downloads/ 2>/dev/null || true
+    cp -v lorapok-player/release/builds/linux/LorapokMediaPlayer-Linux.AppImage lorapok-player/release/builds/linux/LorapokMediaPlayer-Linux.deb lorapok-player/packages/website/public/downloads/ 2>/dev/null || true
+    echo "✅ Download artifacts synchronized."
+}
+
 case "$1" in
     build)
         build_app
@@ -234,13 +242,23 @@ case "$1" in
     setup-media)
         setup_test_media
         ;;
+    sync-downloads)
+        sync_downloads
+        ;;
+    release)
+        build_app
+        build_android
+        sync_downloads
+        test_features
+        ;;
     all)
         build_app
         build_android
+        sync_downloads
         test_features
         ;;
     *)
-        echo "Usage: $0 {build|android|test|setup-media|all}"
+        echo "Usage: $0 {build|android|test|setup-media|sync-downloads|release|all}"
         exit 1
         ;;
 esac

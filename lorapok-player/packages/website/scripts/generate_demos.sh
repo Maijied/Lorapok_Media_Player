@@ -10,6 +10,10 @@ if ! command -v ffmpeg &> /dev/null; then
         FFMPEG_BIN="../../node_modules/ffmpeg-static/ffmpeg"
     elif [ -f "../../../node_modules/ffmpeg-static/ffmpeg" ]; then
         FFMPEG_BIN="../../../node_modules/ffmpeg-static/ffmpeg"
+    elif [ -f "../../release/builds/linux/linux-unpacked/resources/app.asar.unpacked/node_modules/ffmpeg-static/ffmpeg" ]; then
+        FFMPEG_BIN="../../release/builds/linux/linux-unpacked/resources/app.asar.unpacked/node_modules/ffmpeg-static/ffmpeg"
+    elif [ -f "../../release/linux-unpacked/resources/app.asar.unpacked/node_modules/ffmpeg-static/ffmpeg" ]; then
+        FFMPEG_BIN="../../release/linux-unpacked/resources/app.asar.unpacked/node_modules/ffmpeg-static/ffmpeg"
     else
         echo "⚠️ ffmpeg not found in PATH or node_modules, skipping demo generation."
         exit 0

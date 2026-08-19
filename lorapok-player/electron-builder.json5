@@ -2,6 +2,10 @@
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "com.lorapok.mediaplayer",
   "asar": true,
+  "asarUnpack": [
+    "node_modules/ffmpeg-static/**/*",
+    "node_modules/ffprobe-static/**/*"
+  ],
   "compression": "normal",
   "productName": "LorapokMediaPlayer",
   "directories": {

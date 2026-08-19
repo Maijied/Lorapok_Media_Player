@@ -13,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 Object.assign(globalThis, { __dirname, require })
 
 let ffmpeg: any;
-const debugLogPath = path.join(process.cwd(), 'debug.log');
+const debugLogPath = path.join(app.getPath('userData'), 'debug.log');
 
 function logToFile(message: string) {
   const timestamp = new Date().toISOString();
