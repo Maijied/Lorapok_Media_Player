@@ -114,38 +114,38 @@ const DEFAULT_MANIFEST: Manifest = {
         },
         android: {
             default: `${GITHUB_RELEASE_BASE}/app-universal-release.apk`,
-            size: "2.8 MB",
+            size: "4.9 MB",
             universal: {
                 url: `${GITHUB_RELEASE_BASE}/app-universal-release.apk`,
-                size: "2.8 MB",
+                size: "4.9 MB",
                 label: "Universal APK",
                 badge: "INSTALLABLE",
                 desc: "Compatible with all Android phones, tablets & TV"
             },
             arm64: {
                 url: `${GITHUB_RELEASE_BASE}/app-arm64-v8a-release.apk`,
-                size: "2.8 MB",
+                size: "4.9 MB",
                 label: "ARM64-v8a APK",
                 badge: "INSTALLABLE",
                 desc: "Native 64-bit performance for modern Android flagships"
             },
             armv7: {
                 url: `${GITHUB_RELEASE_BASE}/app-armeabi-v7a-release.apk`,
-                size: "2.8 MB",
+                size: "4.9 MB",
                 label: "ARMv7 APK",
                 badge: "INSTALLABLE",
                 desc: "For legacy Android devices & TV sticks"
             },
             x86_64: {
                 url: `${GITHUB_RELEASE_BASE}/app-x86_64-release.apk`,
-                size: "2.8 MB",
+                size: "4.9 MB",
                 label: "x86_64 APK",
                 badge: "INSTALLABLE",
                 desc: "For Android emulators and ChromeOS"
             },
             aab: {
                 url: `${GITHUB_RELEASE_BASE}/app-release.aab`,
-                size: "3.3 MB",
+                size: "4.7 MB",
                 label: "Google Play Bundle (.aab)",
                 badge: "STORE BUNDLE",
                 desc: "Signed Android App Bundle for Store deployment"
@@ -986,11 +986,11 @@ export function App() {
                                 {/* Variant Selector */}
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2">
                                     {[
-                                        { key: 'universal', label: 'Universal APK', sub: 'All Devices (2.8 MB)' },
-                                        { key: 'arm64', label: 'ARM64-v8a', sub: 'Modern Phones (2.8 MB)' },
-                                        { key: 'armv7', label: 'ARMv7', sub: 'TV Sticks / Legacy (2.8 MB)' },
-                                        { key: 'x86_64', label: 'x86_64', sub: 'Emulators (2.8 MB)' },
-                                        { key: 'aab', label: 'App Bundle (.aab)', sub: 'Google Play (3.3 MB)' }
+                                        { key: 'universal', label: 'Universal APK', sub: 'All Devices (4.9 MB)' },
+                                        { key: 'arm64', label: 'ARM64-v8a', sub: 'Modern Phones (4.9 MB)' },
+                                        { key: 'armv7', label: 'ARMv7', sub: 'TV Sticks / Legacy (4.9 MB)' },
+                                        { key: 'x86_64', label: 'x86_64', sub: 'Emulators (4.9 MB)' },
+                                        { key: 'aab', label: 'App Bundle (.aab)', sub: 'Google Play (4.7 MB)' }
                                     ].map((v) => (
                                         <button
                                             key={v.key}

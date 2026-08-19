@@ -1,7 +1,7 @@
 {
   "version": "2.0.0",
   "releaseName": "Lorapok 2.0.0 Neural Release",
-  "updatedAt": "2026-08-18T22:57:51.648Z",
+  "updatedAt": "2026-08-19T13:12:01.726Z",
   "platforms": {
     "windows": {
       "default": "/downloads/LorapokMediaPlayer-Windows-Setup.exe",
@@ -15,7 +15,7 @@
       },
       "portable": {
         "url": "/downloads/LorapokMediaPlayer.exe",
-        "size": "68 MB",
+        "size": "168.8 MB",
         "label": "Windows Standalone (.exe)",
         "badge": "PORTABLE",
         "desc": "Zero-install standalone binary for USB / portable drives"
@@ -23,24 +23,24 @@
     },
     "linux": {
       "default": "/downloads/LorapokMediaPlayer-Linux.AppImage",
-      "size": "108 MB",
+      "size": "253.9 MB",
       "portable": {
         "url": "/downloads/LorapokMediaPlayer-Linux.AppImage",
-        "size": "108 MB",
+        "size": "253.9 MB",
         "label": "Linux AppImage",
         "badge": "PORTABLE",
         "desc": "Self-contained universal executable for all Linux distributions"
       },
       "deb": {
         "url": "/downloads/LorapokMediaPlayer-Linux.deb",
-        "size": "70 MB",
+        "size": "153.9 MB",
         "label": "Debian / Ubuntu (.deb)",
         "badge": "INSTALLABLE",
         "desc": "Native APT package installer with desktop integration"
       },
       "snap": {
         "url": "https://snapcraft.io/lorapokmediaplayer",
-        "size": "93 MB",
+        "size": "214.2 MB",
         "label": "Snap Store (Universal Linux)",
         "badge": "SNAP STORE",
         "desc": "Install directly via snap install lorapokmediaplayer"
@@ -73,38 +73,38 @@
     },
     "android": {
       "default": "/downloads/app-universal-release.apk",
-      "size": "2.8 MB",
+      "size": "4.9 MB",
       "universal": {
         "url": "/downloads/app-universal-release.apk",
-        "size": "2.8 MB",
+        "size": "4.9 MB",
         "label": "Universal APK",
         "badge": "INSTALLABLE",
         "desc": "Compatible with all Android phones, tablets & TV"
       },
       "arm64": {
         "url": "/downloads/app-arm64-v8a-release.apk",
-        "size": "2.8 MB",
+        "size": "4.9 MB",
         "label": "ARM64-v8a APK",
         "badge": "INSTALLABLE",
         "desc": "Native 64-bit performance for modern Android flagships"
       },
       "armv7": {
         "url": "/downloads/app-armeabi-v7a-release.apk",
-        "size": "2.8 MB",
+        "size": "4.9 MB",
         "label": "ARMv7 APK",
         "badge": "INSTALLABLE",
         "desc": "For legacy Android devices & TV sticks"
       },
       "x86_64": {
         "url": "/downloads/app-x86_64-release.apk",
-        "size": "2.8 MB",
+        "size": "4.9 MB",
         "label": "x86_64 APK",
         "badge": "INSTALLABLE",
         "desc": "For Android emulators and ChromeOS"
       },
       "aab": {
         "url": "/downloads/app-release.aab",
-        "size": "3.3 MB",
+        "size": "4.7 MB",
         "label": "Google Play Bundle (.aab)",
         "badge": "STORE BUNDLE",
         "desc": "Signed Android App Bundle for Store deployment"
@@ -113,35 +113,35 @@
     "extensions": {
       "firefoxXpi": {
         "url": "/downloads/lorapok-extension-firefox-2.0.0.xpi",
-        "size": "428.7 KB",
+        "size": "25 KB",
         "label": "Firefox Add-on (.xpi)",
         "badge": "AMO READY",
         "desc": "Mozilla Firefox Add-ons (AMO) installable package"
       },
       "firefoxZip": {
         "url": "/downloads/lorapok-extension-firefox-2.0.0.zip",
-        "size": "428.7 KB",
+        "size": "25 KB",
         "label": "Firefox Source (.zip)",
         "badge": "AMO ARCHIVE",
         "desc": "Firefox Developer Edition / AMO submission archive"
       },
       "chromeZip": {
         "url": "/downloads/lorapok-extension-chrome-2.0.0.zip",
-        "size": "428.7 KB",
+        "size": "25 KB",
         "label": "Google Chrome (.zip)",
         "badge": "CHROME MV3",
         "desc": "Chrome Web Store / Chromium unpacked extension"
       },
       "edgeZip": {
         "url": "/downloads/lorapok-extension-edge-2.0.0.zip",
-        "size": "428.7 KB",
+        "size": "25 KB",
         "label": "Microsoft Edge (.zip)",
         "badge": "EDGE ADD-ONS",
         "desc": "Microsoft Edge Add-ons Store package"
       },
       "vscodeVsix": {
         "url": "/downloads/lorapok-player-vscode-2.0.0.vsix",
-        "size": "21 KB",
+        "size": "735.3 KB",
         "label": "VS Code Extension (.vsix)",
         "badge": "IDE EXTENSION",
         "desc": "Visual Studio Code Media Player & Stream Previewer"
@@ -150,14 +150,14 @@
     "packages": {
       "pythonWhl": {
         "url": "/downloads/lorapok-2.0.0-py3-none-any.whl",
-        "size": "4.5 KB",
+        "size": "6.1 KB",
         "label": "Python Wheel (.whl)",
         "badge": "PIP",
         "desc": "Install via pip install lorapok"
       },
       "pythonSdist": {
         "url": "/downloads/lorapok-2.0.0.tar.gz",
-        "size": "4.2 KB",
+        "size": "5 KB",
         "label": "Python Source (.tar.gz)",
         "badge": "SDIST",
         "desc": "Python Source Distribution"

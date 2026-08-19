@@ -28,10 +28,14 @@ lorapok-player/packages/website/public/downloads/*.apk
 lorapok-player/packages/website/public/downloads/*.aab
 lorapok-player/packages/website/public/downloads/*.AppImage
 lorapok-player/packages/website/public/downloads/*.deb
+lorapok-player/packages/website/public/downloads/*.snap
 lorapok-player/packages/website/public/downloads/*.zip
 lorapok-player/packages/website/public/downloads/*.xpi
 lorapok-player/packages/website/public/downloads/*.exe
 lorapok-player/packages/website/public/downloads/*.dmg
+lorapok-player/packages/website/public/downloads/*.vsix
+lorapok-player/packages/website/public/downloads/*.whl
+lorapok-player/packages/website/public/downloads/*.tar.gz
 
 # OS files
 .DS_Store

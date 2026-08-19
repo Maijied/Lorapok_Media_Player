@@ -375,6 +375,7 @@ jobs:
       - name: Build Android APKs + Bundle
         working-directory: lorapok-player/android
         run: |
+          cp ../release.keystore app/release.keystore 2>/dev/null || true
           chmod +x gradlew
           ./gradlew assembleRelease bundleRelease \
             -PversionCode=${{ github.run_number }} \

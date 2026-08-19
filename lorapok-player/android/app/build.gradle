@@ -28,26 +28,28 @@ android {
 
     signingConfigs {
         release {
-            def localKeystore = file("${rootDir}/../release.keystore")
-            def rootKeystore = file("${rootDir}/../../release.keystore")
-            def customKeystore = System.getenv("ANDROID_KEYSTORE_FILE") ? file(System.getenv("ANDROID_KEYSTORE_FILE")) : null
-
-            if (customKeystore != null && customKeystore.exists()) {
-                storeFile customKeystore
-                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
-                keyAlias System.getenv("ANDROID_KEY_ALIAS")
-                keyPassword System.getenv("ANDROID_KEY_PASSWORD")
-            } else if (localKeystore.exists()) {
-                storeFile localKeystore
-                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: "lorapok123"
-                keyAlias System.getenv("ANDROID_KEY_ALIAS") ?: "lorapok"
-                keyPassword System.getenv("ANDROID_KEY_PASSWORD") ?: "lorapok123"
-            } else if (rootKeystore.exists()) {
-                storeFile rootKeystore
-                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: "lorapok123"
-                keyAlias System.getenv("ANDROID_KEY_ALIAS") ?: "lorapok"
-                keyPassword System.getenv("ANDROID_KEY_PASSWORD") ?: "lorapok123"
+            v1SigningEnabled true
+            v2SigningEnabled true
+            def ks = file("release.keystore")
+            if (!ks.exists()) {
+                ks = file("${rootDir}/release.keystore")
             }
+            if (!ks.exists()) {
+                ks = file("${rootDir}/../release.keystore")
+            }
+            if (!ks.exists()) {
+                ks = file("${rootDir}/../../release.keystore")
+            }
+            if (!ks.exists() && System.getenv("ANDROID_KEYSTORE_FILE")) {
+                ks = file(System.getenv("ANDROID_KEYSTORE_FILE"))
+            }
+
+            println("🔐 Android Signing Keystore: " + ks.absolutePath + " (exists: " + ks.exists() + ")")
+
+            storeFile ks
+            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: "lorapok123"
+            keyAlias System.getenv("ANDROID_KEY_ALIAS") ?: "lorapok"
+            keyPassword System.getenv("ANDROID_KEY_PASSWORD") ?: "lorapok123"
         }
     }
 
@@ -58,11 +60,9 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            if (signingConfigs.release.storeFile != null) {
-                signingConfig signingConfigs.release
-            }
+            signingConfig signingConfigs.release
         }
     }
 }

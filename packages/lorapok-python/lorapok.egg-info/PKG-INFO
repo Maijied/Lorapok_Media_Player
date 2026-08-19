@@ -1,26 +1,12 @@
 Metadata-Version: 2.1
 Name: lorapok
-Version: 1.5.0
-Summary: Lorapok Neural Media Engine & Universal Streaming Toolkit for Python
-Author-email: Mohammad Maizied Hasan Majumder <mdshuvo40@gmail.com>, Lorapok Labs <lorapokdev@gmail.com>
+Version: 2.0.0
+Summary: Lorapok Media Player Python SDK & CLI Stream Controller
+Author-email: Lorapok Labs <labs@lorapok.tech>
 License: MIT
-Project-URL: Homepage, https://media.lorapok.tech
-Project-URL: Repository, https://github.com/Maijied/Lorapok_Media_Player
-Project-URL: Documentation, https://media.lorapok.tech/#developer
-Keywords: media,player,streaming,hls,dash,transcoding,video,audio,lorapok
-Classifier: Development Status :: 5 - Production/Stable
-Classifier: Intended Audience :: Developers
-Classifier: License :: OSI Approved :: MIT License
-Classifier: Programming Language :: Python :: 3
-Classifier: Programming Language :: Python :: 3.8
-Classifier: Programming Language :: Python :: 3.9
-Classifier: Programming Language :: Python :: 3.10
-Classifier: Programming Language :: Python :: 3.11
-Classifier: Programming Language :: Python :: 3.12
-Classifier: Topic :: Multimedia :: Video
-Classifier: Topic :: Multimedia :: Sound/Audio
 Requires-Python: >=3.8
 Description-Content-Type: text/markdown
+License-File: LICENSE
 
 # Lorapok Python SDK & CLI (`lorapok`)
 
