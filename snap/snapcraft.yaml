@@ -45,7 +45,7 @@ parts:
   lorapok-player:
     plugin: npm
     source: lorapok-player
-    npm-node-version: '2.0.0'
+    npm-node-version: '20.18.0'
     build-packages:
       - libasound2-dev
       - libpulse-dev
@@ -65,6 +65,8 @@ parts:
       npm run build
       mkdir -p $SNAPCRAFT_PART_INSTALL/lorapok-player
       cp -r dist $SNAPCRAFT_PART_INSTALL/lorapok-player/
-      if [ -d "release/builds/linux-unpacked" ]; then
-        cp -r release/builds/linux-unpacked/* $SNAPCRAFT_PART_INSTALL/lorapok-player/
+      if [ -d "release/builds/linux/linux-unpacked" ]; then
+        cp -r release/builds/linux/linux-unpacked/* $SNAPCRAFT_PART_INSTALL/lorapok-player/
+      elif [ -d "release/linux-unpacked" ]; then
+        cp -r release/linux-unpacked/* $SNAPCRAFT_PART_INSTALL/lorapok-player/
       fi
