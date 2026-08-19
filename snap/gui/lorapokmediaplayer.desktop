@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Lorapok Media Player
+GenericName=Media Player
+Comment=Next-Gen Sensory Neural Supercomputing Media Player
+Exec=lorapokmediaplayer %U
+Icon=${SNAP}/meta/gui/lorapokmediaplayer.png
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;Video;Player;
+MimeType=audio/mpeg;audio/x-wav;audio/flac;audio/aac;audio/ogg;video/mp4;video/x-matroska;video/webm;video/mpeg;application/x-mpegURL;application/dash+xml;
+Keywords=media;player;video;audio;music;stream;hls;dash;
+StartupWMClass=lorapokmediaplayer

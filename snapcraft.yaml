@@ -22,6 +22,7 @@ contact: https://lorapok.tech
 license: Proprietary
 issues: https://github.com/Maijied/Lorapok_Media_Player/issues
 source-code: https://github.com/Maijied/Lorapok_Media_Player
+icon: snap/gui/lorapokmediaplayer.png
 
 apps:
   lorapokmediaplayer:

@@ -1,3 +1,7 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Lorapok Enterprise CI/CD — Single Unified Pipeline
+# Handles: Quality Gate → Extensions → Desktop → Android → Release → Deploy
+# ──────────────────────────────────────────────────────────────────────────────
 name: Lorapok Enterprise CI/CD
 
 on:
@@ -22,61 +26,129 @@ env:
   BUILD_NUM: ${{ github.run_number }}
   BUILD_VERSION: "2.0.0+build.${{ github.run_number }}"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# JOBS
+# ─────────────────────────────────────────────────────────────────────────────
 jobs:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 1. QUALITY GATE — TypeScript + Vitest
+  # ═══════════════════════════════════════════════════════════════════════════
   quality-gate:
-    name: Security & Quality Gate
+    name: "🛡️ Quality & Security Gate"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: "📋 Summary: Pipeline Initialized"
+        run: |
+          echo "## 🚀 Lorapok Enterprise CI/CD — Build #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version** | \`${{ env.BUILD_VERSION }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | [\`${GITHUB_SHA::8}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered By** | @${{ github.actor }} via \`${{ github.event_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Run Attempt** | \`${{ github.run_attempt }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Started** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: 'npm'
-          cache-dependency-path: 'lorapok-player/package-lock.json'
+          cache: "npm"
+          cache-dependency-path: "lorapok-player/package-lock.json"
 
       - name: Install Dependencies
         working-directory: lorapok-player
         run: npm ci || npm install
 
+      - name: "📋 Summary: Dependencies Installed"
+        run: |
+          echo "### 📦 Dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          MODULES=$(find lorapok-player/node_modules -maxdepth 1 -type d | wc -l)
+          LOCK_SIZE=$(stat -c%s lorapok-player/package-lock.json 2>/dev/null || echo "0")
+          echo "| **Modules Installed** | \`${MODULES}\` packages |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Lock File Size** | \`$(numfmt --to=iec ${LOCK_SIZE})\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Installed At** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
       - name: TypeScript Typecheck
+        id: typecheck
         working-directory: lorapok-player
         run: npm run typecheck
 
+      - name: "📋 Summary: Typecheck"
+        if: always()
+        run: |
+          if [ "${{ steps.typecheck.outcome }}" = "success" ]; then
+            echo "| ✅ TypeScript Typecheck | **Passed** — 0 type errors |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| ❌ TypeScript Typecheck | **Failed** |" >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Run Test Suites
+        id: tests
         working-directory: lorapok-player
         run: npm run test
 
-      - name: Log Quality Gate Summary
+      - name: "📋 Summary: Tests"
         if: always()
         run: |
-          echo "### 🛡️ Quality & Security Gate Summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Check | Status | Details |" >> $GITHUB_STEP_SUMMARY
-          echo "| :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
-          echo "| **TypeScript Typecheck** | ✅ Passed | 0 type errors across all packages |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Vitest Test Suite** | ✅ Passed | 4/4 test files passed |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Build Version** | 🏷️ \`${{ env.BUILD_VERSION }}\` | Run #${{ github.run_number }} (${{ github.sha }}) |" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.tests.outcome }}" = "success" ]; then
+            echo "| ✅ Vitest Suite | **Passed** |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| ❌ Vitest Suite | **Failed** |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 2. BROWSER EXTENSIONS — Firefox XPI, Chrome/Edge ZIP
+  # ═══════════════════════════════════════════════════════════════════════════
   build-extensions:
-    name: Build Browser Extensions (Firefox AMO, Chrome, Edge)
+    name: "🌐 Browser Extensions"
     needs: quality-gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      - name: "📋 Summary: Extensions Build Started"
+        run: |
+          echo "### 🌐 Browser Extensions Build" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Started** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
 
       - name: Package All Browser Extensions
         working-directory: lorapok-extension
         run: |
           sudo apt-get update && sudo apt-get install -y zip
           node build_extensions.js
+
+      - name: "📋 Summary: Extensions Artifacts"
+        run: |
+          echo "| **Artifacts** | |" >> $GITHUB_STEP_SUMMARY
+          for f in lorapok-player/release/builds/extensions/*.{xpi,zip}; do
+            if [ -f "$f" ]; then
+              SIZE=$(stat -c%s "$f")
+              NAME=$(basename "$f")
+              echo "| ✅ \`${NAME}\` | \`$(numfmt --to=iec ${SIZE})\` |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          echo "| **Completed** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
       - name: Store Extension Artifacts
         uses: actions/upload-artifact@v4
@@ -85,19 +157,30 @@ jobs:
           path: |
             lorapok-player/release/builds/extensions/*.xpi
             lorapok-player/release/builds/extensions/*.zip
+          if-no-files-found: warn
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 3. VS CODE EXTENSION — .vsix
+  # ═══════════════════════════════════════════════════════════════════════════
   build-vscode-extension:
-    name: Build Visual Studio Code Extension (.vsix)
+    name: "💻 VS Code Extension"
     needs: quality-gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      - name: "📋 Summary: VSCode Build Started"
+        run: |
+          echo "### 💻 VS Code Extension Build" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Started** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
 
       - name: Package VS Code Extension
         working-directory: packages/vscode-lorapok
@@ -105,32 +188,67 @@ jobs:
           sudo apt-get update && sudo apt-get install -y zip
           node build_extension.js
 
+      - name: "📋 Summary: VSCode Artifacts"
+        run: |
+          for f in lorapok-player/release/builds/extensions/*.vsix; do
+            if [ -f "$f" ]; then
+              SIZE=$(stat -c%s "$f")
+              echo "| ✅ \`$(basename $f)\` | \`$(numfmt --to=iec ${SIZE})\` |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          echo "| **Completed** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
       - name: Store VS Code Extension Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Binaries-VSCode
           path: |
             lorapok-player/release/builds/extensions/*.vsix
+            lorapok-player/release/builds/extensions/*.zip
+          if-no-files-found: warn
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 4. PYTHON PIP PACKAGE — Wheel & Sdist
+  # ═══════════════════════════════════════════════════════════════════════════
   build-python-package:
-    name: Build Python PIP Package (Wheel & Sdist)
+    name: "🐍 Python Package"
     needs: quality-gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      - name: "📋 Summary: Python Build Started"
+        run: |
+          echo "### 🐍 Python SDK Build" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Python** | \`$(python3 --version)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Started** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+
       - name: Install Build Tools
-        run: pip install --upgrade setuptools wheel build
+        run: pip install --upgrade pip setuptools wheel build
 
       - name: Build Python Package
         working-directory: packages/lorapok-python
         run: python -m build
+
+      - name: "📋 Summary: Python Artifacts"
+        run: |
+          for f in packages/lorapok-python/dist/*; do
+            if [ -f "$f" ]; then
+              SIZE=$(stat -c%s "$f")
+              echo "| ✅ \`$(basename $f)\` | \`$(numfmt --to=iec ${SIZE})\` |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          echo "| **Completed** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
       - name: Store Python Package Artifact
         uses: actions/upload-artifact@v4
@@ -139,22 +257,37 @@ jobs:
           path: |
             packages/lorapok-python/dist/*.whl
             packages/lorapok-python/dist/*.tar.gz
+          if-no-files-found: warn
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 5. DESKTOP — Electron (Linux / Windows / macOS)
+  # ═══════════════════════════════════════════════════════════════════════════
   build-desktop:
-    name: Build Desktop (${{ matrix.os }})
+    name: "🖥️ Desktop (${{ matrix.os }})"
     needs: quality-gate
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - name: Check out Git repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Node.js
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      - name: "📋 Summary: Desktop Build Started"
+        shell: bash
+        run: |
+          echo "### 🖥️ Desktop Build — ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **OS** | \`${{ matrix.os }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Node.js** | \`$(node --version)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Started** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
 
       - name: Install Dependencies
         working-directory: lorapok-player
@@ -164,7 +297,26 @@ jobs:
         working-directory: lorapok-player
         run: npm run build
 
-      - name: Store Binaries
+      - name: "📋 Summary: Desktop Artifacts"
+        if: always()
+        shell: bash
+        run: |
+          echo "| **Artifacts** | |" >> $GITHUB_STEP_SUMMARY
+          FOUND=0
+          for ext in exe dmg AppImage deb snap rpm zip tar.gz; do
+            for f in $(find lorapok-player/release -name "*.${ext}" -type f 2>/dev/null); do
+              SIZE=$(stat -c%s "$f" 2>/dev/null || stat -f%z "$f" 2>/dev/null || echo "0")
+              echo "| ✅ \`$(basename $f)\` | \`$(numfmt --to=iec ${SIZE} 2>/dev/null || echo ${SIZE}B)\` |" >> $GITHUB_STEP_SUMMARY
+              FOUND=$((FOUND + 1))
+            done
+          done
+          if [ $FOUND -eq 0 ]; then
+            echo "| ⚠️ No artifacts found | Check build logs |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "| **Completed** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      - name: Store Desktop Binaries
         uses: actions/upload-artifact@v4
         with:
           name: Binaries-${{ matrix.os }}
@@ -175,92 +327,172 @@ jobs:
             lorapok-player/release/**/*.deb
             lorapok-player/release/**/*.snap
             lorapok-player/release/**/*.zip
+          if-no-files-found: warn
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 6. ANDROID — Signed Release APK + AAB
+  # ═══════════════════════════════════════════════════════════════════════════
   build-android:
-    name: Build Android (Signed Release)
+    name: "🤖 Android (Signed Release)"
     needs: quality-gate
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Git repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java JDK
+      - name: Setup Java JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
 
-      - name: Install Node.js
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
-      - name: Install Dependencies & Sync Android
+      - name: "📋 Summary: Android Build Started"
+        run: |
+          echo "### 🤖 Android Build" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **JDK** | \`$(java --version 2>&1 | head -1)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version Code** | \`${{ github.run_number }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version Name** | \`${{ env.BUILD_VERSION }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Started** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Install Dependencies & Sync Capacitor
         working-directory: lorapok-player
         run: |
           npm ci || npm install
           npm run build:only
           npx cap sync android
 
-      - name: Build Android Universal & Splits APK + Bundle
+      - name: "📋 Summary: Capacitor Synced"
+        run: |
+          echo "| **Capacitor Sync** | ✅ Complete |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Build Android APKs + Bundle
         working-directory: lorapok-player/android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease bundleRelease -PversionCode=${{ github.run_number }} -PversionName="${{ env.BUILD_VERSION }}"
+          ./gradlew assembleRelease bundleRelease \
+            -PversionCode=${{ github.run_number }} \
+            -PversionName="${{ env.BUILD_VERSION }}"
+
+      - name: "📋 Summary: Android Artifacts"
+        run: |
+          echo "| **Artifacts** | |" >> $GITHUB_STEP_SUMMARY
+          for f in $(find lorapok-player/android/app/build/outputs -name "*.apk" -o -name "*.aab" 2>/dev/null); do
+            SIZE=$(stat -c%s "$f")
+            echo "| ✅ \`$(basename $f)\` | \`$(numfmt --to=iec ${SIZE})\` |" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "| **Completed** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
       - name: Store Android Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Binaries-android
+          name: Binaries-Android
           path: |
             lorapok-player/android/app/build/outputs/apk/release/*.apk
             lorapok-player/android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: warn
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 7. RELEASE PUBLISHER — Aggregate & Create GitHub Release
+  # ═══════════════════════════════════════════════════════════════════════════
   release-rolling:
-    name: Aggregate & Publish Rolling Release
-    needs: [build-desktop, build-android, build-extensions, build-vscode-extension, build-python-package]
+    name: "📦 Aggregate & Publish Release"
+    needs:
+      - build-desktop
+      - build-android
+      - build-extensions
+      - build-vscode-extension
+      - build-python-package
+    if: always() && !cancelled()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download all built binaries
+      - name: Download All Built Artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+        continue-on-error: true
+
+      - name: "📋 Summary: Release Aggregation"
+        run: |
+          echo "### 📦 Release Aggregation — Build #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Tag** | \`${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version** | \`${{ env.BUILD_VERSION }}\` |" >> $GITHUB_STEP_SUMMARY
+          TOTAL_FILES=$(find artifacts -type f 2>/dev/null | wc -l)
+          TOTAL_SIZE=$(du -sb artifacts 2>/dev/null | cut -f1 || echo "0")
+          echo "| **Total Artifacts** | \`${TOTAL_FILES}\` files |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Total Size** | \`$(numfmt --to=iec ${TOTAL_SIZE})\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### 📁 Artifact Inventory" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact | Size | Type |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          find artifacts -type f | sort | while read f; do
+            SIZE=$(stat -c%s "$f")
+            EXT="${f##*.}"
+            echo "| \`$(basename $f)\` | \`$(numfmt --to=iec ${SIZE})\` | \`${EXT}\` |" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
 
       - name: Display Downloaded Files
-        run: ls -R artifacts/
+        run: ls -R artifacts/ || echo "No artifacts downloaded"
+
+      - name: Determine Release Tag
+        id: release_tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "name=Lorapok Media Player ${{ github.ref_name }} (Build #${{ github.run_number }})" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+            echo "latest=true" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+            echo "name=Lorapok Media Player v2.0.0 (Build #${{ github.run_number }})" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+            echo "latest=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@v2
         continue-on-error: true
         with:
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
-          name: ${{ github.ref_type == 'tag' && format('Lorapok Media Player {0} (Build #{1})', github.ref_name, github.run_number) || format('Lorapok Media Player v2.0.0 (Build #{0})', github.run_number) }}
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: ${{ steps.release_tag.outputs.name }}
+          prerelease: ${{ steps.release_tag.outputs.prerelease }}
+          make_latest: ${{ steps.release_tag.outputs.latest }}
           generate_release_notes: false
           body: |
             ## 🎬 Lorapok Media Player v2.0.0 (Build #${{ github.run_number }})
-            
-            **Version**: `${{ env.BUILD_VERSION }}`  
-            **Commit**: `${{ github.sha }}`  
-            **Built On**: `${{ github.event.repository.updated_at }}`  
-            
+
+            **Version**: `${{ env.BUILD_VERSION }}`
+            **Commit**: `${{ github.sha }}`
+            **Built**: `${{ github.event.repository.updated_at }}`
+
             ### 📦 Cross-Platform Distribution Matrix
-            | Platform / Ecosystem | File Asset | Architecture | Type |
+            | Platform | Asset | Architecture | Type |
             | :--- | :--- | :--- | :--- |
             | 🪟 **Windows** | `LorapokMediaPlayer-Windows-Setup.exe` | x64 | Setup Installer |
-            | 🪟 **Windows Portable** | `LorapokMediaPlayer.exe` | x64 | Zero-Install Executable |
-            | 🐧 **Linux AppImage** | `LorapokMediaPlayer-Linux.AppImage` | x86_64 | Universal Portable |
-            | 🐧 **Debian / Ubuntu** | `LorapokMediaPlayer-Linux.deb` | amd64 | Native APT Package |
-            | 🤖 **Android Universal** | `app-universal-release.apk` | Universal | Signed APK (All Devices) |
-            | 🤖 **Android ARM64** | `app-arm64-v8a-release.apk` | ARM64-v8a | Signed Flagship APK |
-            | 🤖 **Google Play** | `app-release.aab` | Universal | Store Bundle (AAB) |
-            | 🍎 **macOS Apple Silicon** | `LorapokMediaPlayer-Mac-Installer.dmg` | arm64 | Apple M1/M2/M3/M4 |
-            | 🦊 **Firefox Add-on** | `lorapok-extension-firefox-2.0.0.xpi` | Web | AMO Installable |
-            | 🌐 **Chrome / Edge** | `lorapok-extension-chrome-2.0.0.zip` | Web | Chromium MV3 |
-            | 💻 **VS Code Extension** | `lorapok-player-vscode-2.0.0.vsix` | IDE | Visual Studio Code |
-            | 🐍 **Python SDK** | `lorapok-2.0.0-py3-none-any.whl` | Python 3 | PIP Wheel |
+            | 🪟 **Windows Portable** | `LorapokMediaPlayer.exe` | x64 | Zero-Install |
+            | 🐧 **Linux AppImage** | `LorapokMediaPlayer-Linux.AppImage` | x86_64 | Portable |
+            | 🐧 **Debian / Ubuntu** | `LorapokMediaPlayer-Linux.deb` | amd64 | APT Package |
+            | 🤖 **Android Universal** | `app-universal-release.apk` | Universal | Signed APK |
+            | 🤖 **Android ARM64** | `app-arm64-v8a-release.apk` | ARM64-v8a | Signed APK |
+            | 🤖 **Google Play** | `app-release.aab` | Universal | Store Bundle |
+            | 🍎 **macOS** | `LorapokMediaPlayer-Mac-Installer.dmg` | arm64 | DMG |
+            | 🦊 **Firefox** | `lorapok-extension-firefox-2.0.0.xpi` | Web | AMO |
+            | 🌐 **Chrome / Edge** | `lorapok-extension-chrome-2.0.0.zip` | Web | MV3 |
+            | 💻 **VS Code** | `lorapok-player-vscode-2.0.0.vsix` | IDE | Extension |
+            | 🐍 **Python SDK** | `lorapok-2.0.0-py3-none-any.whl` | Python 3 | PIP |
 
             ---
             🌐 **Live Web Platform**: [https://media.lorapok.tech](https://media.lorapok.tech)
@@ -277,126 +509,142 @@ jobs:
             artifacts/**/*.vsix
             artifacts/**/*.whl
             artifacts/**/*.tar.gz
-          make_latest: ${{ github.ref_type == 'tag' && 'true' || 'false' }}
-          prerelease: ${{ github.ref_type != 'tag' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate Detailed CI/CD Job Summary
+      - name: "📋 Summary: Release Published"
         if: always()
         run: |
-          cat << 'SUMMARY_EOF' >> $GITHUB_STEP_SUMMARY
-          # 🚀 Lorapok CI/CD Build Summary — Build #${{ github.run_number }}
+          echo "### 🏷️ GitHub Release" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Release Tag** | \`${{ steps.release_tag.outputs.tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Release Name** | ${{ steps.release_tag.outputs.name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Pre-release** | \`${{ steps.release_tag.outputs.prerelease }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Published At** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
-          ### 📌 Release & Build Information
-          - **Version Name**: \`${{ env.BUILD_VERSION }}\`
-          - **Build Number**: \`${{ github.run_number }}\` (Attempt: \`${{ github.run_attempt }}\`)
-          - **Git Reference**: \`${{ github.ref }}\`
-          - **Commit SHA**: [\`${{ github.sha }}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-          - **Triggered By**: @${{ github.actor }} on \`${{ github.event_name }}\`
-
-          ### 📦 Published Artifacts Matrix
-          | Target Ecosystem | Asset Name | Status |
-          | :--- | :--- | :--- |
-          | 🪟 Windows (x64) | \`LorapokMediaPlayer-Windows-Setup.exe\` | ✅ Built & Packaged |
-          | 🐧 Linux (AppImage / DEB / Snap) | \`LorapokMediaPlayer-Linux.AppImage\` | ✅ Built & Packaged |
-          | 🤖 Android (Signed Split & Universal) | \`app-universal-release.apk\` | ✅ Signed with Release Keystore |
-          | 🤖 Google Play Store Bundle | \`app-release.aab\` | ✅ Built & Bundled |
-          | 🍎 macOS (Apple Silicon & Intel) | \`LorapokMediaPlayer-Mac-Installer.dmg\` | ✅ Built & Packaged |
-          | 🦊 Firefox Add-on | \`lorapok-extension-firefox-2.0.0.xpi\` | ✅ AMO Package Ready |
-          | 🌐 Chrome & Edge Extensions | \`lorapok-extension-chrome-2.0.0.zip\` | ✅ MV3 Unpacked & Zipped |
-          | 💻 VS Code Marketplace | \`lorapok-player-vscode-2.0.0.vsix\` | ✅ VSIX Extension Ready |
-          | 🐍 Python PIP | \`lorapok-2.0.0-py3-none-any.whl\` | ✅ PEP 517/621 Compliant |
-
-          ### 🌐 Ecosystem Links
-          - 🎬 **Web App**: [media.lorapok.tech](https://media.lorapok.tech)
-          - 🐙 **GitHub Releases**: [Latest Release](https://github.com/${{ github.repository }}/releases)
-          - 📦 **Snapcraft Store**: [lorapokmediaplayer](https://snapcraft.io/lorapokmediaplayer)
-          SUMMARY_EOF
-
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 8. WEBSITE DEPLOY — Build & Deploy to GitHub Pages
+  # ═══════════════════════════════════════════════════════════════════════════
   deploy-site:
-    name: Build & Deploy Website
-    needs: [build-desktop, build-android, build-extensions, build-vscode-extension, build-python-package]
+    name: "🌐 Build & Deploy Website"
+    needs:
+      - build-desktop
+      - build-android
+      - build-extensions
+      - build-vscode-extension
+      - build-python-package
     if: always() && !cancelled()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
-      - name: Setup Python
+      - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Download all built binaries
+      - name: "📋 Summary: Website Deploy Started"
+        run: |
+          echo "### 🌐 Website Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Target** | GitHub Pages |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Domain** | \`media.lorapok.tech\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Started** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Download All Built Artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+        continue-on-error: true
 
       - name: Install Dependencies
         working-directory: lorapok-player
         run: npm ci || npm install
 
-      - name: Build Library
+      - name: Build Core Library
         working-directory: lorapok-player/packages/lorapok-player
         run: npm run build
+
+      - name: "📋 Summary: Library Built"
+        run: |
+          echo "| **Core Library** | ✅ Built |" >> $GITHUB_STEP_SUMMARY
 
       - name: Package Extensions for Website
         working-directory: lorapok-extension
         run: |
           sudo apt-get update && sudo apt-get install -y zip
           node build_extensions.js
+        continue-on-error: true
 
       - name: Package VS Code Extension for Website
         working-directory: packages/vscode-lorapok
         run: node build_extension.js
+        continue-on-error: true
 
       - name: Package Python SDK for Website
         working-directory: packages/lorapok-python
         run: |
-          pip install --upgrade setuptools wheel
-          python setup.py sdist bdist_wheel
+          pip install --upgrade pip setuptools wheel build
+          python -m build
+        continue-on-error: true
 
-      - name: Generate Demos & Build Website
+      - name: Sync Downloads & Build Website
         working-directory: lorapok-player/packages/website
         run: |
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg || true
           node scripts/sync_downloads.js
           npm run build
 
-      - name: Ensure Custom Domain CNAME
-        working-directory: lorapok-player/packages/website
+      - name: "📋 Summary: Website Built"
         run: |
-          echo "media.lorapok.tech" > dist/CNAME
+          DIST_SIZE=$(du -sb lorapok-player/packages/website/dist 2>/dev/null | cut -f1 || echo "0")
+          FILE_COUNT=$(find lorapok-player/packages/website/dist -type f 2>/dev/null | wc -l)
+          echo "| **Website Build** | ✅ Complete |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Output Size** | \`$(numfmt --to=iec ${DIST_SIZE})\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Files** | \`${FILE_COUNT}\` |" >> $GITHUB_STEP_SUMMARY
 
-      - name: Setup Pages
+      - name: Ensure Custom Domain CNAME
+        run: echo "media.lorapok.tech" > lorapok-player/packages/website/dist/CNAME
+
+      - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './lorapok-player/packages/website/dist'
+          path: "./lorapok-player/packages/website/dist"
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Log Deployment Job Summary
+      - name: "📋 Summary: Deployment Complete"
         if: always()
         run: |
-          echo "### 🚀 Website Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ✅ Deployed Successfully" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version**: \`${{ env.BUILD_VERSION }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Live URL**: [https://media.lorapok.tech](https://media.lorapok.tech)" >> $GITHUB_STEP_SUMMARY
-          echo "- **GitHub Pages URL**: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.deployment.outcome }}" = "success" ]; then
+            echo "| **Deploy Status** | ✅ Live |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| **Deploy Status** | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "| **Live URL** | [https://media.lorapok.tech](https://media.lorapok.tech) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Pages URL** | ${{ steps.deployment.outputs.page_url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployed At** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 9. NPM PUBLISH
+  # ═══════════════════════════════════════════════════════════════════════════
   publish-package:
-    name: Publish to NPM
+    name: "📦 Publish to NPM"
     needs: quality-gate
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -404,34 +652,45 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org/"
 
-      - name: Install Dependencies
-        working-directory: ./lorapok-player
-        run: npm ci || npm install
-
-      - name: Build Library
-        working-directory: ./lorapok-player/packages/lorapok-player
-        run: npm run build
+      - name: Install & Build
+        run: |
+          cd lorapok-player && npm ci || npm install
+          cd packages/lorapok-player && npm run build
 
       - name: Publish to NPM
         working-directory: ./lorapok-player/packages/lorapok-player
         run: |
           if [ -n "$NODE_AUTH_TOKEN" ]; then
             echo "📦 Publishing lorapok-player to npmjs.org..."
-            npm publish --access public || echo "⚠️ NPM publish notice."
+            npm publish --access public || echo "⚠️ NPM publish skipped (version may already exist)."
           else
-            echo "⚠️ NPM_TOKEN secret not configured in repository. Skipping NPM publish step."
+            echo "ℹ️ NPM_TOKEN secret not configured. Skipping NPM publish."
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: "📋 Summary: NPM Publish"
+        if: always()
+        run: |
+          echo "### 📦 NPM Registry" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Package** | \`lorapok-player\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version** | \`${{ env.VERSION_BASE }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Completed** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 10. FIREFOX AMO PUBLISH
+  # ═══════════════════════════════════════════════════════════════════════════
   publish-firefox-amo:
-    name: Publish to Mozilla Add-ons (AMO)
+    name: "🦊 Publish to Mozilla AMO"
     needs: build-extensions
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -439,7 +698,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -452,16 +711,34 @@ jobs:
           if [ -n "$AMO_JWT_ISSUER" ] && [ -n "$AMO_JWT_SECRET" ]; then
             echo "🦊 Submitting Firefox Extension to Mozilla Add-ons (AMO)..."
             cd lorapok-extension
-            web-ext sign --api-key="$AMO_JWT_ISSUER" --api-secret="$AMO_JWT_SECRET" --source-dir=. --artifacts-dir=../amo-artifacts --channel=listed || echo "⚠️ AMO submission notice."
+            web-ext sign \
+              --api-key="$AMO_JWT_ISSUER" \
+              --api-secret="$AMO_JWT_SECRET" \
+              --source-dir=. \
+              --artifacts-dir=../amo-artifacts \
+              --channel=listed || echo "⚠️ AMO submission notice."
           else
-            echo "ℹ️ AMO_JWT_ISSUER / AMO_JWT_SECRET not configured."
+            echo "ℹ️ AMO_JWT_ISSUER / AMO_JWT_SECRET not configured. Skipping."
           fi
         env:
-          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER || secrets.AMO_API_KEY }}
-          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET || secrets.AMO_API_SECRET }}
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
 
+      - name: "📋 Summary: AMO Publish"
+        if: always()
+        run: |
+          echo "### 🦊 Mozilla AMO" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Extension** | \`lorapok-extension\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Completed** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 11. SNAP STORE PUBLISH
+  # ═══════════════════════════════════════════════════════════════════════════
   publish-snap:
-    name: Publish to Snap Store
+    name: "🐧 Publish to Snap Store"
     needs: build-desktop
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -474,17 +751,99 @@ jobs:
         with:
           name: Binaries-ubuntu-latest
           path: release
+        continue-on-error: true
 
       - name: Publish to Snap Store
         run: |
-          SNAP_PATH=$(find release -name "*.snap" -type f | head -n 1)
+          SNAP_PATH=$(find release -name "*.snap" -type f 2>/dev/null | head -n 1)
           if [ -n "$SNAP_PATH" ] && [ -n "$SNAPCRAFT_STORE_CREDENTIALS" ]; then
             echo "📦 Publishing $SNAP_PATH to Snap Store..."
             sudo snap install snapcraft --classic
-            snapcraft login --with <(echo "$SNAPCRAFT_STORE_CREDENTIALS")
+            echo "$SNAPCRAFT_STORE_CREDENTIALS" | snapcraft login --with -
             snapcraft upload --release=stable "$SNAP_PATH"
           else
-            echo "ℹ️ Snap package or SNAPCRAFT_STORE_CREDENTIALS secret not set."
+            echo "ℹ️ Snap package not found or SNAPCRAFT_STORE_CREDENTIALS not set. Skipping."
           fi
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+
+      - name: "📋 Summary: Snap Store"
+        if: always()
+        run: |
+          echo "### 🐧 Snap Store" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Snap Name** | \`lorapokmediaplayer\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Completed** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 12. FINAL PIPELINE SUMMARY
+  # ═══════════════════════════════════════════════════════════════════════════
+  pipeline-summary:
+    name: "📊 Pipeline Summary"
+    needs:
+      - quality-gate
+      - build-extensions
+      - build-vscode-extension
+      - build-python-package
+      - build-desktop
+      - build-android
+      - release-rolling
+      - deploy-site
+      - publish-package
+      - publish-firefox-amo
+      - publish-snap
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: "📊 Generate Final Pipeline Summary"
+        run: |
+          echo "## 📊 Lorapok Enterprise CI/CD — Final Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version** | \`${{ env.BUILD_VERSION }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Build Number** | \`#${{ github.run_number }}\` (Attempt \`${{ github.run_attempt }}\`) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | [\`${GITHUB_SHA::8}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered By** | @${{ github.actor }} via \`${{ github.event_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Completed At** | \`$(date -u +%Y-%m-%dT%H:%M:%SZ)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### 🏗️ Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+
+          # Map job outcomes to emoji
+          status_icon() {
+            case "$1" in
+              success) echo "✅" ;;
+              failure) echo "❌" ;;
+              cancelled) echo "⏹️" ;;
+              skipped) echo "⏭️" ;;
+              *) echo "⚪" ;;
+            esac
+          }
+
+          echo "| 🛡️ Quality Gate | $(status_icon '${{ needs.quality-gate.result }}') \`${{ needs.quality-gate.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌐 Browser Extensions | $(status_icon '${{ needs.build-extensions.result }}') \`${{ needs.build-extensions.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 💻 VS Code Extension | $(status_icon '${{ needs.build-vscode-extension.result }}') \`${{ needs.build-vscode-extension.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐍 Python Package | $(status_icon '${{ needs.build-python-package.result }}') \`${{ needs.build-python-package.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🖥️ Desktop Builds | $(status_icon '${{ needs.build-desktop.result }}') \`${{ needs.build-desktop.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🤖 Android Build | $(status_icon '${{ needs.build-android.result }}') \`${{ needs.build-android.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 Release Publisher | $(status_icon '${{ needs.release-rolling.result }}') \`${{ needs.release-rolling.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌐 Website Deploy | $(status_icon '${{ needs.deploy-site.result }}') \`${{ needs.deploy-site.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 NPM Publish | $(status_icon '${{ needs.publish-package.result }}') \`${{ needs.publish-package.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🦊 Firefox AMO | $(status_icon '${{ needs.publish-firefox-amo.result }}') \`${{ needs.publish-firefox-amo.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐧 Snap Store | $(status_icon '${{ needs.publish-snap.result }}') \`${{ needs.publish-snap.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### 🌐 Ecosystem Links" >> $GITHUB_STEP_SUMMARY
+          echo "| Resource | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🎬 Web App | [media.lorapok.tech](https://media.lorapok.tech) |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐙 GitHub Releases | [Latest Release](https://github.com/${{ github.repository }}/releases) |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 Snapcraft | [lorapokmediaplayer](https://snapcraft.io/lorapokmediaplayer) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_Job summary generated at run-time_" >> $GITHUB_STEP_SUMMARY
